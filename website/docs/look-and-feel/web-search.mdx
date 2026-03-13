@@ -1,0 +1,48 @@
+# Web Search
+
+Sparky supports web search across all LLM providers, but how it works depends on which provider you use.
+
+## Native Search (Anthropic)
+
+When using **Anthropic** models (Claude), Sparky uses Anthropic's built-in server-side web search tool (`web_search_20250305`). The model decides when to search, the API executes the search internally, and results are woven into the response.
+
+You will see a **search activity** indicator in the chat, and **citations** with source links appear at the bottom of the response.
+
+This is the fastest and most seamless experience. The model has full control over when and how to search.
+
+## Grounded Search (Google Gemini)
+
+**Google Gemini** models use Google's grounding feature (`google_search`). When enabled, the model's response is automatically grounded with real-time web data.
+
+After the response, you will see **search activities** showing the queries Google used, along with **links** to the source domains at the bottom.
+
+Google grounding is fast and produces well-sourced responses, though the source links point to domain-level URLs rather than specific pages.
+
+## DDG Search (Copilot, Ollama)
+
+**GitHub Copilot** and **Ollama** models do not have native search capabilities. For these providers, Sparky uses a built-in DuckDuckGo (DDG) search tool.
+
+The model calls the `app_web_search` tool like any other function call. Sparky executes the search via DDG Lite, fetches results, and returns them to the model. A second tool (`app_web_read`) lets the model read specific pages from the results.
+
+This approach works but comes with limitations:
+- DDG Lite has **heavy rate limiting**. Frequent searches may be throttled.
+- The search happens as a tool call round-trip, so it is slower than native search.
+- Results depend on DDG Lite's coverage and ranking.
+
+## Custom Search via Connected Services
+
+You can also connect a dedicated search API as a service connection. For example, connecting **Brave Search** gives the model access to a high-quality search API without DDG rate limits.
+
+Once connected, the model can call the search service via `svc.describe` and `svc.call`, just like any other connected service.
+
+<video src={require('../assets/uc/brave.mp4').default} autoPlay muted loop playsInline style={{maxWidth: '700px', width: '100%'}} />
+
+## Summary
+
+| Provider | Search Type | Speed | Citations | Cost |
+| :--- | :--- | :--- | :--- | :--- |
+| **Anthropic** | Native (server-side) | Fast | Yes, with URLs | Free |
+| **Google Gemini** | Grounding | Fast | Domain links | Free |
+| **GitHub Copilot** | DDG tool | Slower | Via tool results | Free |
+| **Ollama** | DDG tool | Slower | Via tool results | Free |
+| **Any (via service)** | Connected API | Fast | Via tool results | Paid |

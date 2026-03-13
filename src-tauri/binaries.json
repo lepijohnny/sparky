@@ -1,0 +1,32 @@
+{
+  "node": {
+    "version": "22.22.0",
+    "targets": {
+      "aarch64-apple-darwin": {
+        "url": "https://nodejs.org/dist/v{version}/node-v{version}-darwin-arm64.tar.gz",
+        "extract": "tar.gz",
+        "binary": "node-v{version}-darwin-arm64/bin/node"
+      },
+      "x86_64-apple-darwin": {
+        "url": "https://nodejs.org/dist/v{version}/node-v{version}-darwin-x64.tar.gz",
+        "extract": "tar.gz",
+        "binary": "node-v{version}-darwin-x64/bin/node"
+      },
+      "x86_64-pc-windows-msvc": {
+        "url": "https://nodejs.org/dist/v{version}/node-v{version}-win-x64.zip",
+        "extract": "zip",
+        "binary": "node-v{version}-win-x64/node.exe"
+      },
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://nodejs.org/dist/v{version}/node-v{version}-linux-x64.tar.gz",
+        "extract": "tar.gz",
+        "binary": "node-v{version}-linux-x64/bin/node"
+      },
+      "aarch64-unknown-linux-gnu": {
+        "url": "https://nodejs.org/dist/v{version}/node-v{version}-linux-arm64.tar.gz",
+        "extract": "tar.gz",
+        "binary": "node-v{version}-linux-arm64/bin/node"
+      }
+    }
+  }
+}

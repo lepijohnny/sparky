@@ -1,0 +1,122 @@
+.trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 6px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.trigger:hover {
+  border-color: var(--fg-subtle);
+  background: var(--bg-hover);
+}
+
+.triggerDisabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.triggerIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.triggerLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.chevron {
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.list {
+  position: fixed;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 4px;
+  user-select: none;
+}
+
+.groupIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.groupLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 6px 28px;
+  font-size: 13px;
+  color: var(--fg);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.contextBadge {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--fg-subtle);
+  opacity: 0.7;
+}
+
+.item:hover,
+.itemFocused {
+  background: var(--bg-overlay);
+}
+
+.itemSelected {
+  background: var(--accent-soft);
+  font-weight: 500;
+}
+
+.itemSelected.itemFocused {
+  background: var(--accent-soft);
+}
+
+.empty {
+  padding: 12px 10px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  text-align: center;
+}

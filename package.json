@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "cd app && npm run dev",
+    "dev:tauri": "cargo tauri dev",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint . --fix",
+    "test": "cd server && npm test && cd ../app && npm test",
+    "test:recordings": "cd server && npx vitest run ./test/recordings/chat.recordings.test.ts",
+    "generate:api": "npx tsx server/core/assistant/cmd.apiparser.ts",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.4",
+    "@commitlint/cli": "^20.4.4",
+    "@commitlint/config-conventional": "^20.4.4",
+    "husky": "^9.1.7"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "node-llama-cpp"
+    ],
+    "patchedDependencies": {
+      "@mariozechner/pi-ai": "patches/@mariozechner__pi-ai.patch"
+    }
+  }
+}

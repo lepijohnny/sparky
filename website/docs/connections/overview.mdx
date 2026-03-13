@@ -1,0 +1,31 @@
+---
+sidebar_position: 1
+sidebar_label: Overview
+---
+
+<span className="section-label">Connections</span>
+
+# Overview
+
+<p className="header-description">Connect external services and let the agent interact with them.</p>
+
+Connections let you bring external APIs into Sparky so the agent can call them directly from chat. Connect services like GitHub, Gmail, Telegram, Todoist, or any REST API and MCP server. Once connected, just mention the service in your message and the agent takes care of the rest.
+
+## How It Works
+
+1. **Connection Agent** - a built-in agent that handles the entire connection flow, connecting a service is as simple as chatting with the agent and providing the necessary details.
+2. **Authentication** - the agent manages authentication for you, whether it's OAuth, API keys, or device login, you just follow the prompts and the agent securely stores your credentials.
+3. **Endpoint Discovery** - once authenticated, the agent discovers the service's capabilities by fetching its API schema or MCP manifest, so it knows exactly what actions it can perform.
+4. **Testing** - the agent can test the connection and ensure the service is working correctly before you start using it.
+5. **Calling Services** - to use a connected service, simply mention it in your message (e.g. `@github create a new issue in my repo`), the agent resolves the mention, selects the appropriate endpoint, fills in the parameters, and executes the action on your behalf.
+
+## Supported Protocols
+
+| Protocol | Description |
+|----------|-------------|
+| REST API | Any HTTP-based API with JSON responses |
+| MCP | Model Context Protocol servers with auto-discovery |
+
+## Mentioning Services
+
+To use a connected service in chat, mention it by name with `@` (e.g. `@github`). Sparky resolves the mention, fetches the service details, and makes its endpoints available to the agent for that message.

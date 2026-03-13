@@ -1,0 +1,274 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.searchIcon {
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--fg);
+  min-width: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--fg-subtle);
+}
+
+.searchClose {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 100ms ease;
+}
+
+.searchClose:hover {
+  color: var(--fg);
+}
+
+.searchToggle {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 100ms ease, background 100ms ease;
+}
+
+.searchToggle:hover {
+  color: var(--fg);
+  background: var(--bg-overlay);
+}
+
+.matchBadge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:hover {
+  background: var(--bg-hover);
+}
+
+.itemActive {
+  background: var(--accent-soft);
+  border-left: 2px solid var(--accent);
+  padding-left: 10px;
+}
+
+.itemContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemNameSystem {
+  color: var(--accent);
+}
+
+.metaIcon {
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.labelBadges {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.labelBadge {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.labelBadge:last-child {
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.streamingLine {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+}
+
+.streamingLine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  animation: streamSlide 1.2s ease-in-out infinite;
+}
+
+@keyframes streamSlide {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+.wandIcon {
+  color: #f5a623;
+  flex-shrink: 0;
+}
+
+.flagIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.itemDate {
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-left: auto;
+}
+
+.moreBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--fg-subtle);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.item:hover .moreBtn {
+  opacity: 1;
+}
+
+.moreBtn:hover {
+  color: var(--fg);
+  background: var(--bg-overlay);
+}
+
+.dateDivider {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--fg-muted);
+  padding: 14px 12px 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dateDivider:first-child {
+  padding-top: 4px;
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--fg-muted);
+  font-size: 13px;
+}

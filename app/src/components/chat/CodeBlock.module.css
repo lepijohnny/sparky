@@ -1,0 +1,84 @@
+.wrap {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  margin: 8px 0;
+  border: 1px solid var(--border);
+}
+
+:global([data-streaming]) .wrap {
+  animation: codeIn 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes codeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.language {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.copyBtn:hover {
+  color: var(--fg);
+  background: var(--bg-hover);
+}
+
+.pre {
+  margin: 0;
+  padding: 10px 14px;
+  overflow-x: auto;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--fg);
+  tab-size: 2;
+}
+
+.pre code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  padding: 0;
+}
+
+.line {
+  display: block;
+}
+
+.lineNum {
+  display: inline-block;
+  width: 3ch;
+  margin-right: 12px;
+  text-align: right;
+  color: var(--fg-muted);
+  user-select: none;
+  -webkit-user-select: none;
+}

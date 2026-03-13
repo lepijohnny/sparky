@@ -1,0 +1,155 @@
+/* ─── Content area ─── */
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Card ─── */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: 6px 16px;
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+}
+
+.cardBody {
+  padding: 16px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.cardBodyRow {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* ─── Fields ─── */
+.fieldText {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+  margin-bottom: 2px;
+}
+
+.fieldHint {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+.emptyState {
+  padding: 12px 0;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+/* ─── Buttons ─── */
+.btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--fg);
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: border-color 150ms ease, background 150ms ease;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  border-color: var(--fg-subtle);
+  background: var(--bg-hover);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btnDanger {
+  composes: btn;
+  color: #ef4444;
+}
+
+.btnDanger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+.btnDanger:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btnMuted {
+  composes: btn;
+  color: var(--fg-muted);
+}
+
+/* ─── Dropdown wrap ─── */
+.dropdownWrap {
+  flex-shrink: 0;
+  width: 200px;
+}
+
+/* ─── Progress bar ─── */
+.progressWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progressLabel {
+  font-size: 10px;
+  color: var(--fg-muted);
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.2s;
+  min-width: 2%;
+}

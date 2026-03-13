@@ -1,0 +1,59 @@
+/* ─── Windows-only custom titlebar controls ─── */
+.controls {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9998;
+  display: flex;
+  height: 32px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.controls:hover {
+  opacity: 1;
+}
+
+/* Invisible hover zone at the top of the window */
+.hoverZone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  z-index: 9997;
+}
+
+.hoverZone:hover ~ .controls,
+.controls:hover {
+  opacity: 1;
+}
+
+.btn {
+  appearance: none;
+  background: none;
+  border: none;
+  width: 46px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  color: var(--fg);
+  transition: background 100ms ease;
+}
+
+.btn:hover {
+  background: var(--bg-overlay);
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.closeBtn:hover {
+  background: #e81123;
+  color: #fff;
+}

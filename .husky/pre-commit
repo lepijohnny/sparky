@@ -1,0 +1,15 @@
+if git diff --cached --name-only | grep -q '^\.version$'; then
+  VERSION=$(cat .version | tr -d '[:space:]')
+
+  if [ "$(uname -s)" = "Darwin" ]; then
+    sed -i '' "s/^version = \".*\"/version = \"$VERSION\"/" src-tauri/Cargo.toml
+    sed -i '' "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" src-tauri/tauri.conf.json
+    sed -i '' "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" app/package.json
+  else
+    sed -i "s/^version = \".*\"/version = \"$VERSION\"/" src-tauri/Cargo.toml
+    sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" src-tauri/tauri.conf.json
+    sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" app/package.json
+  fi
+
+  git add src-tauri/Cargo.toml src-tauri/tauri.conf.json app/package.json
+fi

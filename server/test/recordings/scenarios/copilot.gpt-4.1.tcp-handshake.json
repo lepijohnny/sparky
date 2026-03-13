@@ -1,0 +1,2684 @@
+{
+  "id": "copilot.gpt-4.1.2026-03-14T16-03-13",
+  "description": "Recorded session",
+  "prompt": "Explain me TCP handshake?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 1058,
+          "event": {
+            "type": "text.delta",
+            "content": "Certainly"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "!"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " The"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "TCP"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " handshake"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " refers"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " to"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 65,
+          "event": {
+            "type": "text.delta",
+            "content": " process"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " used"
+          }
+        },
+        {
+          "delay": 12,
+          "event": {
+            "type": "text.delta",
+            "content": " by"
+          }
+        },
+        {
+          "delay": 87,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Transmission"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Control"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Protocol"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "TCP"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ")"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " to"
+          }
+        },
+        {
+          "delay": 58,
+          "event": {
+            "type": "text.delta",
+            "content": " establish"
+          }
+        },
+        {
+          "delay": 8,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 95,
+          "event": {
+            "type": "text.delta",
+            "content": " reliable"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " connection"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " between"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " two"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " devices"
+          }
+        },
+        {
+          "delay": 26,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "usually"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 21,
+          "event": {
+            "type": "text.delta",
+            "content": " client"
+          }
+        },
+        {
+          "delay": 105,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 12,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ")"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " before"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " data"
+          }
+        },
+        {
+          "delay": 13,
+          "event": {
+            "type": "text.delta",
+            "content": " transfer"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " begins"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 22,
+          "event": {
+            "type": "text.delta",
+            "content": " This"
+          }
+        },
+        {
+          "delay": 117,
+          "event": {
+            "type": "text.delta",
+            "content": " is"
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " known"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " as"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "three"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-way"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " handshake"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 151,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "###"
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " Steps"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " in"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " TCP"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Three"
+          }
+        },
+        {
+          "delay": 26,
+          "event": {
+            "type": "text.delta",
+            "content": "-way"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Hand"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "shake"
+          }
+        },
+        {
+          "delay": 112,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 23,
+          "event": {
+            "type": "text.delta",
+            "content": "1"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Synchron"
+          }
+        },
+        {
+          "delay": 26,
+          "event": {
+            "type": "text.delta",
+            "content": "ize"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "):"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "**\n"
+          }
+        },
+        {
+          "delay": 89,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " The"
+          }
+        },
+        {
+          "delay": 48,
+          "event": {
+            "type": "text.delta",
+            "content": " client"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " sends"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " TCP"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " segment"
+          }
+        },
+        {
+          "delay": 17,
+          "event": {
+            "type": "text.delta",
+            "content": " with"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 84,
+          "event": {
+            "type": "text.delta",
+            "content": " flag"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " set"
+          }
+        },
+        {
+          "delay": 60,
+          "event": {
+            "type": "text.delta",
+            "content": " to"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " This"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " indicates"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 85,
+          "event": {
+            "type": "text.delta",
+            "content": " client"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " wishes"
+          }
+        },
+        {
+          "delay": 73,
+          "event": {
+            "type": "text.delta",
+            "content": " to"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " establish"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " connection"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 27,
+          "event": {
+            "type": "text.delta",
+            "content": " synchron"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "izes"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " sequence"
+          }
+        },
+        {
+          "delay": 48,
+          "event": {
+            "type": "text.delta",
+            "content": " numbers"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n"
+          }
+        },
+        {
+          "delay": 85,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "2"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 17,
+          "event": {
+            "type": "text.delta",
+            "content": "ACK"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Synchron"
+          }
+        },
+        {
+          "delay": 50,
+          "event": {
+            "type": "text.delta",
+            "content": "ize"
+          }
+        },
+        {
+          "delay": 83,
+          "event": {
+            "type": "text.delta",
+            "content": "-A"
+          }
+        },
+        {
+          "delay": 12,
+          "event": {
+            "type": "text.delta",
+            "content": "cknow"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ledge"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "):"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "**\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": " The"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " responds"
+          }
+        },
+        {
+          "delay": 49,
+          "event": {
+            "type": "text.delta",
+            "content": " with"
+          }
+        },
+        {
+          "delay": 96,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " TCP"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " segment"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " that"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " has"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " both"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 47,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " flags"
+          }
+        },
+        {
+          "delay": 108,
+          "event": {
+            "type": "text.delta",
+            "content": " set"
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " synchron"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "izes"
+          }
+        },
+        {
+          "delay": 30,
+          "event": {
+            "type": "text.delta",
+            "content": " sequence"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " numbers"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " from"
+          }
+        },
+        {
+          "delay": 104,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 28,
+          "event": {
+            "type": "text.delta",
+            "content": "'s"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " side"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK"
+          }
+        },
+        {
+          "delay": 21,
+          "event": {
+            "type": "text.delta",
+            "content": " acknowledges"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " client's"
+          }
+        },
+        {
+          "delay": 102,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n"
+          }
+        },
+        {
+          "delay": 39,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "3"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 8,
+          "event": {
+            "type": "text.delta",
+            "content": "A"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "cknow"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ledge"
+          }
+        },
+        {
+          "delay": 103,
+          "event": {
+            "type": "text.delta",
+            "content": "):"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "**\n"
+          }
+        },
+        {
+          "delay": 52,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " The"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " client"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " sends"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " final"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " TCP"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " segment"
+          }
+        },
+        {
+          "delay": 100,
+          "event": {
+            "type": "text.delta",
+            "content": " with"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 62,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " flag"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " set"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 34,
+          "event": {
+            "type": "text.delta",
+            "content": " This"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " acknowledges"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 55,
+          "event": {
+            "type": "text.delta",
+            "content": " receipt"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " of"
+          }
+        },
+        {
+          "delay": 73,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "’s"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n"
+          }
+        },
+        {
+          "delay": 23,
+          "event": {
+            "type": "text.delta",
+            "content": "After"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " these"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " three"
+          }
+        },
+        {
+          "delay": 54,
+          "event": {
+            "type": "text.delta",
+            "content": " steps"
+          }
+        },
+        {
+          "delay": 76,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 12,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " connection"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " is"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " established"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " data"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " can"
+          }
+        },
+        {
+          "delay": 53,
+          "event": {
+            "type": "text.delta",
+            "content": " flow"
+          }
+        },
+        {
+          "delay": 90,
+          "event": {
+            "type": "text.delta",
+            "content": " between"
+          }
+        },
+        {
+          "delay": 14,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " client"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "---\n\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "###"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Sequence"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Diagram"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "```"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "mer"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "maid"
+          }
+        },
+        {
+          "delay": 26,
+          "event": {
+            "type": "text.delta",
+            "content": "\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "sequence"
+          }
+        },
+        {
+          "delay": 23,
+          "event": {
+            "type": "text.delta",
+            "content": "Diagram"
+          }
+        },
+        {
+          "delay": 105,
+          "event": {
+            "type": "text.delta",
+            "content": "\n"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "   "
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " participant"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Client"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "   "
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " participant"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n"
+          }
+        },
+        {
+          "delay": 42,
+          "event": {
+            "type": "text.delta",
+            "content": "   "
+          }
+        },
+        {
+          "delay": 109,
+          "event": {
+            "type": "text.delta",
+            "content": " Client"
+          }
+        },
+        {
+          "delay": 12,
+          "event": {
+            "type": "text.delta",
+            "content": "->"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ">"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ":"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 33,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Seq"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ="
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " x"
+          }
+        },
+        {
+          "delay": 120,
+          "event": {
+            "type": "text.delta",
+            "content": ")\n"
+          }
+        },
+        {
+          "delay": 10,
+          "event": {
+            "type": "text.delta",
+            "content": "   "
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "--"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ">>"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Client"
+          }
+        },
+        {
+          "delay": 23,
+          "event": {
+            "type": "text.delta",
+            "content": ":"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 132,
+          "event": {
+            "type": "text.delta",
+            "content": "ACK"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 8,
+          "event": {
+            "type": "text.delta",
+            "content": "Seq"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ="
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " y"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Ack"
+          }
+        },
+        {
+          "delay": 15,
+          "event": {
+            "type": "text.delta",
+            "content": " ="
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " x"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "+"
+          }
+        },
+        {
+          "delay": 127,
+          "event": {
+            "type": "text.delta",
+            "content": "1"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ")\n"
+          }
+        },
+        {
+          "delay": 41,
+          "event": {
+            "type": "text.delta",
+            "content": "   "
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Client"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "->"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ">"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ":"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 114,
+          "event": {
+            "type": "text.delta",
+            "content": "Ack"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ="
+          }
+        },
+        {
+          "delay": 30,
+          "event": {
+            "type": "text.delta",
+            "content": " y"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "+"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "1"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ")\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "``"
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.delta",
+            "content": "`\n\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "---\n\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "###"
+          }
+        },
+        {
+          "delay": 145,
+          "event": {
+            "type": "text.delta",
+            "content": " Visual"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Explanation"
+          }
+        },
+        {
+          "delay": 10,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "S"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "YN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ":**"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Client"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " initi"
+          }
+        },
+        {
+          "delay": 138,
+          "event": {
+            "type": "text.delta",
+            "content": "ates"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " connection"
+          }
+        },
+        {
+          "delay": 23,
+          "event": {
+            "type": "text.delta",
+            "content": " (`"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "S"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "YN"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "`"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " flag"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ").\n"
+          }
+        },
+        {
+          "delay": 84,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "S"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": "YN"
+          }
+        },
+        {
+          "delay": 74,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ACK"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ":**"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " replies"
+          }
+        },
+        {
+          "delay": 32,
+          "event": {
+            "type": "text.delta",
+            "content": " to"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " client"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "’s"
+          }
+        },
+        {
+          "delay": 42,
+          "event": {
+            "type": "text.delta",
+            "content": " request"
+          }
+        },
+        {
+          "delay": 79,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 13,
+          "event": {
+            "type": "text.delta",
+            "content": " synchron"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "izing"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " acknowledging"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n"
+          }
+        },
+        {
+          "delay": 20,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "ACK"
+          }
+        },
+        {
+          "delay": 42,
+          "event": {
+            "type": "text.delta",
+            "content": ":**"
+          }
+        },
+        {
+          "delay": 80,
+          "event": {
+            "type": "text.delta",
+            "content": " Client"
+          }
+        },
+        {
+          "delay": 22,
+          "event": {
+            "type": "text.delta",
+            "content": " acknowledges"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " server"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": " completing"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " handshake"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "---\n\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "###"
+          }
+        },
+        {
+          "delay": 42,
+          "event": {
+            "type": "text.delta",
+            "content": " Purpose"
+          }
+        },
+        {
+          "delay": 78,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n"
+          }
+        },
+        {
+          "delay": 33,
+          "event": {
+            "type": "text.delta",
+            "content": "The"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " handshake"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ":\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Establish"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "es"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " both"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " devices"
+          }
+        },
+        {
+          "delay": 41,
+          "event": {
+            "type": "text.delta",
+            "content": " are"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ready"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n"
+          }
+        },
+        {
+          "delay": 109,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 13,
+          "event": {
+            "type": "text.delta",
+            "content": " Ag"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "rees"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " on"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " starting"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " sequence"
+          }
+        },
+        {
+          "delay": 31,
+          "event": {
+            "type": "text.delta",
+            "content": " numbers"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Enables"
+          }
+        },
+        {
+          "delay": 109,
+          "event": {
+            "type": "text.delta",
+            "content": " reliable"
+          }
+        },
+        {
+          "delay": 24,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ordered"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " communication"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 18,
+          "event": {
+            "type": "text.delta",
+            "content": "If"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " you"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " want"
+          }
+        },
+        {
+          "delay": 112,
+          "event": {
+            "type": "text.delta",
+            "content": " more"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " technical"
+          }
+        },
+        {
+          "delay": 31,
+          "event": {
+            "type": "text.delta",
+            "content": " detail"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " or"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " have"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " questions"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " about"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " closing"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ("
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "te"
+          }
+        },
+        {
+          "delay": 114,
+          "event": {
+            "type": "text.delta",
+            "content": "ardown"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": ")"
+          }
+        },
+        {
+          "delay": 41,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " connection"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " let"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " me"
+          }
+        },
+        {
+          "delay": 31,
+          "event": {
+            "type": "text.delta",
+            "content": " know"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "!"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "**"
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.done",
+            "content": "Certainly! The **TCP handshake** refers to the process used by the Transmission Control Protocol (TCP) to establish a reliable connection between two devices (usually a client and a server) before data transfer begins. This is known as the **three-way handshake**.\n\n### Steps in the TCP Three-way Handshake\n\n**1. SYN (Synchronize):**\n- The client sends a TCP segment with the SYN flag set to the server.\n- This indicates the client wishes to establish a connection and synchronizes sequence numbers.\n\n**2. SYN-ACK (Synchronize-Acknowledge):**\n- The server responds with a TCP segment that has both SYN and ACK flags set.\n- SYN synchronizes sequence numbers from the server's side, and ACK acknowledges the client's SYN.\n\n**3. ACK (Acknowledge):**\n- The client sends a final TCP segment with the ACK flag set.\n- This acknowledges the receipt of the server’s SYN.\n\nAfter these three steps, the connection is established, and data can flow between the client and server.\n\n---\n\n### Sequence Diagram\n\n```mermaid\nsequenceDiagram\n    participant Client\n    participant Server\n    Client->>Server: SYN (Seq = x)\n    Server-->>Client: SYN-ACK (Seq = y, Ack = x+1)\n    Client->>Server: ACK (Ack = y+1)\n```\n\n---\n\n### Visual Explanation\n\n- **SYN:** Client initiates connection (`SYN` flag).\n- **SYN-ACK:** Server replies to client’s request, synchronizing and acknowledging.\n- **ACK:** Client acknowledges server, completing handshake.\n\n---\n\n### Purpose\n\nThe handshake:\n- Establishes both devices are ready\n- Agrees on starting sequence numbers\n- Enables reliable, ordered communication\n\n**If you want more technical detail or have questions about closing (teardown) the connection, let me know!**"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

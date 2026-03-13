@@ -1,0 +1,278 @@
+.overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 65%;
+  z-index: 100000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+.spark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  animation: sparkFloat 1.1s ease-in-out infinite;
+}
+
+.spark:nth-child(1) { top: 50%; left: 50%; animation-delay: 0s; }
+.spark:nth-child(2) { top: 50%; left: 50%; animation-delay: 0.14s; }
+.spark:nth-child(3) { top: 50%; left: 50%; animation-delay: 0.28s; }
+.spark:nth-child(4) { top: 50%; left: 50%; animation-delay: 0.42s; }
+.spark:nth-child(5) { top: 50%; left: 50%; animation-delay: 0.56s; }
+.spark:nth-child(6) { top: 50%; left: 50%; animation-delay: 0.7s; }
+.spark:nth-child(7) { top: 50%; left: 50%; animation-delay: 0.84s; }
+.spark:nth-child(8) { top: 50%; left: 50%; animation-delay: 0.98s; }
+
+@keyframes sparkFloat {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3);
+  }
+}
+
+.spark:nth-child(1) { --dx: 0px;   --dy: -50px; }
+.spark:nth-child(2) { --dx: 35px;  --dy: -35px; }
+.spark:nth-child(3) { --dx: 50px;  --dy: 0px;   }
+.spark:nth-child(4) { --dx: 35px;  --dy: 35px;  }
+.spark:nth-child(5) { --dx: 0px;   --dy: 50px;  }
+.spark:nth-child(6) { --dx: -35px; --dy: 35px;  }
+.spark:nth-child(7) { --dx: -50px; --dy: 0px;   }
+.spark:nth-child(8) { --dx: -35px; --dy: -35px; }
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: 1px;
+}
+
+.deps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  width: 300px;
+}
+
+.depsLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--fg-subtle);
+}
+
+.depCards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.depCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--fg-subtle, rgba(255,255,255,0.1));
+  background: var(--bg-raised, rgba(255,255,255,0.03));
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.depCardOk {
+  border-color: rgba(74, 222, 128, 0.25);
+  background: rgba(74, 222, 128, 0.04);
+}
+
+.depCardErr {
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.depBrand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--bg-surface, rgba(255,255,255,0.05));
+  flex-shrink: 0;
+}
+
+.brandIcon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.85;
+}
+
+.depInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.depName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.depStatus {
+  font-size: 11px;
+  color: var(--fg-subtle);
+}
+
+.statusOk {
+  color: #4ade80;
+}
+
+.statusErr {
+  color: #f87171;
+}
+
+.statusBusy {
+  color: var(--accent);
+}
+
+.depBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--fg-subtle);
+}
+
+.depCardOk .depBadge {
+  color: #4ade80;
+}
+
+.depCardErr .depBadge {
+  color: #f87171;
+}
+
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted, rgba(255,255,255,0.4));
+}
+
+.statusText {
+  font-size: 11px;
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+.depSpinner {
+  animation: spin 1s linear infinite;
+}
+
+.progressBar {
+  width: 100%;
+  height: 3px;
+  background: var(--bg-raised, rgba(255,255,255,0.06));
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.errorMsg {
+  font-size: 11px;
+  color: #f87171;
+  max-width: 280px;
+  word-break: break-word;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.installBtn {
+  padding: 8px 24px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.installBtn:hover {
+  opacity: 0.85;
+}
+
+.quitBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--fg-subtle, rgba(255,255,255,0.15));
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.quitBtn:hover {
+  border-color: var(--fg-muted);
+}
+
+.hint {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--fg-subtle);
+  text-align: center;
+  margin-top: 4px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

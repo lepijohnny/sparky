@@ -1,0 +1,56 @@
+---
+sidebar_position: 2
+sidebar_label: Authentication
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<span className="section-label">Connections</span>
+
+# Authentication
+
+<p className="header-description">How Sparky handles credentials and token management.</p>
+
+Sparky supports multiple authentication strategies to connect with different types of APIs. All credentials are stored securely in the OS keychain (Keychain on macOS, DPAPI on Windows). Nothing is saved in plain text.
+
+## Auth Strategies
+
+| Strategy | Use Case | Example |
+|----------|----------|---------|
+| `bearer` | API token in Authorization header | GitHub, Todoist |
+| `oauth` | OAuth 2.0 PKCE flow with automatic token refresh | Gmail, Google APIs |
+| `bot` | Bot token in Authorization header | Telegram bots |
+| `url` | Token embedded in URL path | APIs with token-in-URL patterns |
+| `basic` | Username and password | Basic auth APIs |
+| `header` | Custom header name and value | APIs with non-standard auth headers |
+| `query` | Token as query parameter | APIs using `?api_key=...` |
+
+## Token Management
+
+For OAuth connections, Sparky handles the entire flow automatically:
+
+- Opens the authorization page in your browser
+- Captures the callback with the authorization code
+- Exchanges the code for access and refresh tokens
+- Stores tokens securely in the OS keychain
+- Refreshes tokens automatically when they expire
+
+You connect once and it works. No manual token rotation needed.
+
+## Credential Storage
+
+All secrets are stored in the native OS keychain. Credentials are never written to disk in plain text. They are scoped per service (e.g. `svc.github.TOKEN`, `svc.gmail.REFRESH_TOKEN`).
+
+<Tabs>
+  <TabItem value="macos" label="macOS" default>
+
+Stored in **Keychain Access** using `keytar`, which natively integrates with the macOS `security` framework. Each credential is a keychain item scoped to the Sparky application.
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+Stored via **DPAPI** (Data Protection API) in the Windows Registry at `HKCU:\Software\Sparky\Credentials\`. Values are encrypted with the current user's credentials and inaccessible to other accounts.
+
+  </TabItem>
+</Tabs>

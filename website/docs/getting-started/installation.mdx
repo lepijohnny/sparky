@@ -1,0 +1,57 @@
+---
+sidebar_position: 2
+sidebar_label: Installation
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<span className="section-label">Getting Started</span>
+
+# Installation
+
+<p className="header-description">Download and install Sparky on macOS or Windows.</p>
+
+Sparky is a native desktop application built with [Tauri](https://tauri.app). The backend runs as a Node.js sidecar server that handles chat, knowledge indexing, and LLM routing.
+
+## Requirements
+
+| Platform | Architecture |
+|----------|-------------|
+| macOS 12+ (Monterey) | Apple Silicon, Intel |
+| Windows 10+ | x64 |
+
+:::note
+16 GB RAM recommended for local RAG (embedding and reranking models run on-device via llama.cpp).
+:::
+
+## How to Install
+
+Download the latest release from [GitHub Releases](https://github.com/lepijohnny/sparky/releases).
+
+<Tabs>
+  <TabItem value="macos" label="macOS" default>
+
+1. Download the DMG from [GitHub Releases](https://github.com/lepijohnny/sparky/releases/latest):
+   - **Apple Silicon**: `Sparky_0.3.0_aarch64.dmg`
+
+2. Open the DMG and **drag Sparky.app into `/Applications`**.
+
+3. Launch Sparky from `/Applications` as usual.
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+1. Download the installer from [GitHub Releases](https://github.com/lepijohnny/sparky/releases/latest):
+   - **x64**: `Sparky_0.3.0_x64-setup.exe`
+
+2. Run the installer. Windows SmartScreen may show an "Unknown publisher" warning. Click **More info** → **Run anyway**.
+
+3. Sparky installs to `C:\Program Files\Sparky\` with a Start Menu shortcut.
+
+:::info Unsigned App
+Sparky is not yet code-signed. The SmartScreen warning only appears on first install. Code signing will be added in a future release.
+:::
+
+  </TabItem>
+</Tabs>

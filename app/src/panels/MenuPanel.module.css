@@ -1,0 +1,396 @@
+.newChatBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 8px 0;
+  padding: 9px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-overlay);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--fg);
+  cursor: pointer;
+  outline: none;
+  transition: all 120ms ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.newChatBtn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.navList {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 6px;
+  cursor: default;
+  font-size: 13px;
+  color: var(--fg-muted);
+  transition: all 120ms ease;
+}
+
+.navItem:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.navItemActive,
+.navItemActive:hover {
+  background: var(--accent-soft);
+  color: var(--fg);
+  font-weight: 500;
+  border-left: 2px solid var(--accent);
+  padding-left: 12px;
+}
+
+.navDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 14px;
+}
+
+.itemIcon {
+  position: relative;
+  font-size: 15px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navCount {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-subtle);
+  min-width: 16px;
+  text-align: right;
+}
+
+/* ─── Labels sub-list ─── */
+.labelsWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease;
+}
+
+.labelsWrapOpen {
+  grid-template-rows: 1fr;
+}
+
+.labelsInner {
+  overflow: hidden;
+}
+
+.labelsList {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0 2px 20px;
+}
+
+.labelsList::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 14px;
+  width: 1px;
+  background: var(--border);
+}
+
+.labelItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: default;
+  transition: background 100ms ease, transform 150ms ease, opacity 150ms ease;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.labelItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: var(--border);
+}
+
+.labelItem:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.labelItemActive,
+.labelItemActive:hover {
+  background: var(--accent-soft);
+  color: var(--fg);
+}
+
+.labelItemDragging {
+  background: var(--accent-soft);
+  opacity: 0.7;
+  transform: scale(1.04);
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+
+.labelDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.labelName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.labelsIcon {
+  display: flex;
+  align-items: center;
+  transition: opacity 150ms ease 200ms;
+}
+
+.labelsChevron {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms ease 200ms;
+}
+
+.itemIcon:hover .labelsIcon {
+  opacity: 0;
+  transition-delay: 200ms;
+}
+
+.itemIcon:hover .labelsChevron {
+  opacity: 1;
+  transition-delay: 200ms;
+}
+
+.labelCount {
+  transition: opacity 100ms ease;
+}
+
+.labelItem:hover .labelCount {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.labelGrip {
+  position: absolute;
+  right: 14px;
+  cursor: grab;
+  color: var(--fg-subtle);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.labelItem:hover .labelGrip {
+  opacity: 1;
+}
+
+.labelGrip:active {
+  cursor: grabbing;
+}
+
+/* ─── Workspace expander ─── */
+.workspaceBar {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.wsTrigger {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--fg-muted);
+  cursor: pointer;
+  outline: none;
+  transition: all 120ms ease;
+}
+
+.wsTrigger:hover {
+  background: var(--bg-overlay);
+  color: var(--fg);
+}
+
+.wsTriggerLabel {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wsChevron {
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+  transform: rotate(180deg);
+}
+
+.wsChevronOpen {
+  transform: rotate(0deg);
+}
+
+.wsExpandedList {
+  padding: 0 0 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wsItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+
+.wsItem:hover {
+  background: var(--bg-overlay);
+  color: var(--fg);
+}
+
+.wsItemActive {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.wsItemLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wsListDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 12px;
+}
+
+.newWsItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+
+.newWsItem:hover {
+  background: var(--bg-overlay);
+  color: var(--fg);
+}
+
+/* ─── Status bar ─── */
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--fg-muted);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusText {
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 11px;
+}
+
+.iconOff {
+  display: flex;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.iconOn {
+  display: flex;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.logBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.logBtn:hover {
+  background: var(--bg-overlay);
+  color: var(--fg);
+  border-color: var(--fg-subtle);
+}

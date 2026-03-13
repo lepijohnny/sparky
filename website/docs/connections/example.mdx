@@ -1,0 +1,53 @@
+---
+sidebar_position: 3
+sidebar_label: Example
+---
+
+<span className="section-label">Connections</span>
+
+# Example
+
+<p className="header-description">Step-by-step: connecting GitHub and using it from chat.</p>
+
+## Connecting GitHub
+
+The easiest way to connect a service is through chat. Ask the agent:
+
+> "Connect my GitHub account"
+
+The agent will guide you through the registration flow:
+
+1. **Discovery** - the agent identifies the service and its capabilities by searching for known patterns (e.g. GitHub's API endpoints)
+2. **Authentication** - the agent proposes possible authentication option and recommends the best one (PAT or OAuth)
+3. **Prompt** - the agent asks the user to provide secrets (e.g. PAT) or follow the OAuth flow
+4. **Validation** - the agent tests the credentials by making a simple API call to ensure everything is working
+5. **Guide** - once validated, the agent confirms the connection is successful and writes the connection guide
+
+Once registered, the service appears in your connections list.
+
+## Using It in Chat
+
+Mention the service with `@` and describe what you need:
+
+> "@github list my open pull requests in the sparky repo"
+
+The agent will:
+
+1. Call `svc.describe` to fetch available GitHub endpoints
+2. Select the right endpoint (`GET /repos/{owner}/{repo}/pulls`)
+3. Execute the call and present the results
+4. Update the endpoints status based on the response (e.g. ok or error)
+
+## Managing Connections
+
+View, test or remove connections from the **Connections** page in settings. You can also ask the agent:
+
+- "Show my connections"
+- "Remove the todoist connection"
+- "Test the gmail connection"
+
+## Practical Example
+
+Example connecting to github and listing profile and repositories:
+
+<video src={require('../assets/connection.mp4').default} autoPlay muted loop playsInline style={{maxWidth: '700px', width: '100%'}} />

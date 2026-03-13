@@ -1,0 +1,84 @@
+.tray {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--border);
+  max-height: 84px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 100ms ease;
+  min-width: 0;
+}
+
+.item:hover {
+  background: var(--bg-hover);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.preview {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  outline: none;
+  border-radius: 2px;
+}
+
+.preview:focus {
+  outline: none;
+}
+
+
+
+@keyframes anchorFlash {
+  0% { font-weight: 700; color: var(--accent); }
+  100% { font-weight: inherit; color: inherit; }
+}
+
+.flash {
+  animation: anchorFlash 300ms ease-out;
+}
+
+.rename,
+.unpin {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--fg-subtle);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 100ms ease, color 100ms ease;
+}
+
+.item:hover .rename,
+.item:hover .unpin {
+  opacity: 1;
+}
+
+.rename:hover,
+.unpin:hover {
+  color: var(--fg);
+  background: var(--bg-overlay);
+}

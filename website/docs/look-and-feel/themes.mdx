@@ -1,0 +1,28 @@
+---
+sidebar_position: 1
+sidebar_label: Themes
+---
+
+<span className="section-label">Look and Feel</span>
+
+# Themes
+
+<p className="header-description">Customize the appearance of Sparky.</p>
+
+Sparky ships with built-in light and dark themes. You can switch between them from the settings page or ask the agent to do it for you.
+
+## Custom Themes
+
+Create your own theme with a simple JSON file. Define a few base colors and Sparky derives the rest automatically. Drop the file into `~/.sparky/themes/` and it appears in the theme picker.
+
+```json
+{
+  "name": "GitHub Light",
+  "bg": "#ffffff",
+  "fg": "#1f2328",
+  "accent": "#0969da",
+  "mode": "light"
+}
+```
+
+Only four colors and a mode are needed. Sparky derives all other shades (borders, surfaces, muted text) automatically from these base values.

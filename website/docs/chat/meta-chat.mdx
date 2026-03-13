@@ -1,0 +1,26 @@
+---
+sidebar_position: 4
+sidebar_label: Meta-Chat
+---
+
+<span className="section-label">Chat</span>
+
+# Meta-Chat
+
+<p className="header-description">Control the app through conversation.</p>
+
+## AI-first Interface
+
+Sparky takes an AI-first approach. Every application action is available through chat. Instead of navigating menus and settings pages, you can ask the agent to do it for you. By chatting with the agent, you can:
+
+- **Create and manage labels** — "Create a label called Work / Projects"
+- **Configure settings** — "Change the theme to dark" or "Set my timezone to UTC+1"
+- **Connect services** — "Connect my GitHub account"
+- **Manage workspaces** — "Create a new workspace called Research"
+- **Search and organize chats** — "Archive all chats older than 30 days"
+
+## How It Works
+
+Every action is exposed as a tool with a defined schema. When you describe what you want, the agent selects the right tool, fills in the parameters, and asks for approval if needed. The same tools that power meta-chat are available in every conversation — there is no separate "assistant mode."
+
+<video src={require('../assets/meta-agent.mp4').default} autoPlay muted loop playsInline style={{maxWidth: '700px', width: '100%'}} />

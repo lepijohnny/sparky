@@ -1,0 +1,413 @@
+.wrap {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+
+.bubble {
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  background: var(--bg-surface);
+  color: var(--fg);
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+  min-width: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+.fadeIn {
+  animation: fadeIn 300ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.blockFadeIn {
+  animation: blockReveal 400ms ease;
+}
+
+@keyframes blockReveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bubble p {
+  margin: 0 0 8px;
+}
+
+.bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.bubble h1,
+.bubble h2,
+.bubble h3,
+.bubble h4 {
+  margin: 12px 0 6px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.bubble h1 { font-size: 1.2em; }
+.bubble h2 { font-size: 1.1em; }
+.bubble h3 { font-size: 1.05em; }
+.bubble h4 { font-size: 1em; }
+
+.bubble h1:first-child,
+.bubble h2:first-child,
+.bubble h3:first-child,
+.bubble h4:first-child {
+  margin-top: 0;
+}
+
+.bubble ul,
+.bubble ol {
+  margin: 4px 0 8px;
+  padding-left: 20px;
+}
+
+.bubble li {
+  margin: 2px 0;
+}
+
+.bubble li > ul,
+.bubble li > ol {
+  margin: 2px 0;
+}
+
+.bubble code {
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.9em;
+  background: none;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.bubble pre {
+  margin: 4px 0;
+  padding: 4px 4px 4px 12px;
+  background: none;
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 400px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bubble pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.bubble blockquote {
+  margin: 8px 0;
+  padding: 4px 12px;
+  border-left: 3px solid var(--border);
+  color: var(--fg-muted);
+}
+
+.bubble :global(.katex-display) {
+  margin: 8px auto;
+  overflow-x: auto;
+}
+
+.bubble :global(.katex) {
+  margin: 0 auto;
+}
+
+.bubble table {
+  border-collapse: collapse;
+  margin: 8px auto;
+  font-size: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.bubble th,
+.bubble td {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.bubble th {
+  font-weight: 600;
+  background: var(--bg-hover);
+}
+
+.bubble a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.bubble a:hover {
+  text-decoration: underline;
+}
+
+.bubble hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+.bubble strong {
+  font-weight: 600;
+}
+
+.activitiesGroup {
+  min-width: 0;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.activitiesGroupError {
+  border-color: #ef4444;
+}
+
+.activitiesToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: var(--fg-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.activitiesTogglePassive {
+  cursor: default;
+}
+
+.activitiesToggle:not(.activitiesTogglePassive):hover {
+  background: var(--bg-overlay);
+}
+
+.activitiesLabel {
+  font-weight: 500;
+}
+
+.activitiesBadge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  background: var(--bg-overlay);
+  border-radius: 8px;
+  padding: 0 5px;
+  line-height: 16px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.activitiesCountIn {
+  animation: activityFadeIn 300ms ease;
+}
+
+@keyframes activityFadeIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.thinkingTrail {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 2px;
+}
+
+.thinkingBrain {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.thinkingPulse {
+  color: var(--accent);
+  flex-shrink: 0;
+  animation: brainAppear 400ms ease, brainPulse 1.2s ease-in-out 400ms infinite;
+}
+
+@keyframes brainPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes brainAppear {
+  0% { opacity: 0; transform: scale(0.3); }
+  60% { opacity: 0.6; transform: scale(1.1); }
+  100% { opacity: 0.4; transform: scale(1); }
+}
+
+.activitiesChevron {
+  transition: transform 150ms ease;
+  flex-shrink: 0;
+}
+
+.activitiesChevronOpen {
+  transform: rotate(90deg);
+}
+
+.activitiesListWrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 200ms ease, opacity 200ms ease;
+  opacity: 1;
+}
+
+.activitiesListWrapOut {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.activitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0 4px 20px;
+  overflow: hidden;
+}
+
+.activityRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--fg-muted);
+  border-radius: 4px;
+  min-width: 0;
+}
+
+.activityError {
+  color: #ef4444;
+}
+
+.activityApproved {
+  color: #22c55e;
+}
+
+.activityPending {
+  color: var(--accent);
+}
+
+.activityLabel {
+  flex: 1;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.bubbleError {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #ef4444;
+  background: color-mix(in srgb, #ef4444 8%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 0;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusLabel {
+  font-weight: 500;
+}
+
+.usageGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.usageBar {
+  width: 80px;
+  height: 4px;
+  background: var(--bg-overlay);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.usageFill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 300ms ease;
+}
+
+.anchorBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--fg-subtle);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 100ms ease, color 100ms ease;
+  align-self: flex-end;
+}
+
+.wrap:hover .anchorBtn {
+  opacity: 1;
+}
+
+.anchorBtnActive {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.anchorBtn:hover {
+  color: var(--accent);
+  background: var(--bg-hover);
+}
+
+
+@media print {
+  .bubble {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .bubble pre {
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+  }
+
+  .statusRow {
+    display: none !important;
+  }
+}

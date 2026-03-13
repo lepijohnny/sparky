@@ -1,0 +1,84 @@
+.input {
+  width: 200px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--fg);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::placeholder {
+  color: var(--fg-muted);
+}
+
+.promptRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.promptTextarea {
+  width: 100%;
+  min-height: 120px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.5;
+  color: var(--fg);
+  outline: none;
+  resize: vertical;
+  transition: border-color 150ms ease;
+}
+
+.promptTextarea:focus {
+  border-color: var(--accent);
+}
+
+.promptTextarea::placeholder {
+  color: var(--fg-muted);
+}
+
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.onboardingField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.onboardingLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.onboardingHint {
+  font-size: 11px;
+  color: var(--fg-subtle);
+  margin-bottom: 4px;
+}
+
+.onboardingInput {
+  width: 100% !important;
+}

@@ -1,0 +1,162 @@
+{
+  "id": "google.gemini-3-flash-preview.2026-03-14T16-06-23",
+  "description": "Recorded session",
+  "prompt": "the breaking news today?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 7409,
+          "event": {
+            "type": "text.delta",
+            "content": "Today, Saturday, March 14, 202"
+          }
+        },
+        {
+          "delay": 321,
+          "event": {
+            "type": "text.delta",
+            "content": "6, the global news landscape is dominated by a major military escalation in the Middle"
+          }
+        },
+        {
+          "delay": 222,
+          "event": {
+            "type": "text.delta",
+            "content": " East, significant political shifts in the U.S., and severe weather events.\n\n### **1. Middle East Crisis & Military Action**\n*   **U."
+          }
+        },
+        {
+          "delay": 392,
+          "event": {
+            "type": "text.delta",
+            "content": "S. Strikes on Iran:** President Donald Trump announced that U.S. forces have \"obliterated\" military targets on **Kharg Island**, Iran's primary"
+          }
+        },
+        {
+          "delay": 276,
+          "event": {
+            "type": "text.delta",
+            "content": " oil export terminal. This follows a missile strike on a helipad at the **U.S. Embassy in Baghdad** and ongoing regional tensions.\n*   **Iran's Response:** Iran has vowed to target regional energy facilities with American interests"
+          }
+        },
+        {
+          "delay": 288,
+          "event": {
+            "type": "text.delta",
+            "content": " if its infrastructure is hit further. Reports suggest the new Supreme Leader, **Mojtaba Khamenei**, has vowed to keep the **Strait of Hormuz** closed, though U.S. officials claim he may be wounded or in"
+          }
+        },
+        {
+          "delay": 326,
+          "event": {
+            "type": "text.delta",
+            "content": " hiding following recent strikes.\n*   **Casualties in Lebanon:** Israeli airstrikes have intensified in the southern port city of **Sidon**, with reports of residential buildings destroyed and multiple casualties as the conflict spreads.\n*   **F1 Cancellations:** Formula One is reportedly set to cancel the upcoming **Bahrain and"
+          }
+        },
+        {
+          "delay": 371,
+          "event": {
+            "type": "text.delta",
+            "content": " Saudi Arabia Grands Prix** due to the regional instability.\n\n### **2. United States Politics & Law**\n*   **DOJ Subpoenas Blocked:** A federal judge unsealed an opinion throwing out Justice Department subpoenas issued to the **Federal Reserve**. This is a significant setback for U.S. Attorney"
+          }
+        },
+        {
+          "delay": 392,
+          "event": {
+            "type": "text.delta",
+            "content": " Jeanine Pirro’s investigation into Fed Chair Jerome Powell.\n*   **Kennedy Center Leadership:** **Richard Grenell** is stepping down as head of the John F. Kennedy Center for the Performing Arts. The center is expected to close for two years of renovations following his departure.\n*   **Legislative Action:** A"
+          }
+        },
+        {
+          "delay": 395,
+          "event": {
+            "type": "text.delta",
+            "content": " Senate panel in Minnesota has advanced a bill to ban **assault-style weapons** and high-capacity magazines, moving the measure to the Finance Committee.\n\n### **3. International News**\n*   **Indian Activist Released:** The Indian government revoked the National Security Act (NSA) detention of climate activist **Sonam"
+          }
+        },
+        {
+          "delay": 251,
+          "event": {
+            "type": "text.delta",
+            "content": " Wangchuk**, who has been released from Jodhpur jail.\n*   **Energy Security:** Despite the conflict in the Strait of Hormuz, two Indian-flagged vessels carrying **LPG** safely crossed the strait this morning and are heading to Gujarat ports.\n*   **Connectivity in India:** PM Modi unveiled projects worth"
+          }
+        },
+        {
+          "delay": 101,
+          "event": {
+            "type": "text.delta",
+            "content": " ₹18,680 crore in West Bengal, including major sections of the Kharagpur-Moregram economic corridor.\n\n### **4. Science, Health & Environment**\n*   **Major Winter Storm:** A massive storm is hitting the U.S. Midwest, with **Minnesota** potentially seeing up to 2"
+          }
+        },
+        {
+          "delay": 366,
+          "event": {
+            "type": "text.delta",
+            "content": "0 inches of snow in some areas. Governor Tim Walz has activated the National Guard to assist with emergency operations.\n*   **Measles Outbreak:** The CDC reported a rise in measles cases in the U.S., reaching **1,362 confirmed cases** as of this week, though the rate of increase has"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " slowed slightly compared to previous weeks.\n*   **Medical Milestone:** The FDA's advisory committee has unanimously recommended the trivalent influenza vaccine composition for the 2026-2027 season.\n\n***\n\n**Historical Fact:** Today is the 147th anniversary of the birth of **Albert Einstein**"
+          }
+        },
+        {
+          "delay": 17,
+          "event": {
+            "type": "text.delta",
+            "content": " (born March 14, 1879)."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "server_tool.start",
+            "id": "google_search_1773504394821_iumt",
+            "name": "web_search",
+            "input": {
+              "query": "breaking news today March 14 2026"
+            }
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "server_tool.start",
+            "id": "google_search_1773504394821_qoak",
+            "name": "web_search",
+            "input": {
+              "query": "latest news headlines March 14 2026"
+            }
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "server_tool.start",
+            "id": "google_search_1773504394821_w6mg",
+            "name": "web_search",
+            "input": {
+              "query": "top news stories March 14 2026"
+            }
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.done",
+            "content": "Today, Saturday, March 14, 2026, the global news landscape is dominated by a major military escalation in the Middle East, significant political shifts in the U.S., and severe weather events.\n\n### **1. Middle East Crisis & Military Action**\n*   **U.S. Strikes on Iran:** President Donald Trump announced that U.S. forces have \"obliterated\" military targets on **Kharg Island**, Iran's primary oil export terminal. This follows a missile strike on a helipad at the **U.S. Embassy in Baghdad** and ongoing regional tensions.\n*   **Iran's Response:** Iran has vowed to target regional energy facilities with American interests if its infrastructure is hit further. Reports suggest the new Supreme Leader, **Mojtaba Khamenei**, has vowed to keep the **Strait of Hormuz** closed, though U.S. officials claim he may be wounded or in hiding following recent strikes.\n*   **Casualties in Lebanon:** Israeli airstrikes have intensified in the southern port city of **Sidon**, with reports of residential buildings destroyed and multiple casualties as the conflict spreads.\n*   **F1 Cancellations:** Formula One is reportedly set to cancel the upcoming **Bahrain and Saudi Arabia Grands Prix** due to the regional instability.\n\n### **2. United States Politics & Law**\n*   **DOJ Subpoenas Blocked:** A federal judge unsealed an opinion throwing out Justice Department subpoenas issued to the **Federal Reserve**. This is a significant setback for U.S. Attorney Jeanine Pirro’s investigation into Fed Chair Jerome Powell.\n*   **Kennedy Center Leadership:** **Richard Grenell** is stepping down as head of the John F. Kennedy Center for the Performing Arts. The center is expected to close for two years of renovations following his departure.\n*   **Legislative Action:** A Senate panel in Minnesota has advanced a bill to ban **assault-style weapons** and high-capacity magazines, moving the measure to the Finance Committee.\n\n### **3. International News**\n*   **Indian Activist Released:** The Indian government revoked the National Security Act (NSA) detention of climate activist **Sonam Wangchuk**, who has been released from Jodhpur jail.\n*   **Energy Security:** Despite the conflict in the Strait of Hormuz, two Indian-flagged vessels carrying **LPG** safely crossed the strait this morning and are heading to Gujarat ports.\n*   **Connectivity in India:** PM Modi unveiled projects worth ₹18,680 crore in West Bengal, including major sections of the Kharagpur-Moregram economic corridor.\n\n### **4. Science, Health & Environment**\n*   **Major Winter Storm:** A massive storm is hitting the U.S. Midwest, with **Minnesota** potentially seeing up to 20 inches of snow in some areas. Governor Tim Walz has activated the National Guard to assist with emergency operations.\n*   **Measles Outbreak:** The CDC reported a rise in measles cases in the U.S., reaching **1,362 confirmed cases** as of this week, though the rate of increase has slowed slightly compared to previous weeks.\n*   **Medical Milestone:** The FDA's advisory committee has unanimously recommended the trivalent influenza vaccine composition for the 2026-2027 season.\n\n***\n\n**Historical Fact:** Today is the 147th anniversary of the birth of **Albert Einstein** (born March 14, 1879).\n\n---\n**Links:**\n- [ksat.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFyq5Z-C8bV77ec1fFj1NfWJMGNlz0waizhTBLL8fuoAWTe6U8V9f4Fs78CCkHG1euqN4XKPkzWpdTjir5sLGBaVdY1Xhk0UnQOnjED0gGzdSJfsBbu8VwFrrRHQOVU6e37VQu4wUBYmIrsJdE3U4JfIAkc4lzhEZ3I2rTypOCD8VGwY0i3N2hDsSSktOyfULG0KT-yAjUOpb0-oe_yp5MvO0PrPPlWoI5ENQLFrVQz1dtbaX1aF3D02w==)\n- [golocalprov.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHlk9B43252sbLydqNwLuOxHncvDxPTS6yVMypkFfK40bwC_f12pH8z2kbL6_M-IM5mx4hQ2ZyEk4xTCotcPRA5f4Dd8k93Q-zhxhse6IXrl2t4BhUYJEf8F_iKuCDweM4_Y6E9IPQal7yXbtq27pj7RrDcAqUtaz5mHya-2-_qkMWsuQrQBEY_q-K5YZl2ew==)\n- [minnesotanewsnetwork.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFMIP1Gtpgjcw2dvNzBa-vKa844aa7jahW_OJL6uKzWeayX4dsNc2KnVU71o54oeemRWi9d560-9WogTIiZJ6BUkVdunxHZOTORS8c-vLxMvtPKeF9iez_xb3oci0-9zb7s1eLuCuvP1pNwufAyPZz9NiM1qG7qIUxpE57P)\n- [thehindu.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGHs_-ap_gFmjg0AkWh7907qdUoRMw051RbSY_xPMFfijjwfPjpZf8H2VlCeCiBr11ts7xJENRSFfyEj7ILSqOvqqRyH-jj7iFITQcvxD0CmTPNRXjK3pNEo0P_-5LnWCVSmvDBaOYXsyha8HvxVc7Na750iHV5gM37fo_OFdRstWW0agyI_LP4KmpZIQuy)\n- [contagionlive.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHTGUO08_zEzqlDLrN0QmA3Te3ZA531Q6uBJIgOcDhIVk7Agf-NGrszc39GAdj_uEhVBYs1NkweWQ1EtCVoCojXg3nEuq6P7mUpH4A0j3KxB9IqNjItJQAIQ4so-PhOGxEFFLxDUC_Y966kX5KormBGGF3ygh0isK-A6chnu_tnxU8V61tMflijQNNqZl2zzol_lQQNQCg_dnt8wTc=)"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

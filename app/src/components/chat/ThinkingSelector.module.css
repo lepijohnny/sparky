@@ -1,0 +1,133 @@
+.trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-family: inherit;
+  transition: color 150ms ease, border-color 150ms ease;
+  outline: none;
+  min-width: 62px;
+}
+
+.trigger:hover {
+  color: var(--fg);
+  border-color: var(--border);
+}
+
+.triggerActive {
+  color: var(--accent);
+}
+
+.triggerActive:hover {
+  color: var(--accent);
+}
+
+.triggerDisabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.triggerDisabled:hover {
+  color: var(--fg-muted);
+  border-color: transparent;
+}
+
+/* ─── Brain icon ─── */
+.brainIcon {
+  display: inline-flex;
+  align-items: center;
+  transition: filter 300ms ease;
+}
+
+.brainLevel1 {
+  animation: pulse1 3s ease-in-out infinite;
+}
+
+.brainLevel2 {
+  animation: pulse2 2.2s ease-in-out infinite;
+}
+
+.brainLevel3 {
+  animation: pulse3 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 2px var(--accent));
+}
+
+.brainLevel4 {
+  animation: pulse4 1s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px var(--accent));
+}
+
+@keyframes pulse1 {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes pulse2 {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes pulse3 {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+@keyframes pulse4 {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.18); opacity: 1; }
+}
+
+/* ─── Popover ─── */
+.popover {
+  position: fixed;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.pill {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color 100ms ease, background 100ms ease;
+  outline: none;
+}
+
+.pill:hover {
+  color: var(--fg);
+  background: var(--bg-hover);
+}
+
+.pillActive {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.pillActive:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}

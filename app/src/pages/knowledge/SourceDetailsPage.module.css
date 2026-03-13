@@ -1,0 +1,182 @@
+/* ─── Info grid ─── */
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.infoLabel {
+  flex-shrink: 0;
+  width: 70px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  padding-top: 1px;
+}
+
+.infoValue {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.typeValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: capitalize;
+}
+
+.location {
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--fg-muted);
+}
+
+.errorText {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+/* ─── Status badge ─── */
+.statusBadge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.status_pending {
+  color: var(--fg-subtle);
+}
+
+.status_indexing {
+  color: hsl(215, 65%, 55%);
+}
+
+.status_ready {
+  color: hsl(150, 50%, 45%);
+}
+
+.status_error {
+  color: #ef4444;
+}
+
+.status_cancelled {
+  color: var(--fg-subtle);
+}
+
+/* ─── File list ─── */
+.fileList {
+  display: flex;
+  flex-direction: column;
+}
+
+.fileHeader {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-subtle);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--fg-muted);
+  border-bottom: 1px solid var(--border-subtle, var(--border));
+}
+
+.fileRow:last-child {
+  border-bottom: none;
+}
+
+.fileColName {
+  flex: 3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileName {
+  color: var(--fg);
+}
+
+.fileColExt {
+  flex: 1;
+  text-align: center;
+}
+
+.fileColExt code {
+  font-size: 11px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--bg-overlay);
+}
+
+.fileColSize {
+  flex: 1;
+  text-align: right;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 12px;
+}
+
+.fileColChunks {
+  flex: 1;
+  text-align: right;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 12px;
+}
+
+.fileColStatus {
+  flex: 1;
+  text-align: right;
+  font-size: 11px;
+}
+
+/* ─── Header actions ─── */
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 100ms ease, background 100ms ease;
+}
+
+.iconBtn:hover {
+  color: var(--fg);
+  background: var(--bg-overlay);
+}
+
+.iconBtnDanger:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}

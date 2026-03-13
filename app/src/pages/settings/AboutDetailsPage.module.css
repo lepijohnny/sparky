@@ -1,0 +1,162 @@
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appName {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--fg);
+}
+
+.version {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+.changelog {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fg);
+  line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.changelog li::marker {
+  color: var(--fg-muted);
+}
+
+.updateBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 36px;
+  transition: opacity 150ms ease;
+}
+
+.updateStatus {
+  font-size: 13px;
+  color: var(--fg);
+  margin: 0;
+}
+
+.updateError {
+  font-size: 13px;
+  color: var(--danger, #e5534b);
+  margin: 0;
+}
+
+.updateAvailable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.updateDownloading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkBtn {
+  appearance: none;
+  background: none;
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.checkBtn:hover:not(:disabled) {
+  background: var(--bg-overlay);
+  color: var(--fg);
+}
+
+.checkBtn:disabled {
+  opacity: 0.5;
+}
+
+.updateBtn {
+  appearance: none;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.updateBtn:hover {
+  opacity: 0.9;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 200ms ease;
+}
+
+.progressLabel {
+  font-size: 12px;
+  color: var(--fg-muted);
+  min-width: 32px;
+  text-align: right;
+}
+
+.links {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.link {
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

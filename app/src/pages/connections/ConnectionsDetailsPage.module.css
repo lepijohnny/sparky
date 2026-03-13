@@ -1,0 +1,256 @@
+.page {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fixed {
+  flex-shrink: 0;
+  padding: 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ── Title ─────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.iconPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+  flex: 1;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--fg-muted);
+  background: var(--bg-hover);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* ── Connection rows ───────────────── */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  gap: 12px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border);
+}
+
+.rowLabel {
+  font-size: 12px;
+  color: var(--fg-muted);
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.rowValue {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.rowValueMono {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Tools ─────────────────────────── */
+
+.toolsScroll {
+  max-height: 99px;
+  overflow-y: auto;
+}
+
+.docsScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.action + .action {
+  border-top: 1px solid var(--border);
+}
+
+.method {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.actionName {
+  font-weight: 500;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+/* ── Endpoint status dots ──────────── */
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusUnvalidated {
+  background: var(--fg-muted);
+  opacity: 0.4;
+}
+
+.statusValidated {
+  background: var(--accent-green, #22c55e);
+}
+
+.statusHealing {
+  background: var(--accent-yellow, #eab308);
+}
+
+.statusFailed {
+  background: var(--accent-red, #ef4444);
+}
+
+.actionPath {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Documentation ─────────────────── */
+
+.guide {
+  font-size: 13px;
+  color: var(--fg);
+  line-height: 1.6;
+}
+
+.guide h1,
+.guide h2,
+.guide h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+
+.guide h1:first-child,
+.guide h2:first-child,
+.guide h3:first-child {
+  margin-top: 0;
+}
+
+.guide p {
+  margin: 4px 0;
+}
+
+.guide ul,
+.guide ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.guide li {
+  margin: 2px 0;
+}
+
+.guide code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-hover);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.guide pre {
+  background: var(--bg-hover);
+  border-radius: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.guide pre code {
+  background: none;
+  padding: 0;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+

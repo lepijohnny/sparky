@@ -1,0 +1,117 @@
+---
+sidebar_position: 2
+sidebar_label: Extractor Plugins (Experimental)
+---
+
+import { FlaskConical } from 'lucide-react';
+
+<span className="section-label">Knowledge</span>
+
+# Extractor Plugins <FlaskConical size={20} style={{display: 'inline', verticalAlign: 'middle', marginBottom: '2px', color: 'var(--ifm-color-primary)'}} />
+
+<p className="header-description">Extend the knowledge base with custom document extractors.</p>
+
+Extractors are plugins that convert source content into plain text for indexing. Sparky ships with built-in extractors for common formats, but you can install additional ones or write your own.
+
+## Built-in Extractors
+
+| Format | Description |
+|--------|-------------|
+| Plain text | `.txt`, `.md`, `.csv`, and other text files |
+| Code | Source code files with syntax-aware chunking |
+| PDF | Extracts text content from PDF documents |
+| HTML | Strips tags and extracts readable content |
+
+## Installing Plugins
+
+Extractor plugins are standard npm packages published with the `sparky-extractor` keyword. Install them simply using npm to `~/.sparky/plugins/ext/`, they are available across all workspaces.
+
+## Example: `sparky-url-extractor`
+
+A real-world extractor plugin that crawls web pages and extracts clean markdown using Mozilla Readability.
+
+**`package.json`**
+
+```json
+{
+  "name": "sparky-url-extractor",
+  "version": "1.1.1",
+  "description": "URL extractor plugin for Sparky",
+  "keywords": ["sparky-extractor"],
+  "sparky": {
+    "extractors": ["./"],
+    "timeout": 600000,
+    "options": [
+      {
+        "key": "maxDepth",
+        "label": "Max crawl depth",
+        "type": "number",
+        "default": 3,
+        "min": 1,
+        "max": 10
+      },
+      {
+        "key": "maxPages",
+        "label": "Max pages",
+        "type": "number",
+        "default": 200,
+        "min": 1,
+        "max": 1000
+      },
+      {
+        "key": "respectRobots",
+        "label": "Respect robots.txt",
+        "type": "boolean",
+        "default": true
+      }
+    ]
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "linkedom": "^0.18.9"
+  }
+}
+```
+
+**Key conventions:**
+
+- `keywords` must include `"sparky-extractor"` for discovery
+- `sparky.extractors` points to the module entry (e.g. `"./"`)
+- `sparky.options` defines configurable settings shown in the UI
+- `sparky.timeout` sets the maximum extraction time in milliseconds
+
+**`index.js`**
+
+```js
+const extensions = [".url", "url"];
+
+async function* extract(source, options) {
+  // Crawl pages, extract content
+  for (const page of pages) {
+    yield {
+      content: page.markdown,
+      metadata: { url: page.url, title: page.title }
+    };
+  }
+}
+
+module.exports = { extensions, extract };
+```
+
+The `extract` function is an async generator that yields one result per page, enabling streaming processing of large sources.
+
+## Plugin Options
+
+Plugins can define configurable options in `package.json` under `sparky.options`. These appear in the Settings page and support `number`, `boolean`, and `string` types. Options are stored globally in `~/.sparky/extractors.json`.
+
+```json
+{
+  "sparky-url-extractor": {
+    "maxPages": 50,
+    "maxDepth": 2
+  },
+  "sparky-pdf-extractor": {
+    "preserveLayout": true
+  }
+}
+```

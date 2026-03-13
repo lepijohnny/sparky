@@ -1,0 +1,46 @@
+.DS_Store
+*.log
+*.db
+*.db-wal
+*.db-shm
+
+node_modules/
+.node/
+
+# Rust
+target/
+src-tauri/target/
+src-tauri/gen/
+
+# Frontend
+app/dist/
+
+# Environment
+.env
+.env.*
+
+# Editor / AI
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+Desktop.ini
+server/dist/
+
+# Signing keys
+*.tauri-key
+*.key
+*.pem
+*.p12
+
+# Internal docs
+web-search.md
+*.cer
+*.p12
+*.certSigningRequest
+scripts/macos/release.sh

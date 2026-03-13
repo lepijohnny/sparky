@@ -1,0 +1,35 @@
+.menu {
+  padding: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--fg-muted);
+  transition: all 120ms ease;
+}
+
+.menuItem:hover {
+  background: var(--bg-overlay);
+  color: var(--fg);
+}
+
+.menuItemActive {
+  background: var(--accent-soft);
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.itemIcon {
+  font-size: 15px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}

@@ -1,0 +1,1937 @@
+{
+  "id": "anthropic-oauth.claude-sonnet-4-6.2026-03-14T16-06-34",
+  "description": "Recorded session",
+  "prompt": "the breaking news today?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 2153,
+          "event": {
+            "type": "server_tool.start",
+            "id": "srvtoolu_01YRDPTiLgGVJbGU654XVa6K",
+            "name": "web_search",
+            "input": {}
+          }
+        },
+        {
+          "delay": 1419,
+          "event": {
+            "type": "text.delta",
+            "content": "Here"
+          }
+        },
+        {
+          "delay": 395,
+          "event": {
+            "type": "text.delta",
+            "content": " are"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the **"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "top"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " breaking"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " news stories today"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " March 14"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ", 2026**:\n\n---"
+          }
+        },
+        {
+          "delay": 368,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## "
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "🌍 Middle"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " East —"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " US"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "Israel"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " War"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " on"
+          }
+        },
+        {
+          "delay": 377,
+          "event": {
+            "type": "text.delta",
+            "content": " Iran ("
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "Day"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " 15"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": ")\n\n-"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " "
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": "The United"
+          }
+        },
+        {
+          "delay": 446,
+          "event": {
+            "type": "text.delta",
+            "content": " States-"
+          }
+        },
+        {
+          "delay": 15,
+          "event": {
+            "type": "text.delta",
+            "content": "Israel war on"
+          }
+        },
+        {
+          "delay": 24,
+          "event": {
+            "type": "text.delta",
+            "content": " Iran,"
+          }
+        },
+        {
+          "delay": 59,
+          "event": {
+            "type": "text.delta",
+            "content": " now"
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " in its third"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " week"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ", continues"
+          }
+        },
+        {
+          "delay": 14,
+          "event": {
+            "type": "text.delta",
+            "content": " to escalate after"
+          }
+        },
+        {
+          "delay": 229,
+          "event": {
+            "type": "text.delta",
+            "content": " US"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " forces"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " struck"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " military"
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": " targets"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " on"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Kh"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "arg"
+          }
+        },
+        {
+          "delay": 374,
+          "event": {
+            "type": "text.delta",
+            "content": " Island,"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " critical"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " hub"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " through"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " which most"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " of Iran's crude"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " exports"
+          }
+        },
+        {
+          "delay": 369,
+          "event": {
+            "type": "text.delta",
+            "content": " pass"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "President"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " Donald"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Trump said"
+          }
+        },
+        {
+          "delay": 362,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " US"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " \""
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "totally"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " obl"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "iterated every"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " military"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " target\" on"
+          }
+        },
+        {
+          "delay": 421,
+          "event": {
+            "type": "text.delta",
+            "content": " Kharg Island, which"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " handles"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " roughly"
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": " 90"
+          }
+        },
+        {
+          "delay": 26,
+          "event": {
+            "type": "text.delta",
+            "content": "% of Iran's crude exports"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 26,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n-"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " "
+          }
+        },
+        {
+          "delay": 20,
+          "event": {
+            "type": "text.delta",
+            "content": "US"
+          }
+        },
+        {
+          "delay": 410,
+          "event": {
+            "type": "text.delta",
+            "content": " President"
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": " Donald Trump said Washington"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " deliberately"
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": " sp"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": "ared the"
+          }
+        },
+        {
+          "delay": 10,
+          "event": {
+            "type": "text.delta",
+            "content": " island's"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " oil"
+          }
+        },
+        {
+          "delay": 14,
+          "event": {
+            "type": "text.delta",
+            "content": " infrastructure"
+          }
+        },
+        {
+          "delay": 237,
+          "event": {
+            "type": "text.delta",
+            "content": " but"
+          }
+        },
+        {
+          "delay": 8,
+          "event": {
+            "type": "text.delta",
+            "content": " warned"
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": " that it"
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": " could"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " be attacked"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " if Iran interf"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "eres"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " with shipping"
+          }
+        },
+        {
+          "delay": 370,
+          "event": {
+            "type": "text.delta",
+            "content": " through"
+          }
+        },
+        {
+          "delay": 30,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 29,
+          "event": {
+            "type": "text.delta",
+            "content": " Strait of Hormuz."
+          }
+        },
+        {
+          "delay": 51,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 29,
+          "event": {
+            "type": "text.delta",
+            "content": "Vice"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " President J"
+          }
+        },
+        {
+          "delay": 143,
+          "event": {
+            "type": "text.delta",
+            "content": "D Vance said"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " that"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Iran"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "'s new"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " supreme"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " leader"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " Mo"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "jtaba"
+          }
+        },
+        {
+          "delay": 373,
+          "event": {
+            "type": "text.delta",
+            "content": " Khamen"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ei is"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " \"hurt"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ",\""
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " but"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " it"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "'s"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " unclear"
+          }
+        },
+        {
+          "delay": 443,
+          "event": {
+            "type": "text.delta",
+            "content": " if the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " United"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " States is"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " responsible."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## "
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "🇱"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "🇧"
+          }
+        },
+        {
+          "delay": 405,
+          "event": {
+            "type": "text.delta",
+            "content": " Lebanon"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "Israeli"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " attacks"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " have"
+          }
+        },
+        {
+          "delay": 362,
+          "event": {
+            "type": "text.delta",
+            "content": " killed at"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " least 773"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " people in Lebanon since"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " March"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " 2."
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " Lebanon"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "'s Health"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Ministry"
+          }
+        },
+        {
+          "delay": 443,
+          "event": {
+            "type": "text.delta",
+            "content": " strongly"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " condemned an"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Israeli"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " strike"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " on a"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " healthcare"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " centre"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " in Bor"
+          }
+        },
+        {
+          "delay": 306,
+          "event": {
+            "type": "text.delta",
+            "content": "j Q"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "ala"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ou"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "iye"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " that"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " killed 12"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " medical"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " staff"
+          }
+        },
+        {
+          "delay": 385,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " including"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " doctors"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " nurses, and para"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "medics."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "Israeli"
+          }
+        },
+        {
+          "delay": 427,
+          "event": {
+            "type": "text.delta",
+            "content": " shells"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " also"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " struck"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " headquarters"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " of a"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Ne"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "palese peac"
+          }
+        },
+        {
+          "delay": 881,
+          "event": {
+            "type": "text.delta",
+            "content": "ekeeping battalion"
+          }
+        },
+        {
+          "delay": 18,
+          "event": {
+            "type": "text.delta",
+            "content": " serving"
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": " with"
+          }
+        },
+        {
+          "delay": 9,
+          "event": {
+            "type": "text.delta",
+            "content": " UNIFIL in the"
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": " southern"
+          }
+        },
+        {
+          "delay": 10,
+          "event": {
+            "type": "text.delta",
+            "content": " Lebanese"
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.delta",
+            "content": " town"
+          }
+        },
+        {
+          "delay": 22,
+          "event": {
+            "type": "text.delta",
+            "content": " of Me"
+          }
+        },
+        {
+          "delay": 135,
+          "event": {
+            "type": "text.delta",
+            "content": "iss"
+          }
+        },
+        {
+          "delay": 8,
+          "event": {
+            "type": "text.delta",
+            "content": " el"
+          }
+        },
+        {
+          "delay": 10,
+          "event": {
+            "type": "text.delta",
+            "content": "-Ja"
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.delta",
+            "content": "bal"
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 16,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## 🇮"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": "🇶"
+          }
+        },
+        {
+          "delay": 5,
+          "event": {
+            "type": "text.delta",
+            "content": " Iraq"
+          }
+        },
+        {
+          "delay": 80,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": "The U"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ".S. military"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " confirmed"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " that four"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " service"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " members were"
+          }
+        },
+        {
+          "delay": 319,
+          "event": {
+            "type": "text.delta",
+            "content": " killed in the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " crash"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " of a U"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ".S. ref"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "u"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "eling plane in Iraq"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 444,
+          "event": {
+            "type": "text.delta",
+            "content": "Iraq"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " says"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " he"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "lipad"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " at"
+          }
+        },
+        {
+          "delay": 385,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " US"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " Embassy"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " in Baghdad"
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.delta",
+            "content": " has"
+          }
+        },
+        {
+          "delay": 10,
+          "event": {
+            "type": "text.delta",
+            "content": " been hit by a missile."
+          }
+        },
+        {
+          "delay": 6,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## 🇺"
+          }
+        },
+        {
+          "delay": 515,
+          "event": {
+            "type": "text.delta",
+            "content": "🇸 US"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " Domestic"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 13,
+          "event": {
+            "type": "text.delta",
+            "content": "U"
+          }
+        },
+        {
+          "delay": 7,
+          "event": {
+            "type": "text.delta",
+            "content": ".S. Transportation"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Security"
+          }
+        },
+        {
+          "delay": 284,
+          "event": {
+            "type": "text.delta",
+            "content": " Administration security"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " officers"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " missed"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " their"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " first"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " full"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " pay"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "check"
+          }
+        },
+        {
+          "delay": 373,
+          "event": {
+            "type": "text.delta",
+            "content": " as"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " partial"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " funding"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " shutdown"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " of"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " the government"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " approached"
+          }
+        },
+        {
+          "delay": 537,
+          "event": {
+            "type": "text.delta",
+            "content": " the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " one"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "-month"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " mark."
+          }
+        },
+        {
+          "delay": 8,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---"
+          }
+        },
+        {
+          "delay": 30,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## 🇮"
+          }
+        },
+        {
+          "delay": 19,
+          "event": {
+            "type": "text.delta",
+            "content": "🇳"
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " India"
+          }
+        },
+        {
+          "delay": 165,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n- "
+          }
+        },
+        {
+          "delay": 17,
+          "event": {
+            "type": "text.delta",
+            "content": "5"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " Indians"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " have"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " been killed and"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " one"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " is"
+          }
+        },
+        {
+          "delay": 445,
+          "event": {
+            "type": "text.delta",
+            "content": " missing in the"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " West"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Asia"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " conflict"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " so"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " far;"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the Ministry"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " of External"
+          }
+        },
+        {
+          "delay": 855,
+          "event": {
+            "type": "text.delta",
+            "content": " Affairs says"
+          }
+        },
+        {
+          "delay": 68,
+          "event": {
+            "type": "text.delta",
+            "content": " Indian"
+          }
+        },
+        {
+          "delay": 75,
+          "event": {
+            "type": "text.delta",
+            "content": " Missions"
+          }
+        },
+        {
+          "delay": 36,
+          "event": {
+            "type": "text.delta",
+            "content": " in the"
+          }
+        },
+        {
+          "delay": 19,
+          "event": {
+            "type": "text.delta",
+            "content": " region"
+          }
+        },
+        {
+          "delay": 44,
+          "event": {
+            "type": "text.delta",
+            "content": " are"
+          }
+        },
+        {
+          "delay": 45,
+          "event": {
+            "type": "text.delta",
+            "content": " open"
+          }
+        },
+        {
+          "delay": 34,
+          "event": {
+            "type": "text.delta",
+            "content": " "
+          }
+        },
+        {
+          "delay": 252,
+          "event": {
+            "type": "text.delta",
+            "content": "24/7."
+          }
+        },
+        {
+          "delay": 57,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---"
+          }
+        },
+        {
+          "delay": 13,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\nThese"
+          }
+        },
+        {
+          "delay": 11,
+          "event": {
+            "type": "text.delta",
+            "content": " are"
+          }
+        },
+        {
+          "delay": 13,
+          "event": {
+            "type": "text.delta",
+            "content": " rapidly"
+          }
+        },
+        {
+          "delay": 27,
+          "event": {
+            "type": "text.delta",
+            "content": " evolving stories."
+          }
+        },
+        {
+          "delay": 25,
+          "event": {
+            "type": "text.delta",
+            "content": " Stay"
+          }
+        },
+        {
+          "delay": 33,
+          "event": {
+            "type": "text.delta",
+            "content": " tuned to"
+          }
+        },
+        {
+          "delay": 153,
+          "event": {
+            "type": "text.delta",
+            "content": " major"
+          }
+        },
+        {
+          "delay": 36,
+          "event": {
+            "type": "text.delta",
+            "content": " news outlets"
+          }
+        },
+        {
+          "delay": 17,
+          "event": {
+            "type": "text.delta",
+            "content": " for the latest updates"
+          }
+        },
+        {
+          "delay": 15,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 296,
+          "event": {
+            "type": "text.done",
+            "content": "Here are the **top breaking news stories today, March 14, 2026**:\n\n---\n\n## 🌍 Middle East — US-Israel War on Iran (Day 15)\n\n- The United States-Israel war on Iran, now in its third week, continues to escalate after US forces struck military targets on Kharg Island, the critical hub through which most of Iran's crude exports pass.\n\n- President Donald Trump said the US \"totally obliterated every military target\" on Kharg Island, which handles roughly 90% of Iran's crude exports.\n\n- US President Donald Trump said Washington deliberately spared the island's oil infrastructure but warned that it could be attacked if Iran interferes with shipping through the Strait of Hormuz.\n\n- Vice President JD Vance said that Iran's new supreme leader Mojtaba Khamenei is \"hurt,\" but it's unclear if the United States is responsible.\n\n---\n\n## 🇱🇧 Lebanon\n\n- Israeli attacks have killed at least 773 people in Lebanon since March 2. Lebanon's Health Ministry strongly condemned an Israeli strike on a healthcare centre in Borj Qalaouiye that killed 12 medical staff, including doctors, nurses, and paramedics.\n\n- Israeli shells also struck the headquarters of a Nepalese peacekeeping battalion serving with UNIFIL in the southern Lebanese town of Meiss el-Jabal.\n\n---\n\n## 🇮🇶 Iraq\n\n- The U.S. military confirmed that four service members were killed in the crash of a U.S. refueling plane in Iraq.\n\n- Iraq says a helipad at the US Embassy in Baghdad has been hit by a missile.\n\n---\n\n## 🇺🇸 US Domestic\n\n- U.S. Transportation Security Administration security officers missed their first full paycheck as a partial funding shutdown of the government approached the one-month mark.\n\n---\n\n## 🇮🇳 India\n\n- 5 Indians have been killed and one is missing in the West Asia conflict so far; the Ministry of External Affairs says Indian Missions in the region are open 24/7.\n\n---\n\nThese are rapidly evolving stories. Stay tuned to major news outlets for the latest updates.\n\n---\n**Citations:**\n- [Iran war: What is happening on day 15 of US-Israel attacks? | US-Israel war on Iran News | Al Jazeera](https://www.aljazeera.com/news/2026/3/14/iran-war-what-is-happening-on-day-15-of-us-israel-attacks)\n- [News: U.S. and World News Headlines : NPR](https://www.npr.org/sections/news/)\n- [Top of the Morning, March 14, 2026 | Local News | news-gazette.com](https://www.news-gazette.com/news/local/community-events/top-of-the-morning-march-14-2026/article_11d60039-04af-4a13-8361-3bd3c6d224bf.html)\n- [[Highlights] Breaking News Today,11 March 2026: Lok Sabha rejects opposition's No Confidence Motion against Speaker Om Birla](https://news24online.com/india/breaking-news-live-updates-march-11-2026-iran-israel-donald-trump-khamenei-abu-dhabi-pm-modi-congress-bjp-parliament-budget-session-air-india-fuel-charges-latest-news-today/771524/)\n- [Video. Latest news bulletin | March 14th, 2026 – Midday | Euronews](https://www.euronews.com/video/2026/03/14/latest-news-bulletin-march-14th-2026-midday)\n- [5 Big News Stories Overnight - Saturday, March 14, 2026](https://www.golocalprov.com/news/5-big-news-stories-overnight-saturday-march-14-2026)\n- [Stories from March 14, 2026 | MPR News](https://www.mprnews.org/content/3-14-2026)\n- [Day 14 of Middle East conflict — Trump says US ‘totally obliterated every military target’ at Iran oil hub | CNN](https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-13-26)\n- [Latest Breaking News Videos | Fox News Video](https://www.foxnews.com/video)\n- [PBS News: News, Analysis, Top Headlines, Live Coverage](https://www.pbs.org/newshour/)"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

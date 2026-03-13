@@ -1,0 +1,26 @@
+.ticker {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--fg-muted);
+  opacity: 0.5;
+  padding: 4px 16px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-height: 24px;
+  animation: tickerFadeIn 300ms ease;
+}
+
+.tickerOut {
+  animation: tickerFadeOut 400ms ease forwards;
+}
+
+@keyframes tickerFadeIn {
+  from { opacity: 0; max-height: 0; padding: 0 16px; transform: translateY(4px); }
+  to { opacity: 0.5; max-height: 24px; padding: 4px 16px; transform: translateY(0); }
+}
+
+@keyframes tickerFadeOut {
+  from { opacity: 0.5; max-height: 24px; padding: 4px 16px; }
+  to { opacity: 0; max-height: 0; padding: 0 16px; }
+}

@@ -1,0 +1,115 @@
+{
+  "id": "google.gemini-3-flash-preview.2026-03-14T16-04-32",
+  "description": "Recorded session",
+  "prompt": "Explain me TCP handshake?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 58244,
+          "event": {
+            "type": "text.delta",
+            "content": "The **TCP Handshake** (specifically the **Three-Way Handshake"
+          }
+        },
+        {
+          "delay": 308,
+          "event": {
+            "type": "text.delta",
+            "content": "**) is the process used in a TCP/IP network to establish a reliable connection between a client"
+          }
+        },
+        {
+          "delay": 188,
+          "event": {
+            "type": "text.delta",
+            "content": " and a server. It ensures that both parties are ready to transmit data and have agreed on initial sequence numbers.\n\nThink of it like a formal phone introduction."
+          }
+        },
+        {
+          "delay": 324,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---\n\n### The Three Steps (SYN, SYN-ACK, ACK)\n\n#### 1. SYN (Synchronize)\nThe **Client** wants"
+          }
+        },
+        {
+          "delay": 410,
+          "event": {
+            "type": "text.delta",
+            "content": " to establish a connection, so it sends a packet with the **SYN** flag set to the Server.\n*   **What it says:** \"I want to talk to you. Here is my starting sequence number ($X$).\"\n*"
+          }
+        },
+        {
+          "delay": 201,
+          "event": {
+            "type": "text.delta",
+            "content": "   **State:** The client enters the `SYN-SENT` state.\n\n#### 2. SYN-ACK (Synchronize-Acknowledge)\nThe **Server** receives the request. If it’s willing to connect, it replies with"
+          }
+        },
+        {
+          "delay": 311,
+          "event": {
+            "type": "text.delta",
+            "content": " a packet where both the **SYN** and **ACK** flags are set.\n*   **What it says:** \"I received your request ($ACK = X+1$). I also want to talk to you. Here is my starting sequence number ($Y$).\"\n*   **State:** The server enters the `SYN"
+          }
+        },
+        {
+          "delay": 306,
+          "event": {
+            "type": "text.delta",
+            "content": "-RECEIVED` state.\n\n#### 3. ACK (Acknowledge)\nThe **Client** receives the server's response and sends one final confirmation packet with the **ACK** flag set.\n*   **What it says:** \"I received your response ($ACK = Y+1$). We are all"
+          }
+        },
+        {
+          "delay": 319,
+          "event": {
+            "type": "text.delta",
+            "content": " set!\"\n*   **State:** Both the client and server enter the `ESTABLISHED` state.\n\n---\n\n### Visual Representation\n\n```mermaid\nsequenceDiagram\n    participant C as Client\n    participant S as Server\n    \n    Note over C: State: CLOSED\n    Note over S: State: LISTEN\n    "
+          }
+        },
+        {
+          "delay": 162,
+          "event": {
+            "type": "text.delta",
+            "content": "\n    C->>S: SYN (Seq=X)\n    Note over C: State: SYN-SENT\n    \n    S->>C: SYN-ACK (Seq=Y, Ack=X+1)\n    Note over S: State: SYN-RECEIVED\n    \n    C->>S:"
+          }
+        },
+        {
+          "delay": 29,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK (Ack=Y+1)\n    Note over C,S: State: ESTABLISHED\n```\n\n---\n\n### Why is this necessary?\n1.  **Reliability:** It confirms that the sender can transmit to the receiver AND that the receiver can transmit back to the sender.\n2.  **Sequence Numbers"
+          }
+        },
+        {
+          "delay": 15,
+          "event": {
+            "type": "text.delta",
+            "content": ":** TCP uses sequence numbers to put data packets in the correct order and detect if any are missing. The handshake is where these numbers are synchronized.\n3.  **Prevention of Old Connections:** It prevents old, delayed packets from accidentally opening a new \"ghost\" connection.\n\n### How it ends?\nWhen the"
+          }
+        },
+        {
+          "delay": 15,
+          "event": {
+            "type": "text.delta",
+            "content": " conversation is over, TCP uses a **Four-Way Handshake** (using **FIN** and **ACK** flags) to gracefully close the connection."
+          }
+        },
+        {
+          "delay": 14,
+          "event": {
+            "type": "text.done",
+            "content": "The **TCP Handshake** (specifically the **Three-Way Handshake**) is the process used in a TCP/IP network to establish a reliable connection between a client and a server. It ensures that both parties are ready to transmit data and have agreed on initial sequence numbers.\n\nThink of it like a formal phone introduction.\n\n---\n\n### The Three Steps (SYN, SYN-ACK, ACK)\n\n#### 1. SYN (Synchronize)\nThe **Client** wants to establish a connection, so it sends a packet with the **SYN** flag set to the Server.\n*   **What it says:** \"I want to talk to you. Here is my starting sequence number ($X$).\"\n*   **State:** The client enters the `SYN-SENT` state.\n\n#### 2. SYN-ACK (Synchronize-Acknowledge)\nThe **Server** receives the request. If it’s willing to connect, it replies with a packet where both the **SYN** and **ACK** flags are set.\n*   **What it says:** \"I received your request ($ACK = X+1$). I also want to talk to you. Here is my starting sequence number ($Y$).\"\n*   **State:** The server enters the `SYN-RECEIVED` state.\n\n#### 3. ACK (Acknowledge)\nThe **Client** receives the server's response and sends one final confirmation packet with the **ACK** flag set.\n*   **What it says:** \"I received your response ($ACK = Y+1$). We are all set!\"\n*   **State:** Both the client and server enter the `ESTABLISHED` state.\n\n---\n\n### Visual Representation\n\n```mermaid\nsequenceDiagram\n    participant C as Client\n    participant S as Server\n    \n    Note over C: State: CLOSED\n    Note over S: State: LISTEN\n    \n    C->>S: SYN (Seq=X)\n    Note over C: State: SYN-SENT\n    \n    S->>C: SYN-ACK (Seq=Y, Ack=X+1)\n    Note over S: State: SYN-RECEIVED\n    \n    C->>S: ACK (Ack=Y+1)\n    Note over C,S: State: ESTABLISHED\n```\n\n---\n\n### Why is this necessary?\n1.  **Reliability:** It confirms that the sender can transmit to the receiver AND that the receiver can transmit back to the sender.\n2.  **Sequence Numbers:** TCP uses sequence numbers to put data packets in the correct order and detect if any are missing. The handshake is where these numbers are synchronized.\n3.  **Prevention of Old Connections:** It prevents old, delayed packets from accidentally opening a new \"ghost\" connection.\n\n### How it ends?\nWhen the conversation is over, TCP uses a **Four-Way Handshake** (using **FIN** and **ACK** flags) to gracefully close the connection."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

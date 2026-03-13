@@ -1,0 +1,1501 @@
+{
+  "id": "anthropic-oauth.claude-sonnet-4-6.2026-03-14T16-03-04",
+  "description": "Recorded session",
+  "prompt": "Explain me TCP handshake?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 1828,
+          "event": {
+            "type": "text.delta",
+            "content": "#"
+          }
+        },
+        {
+          "delay": 442,
+          "event": {
+            "type": "text.delta",
+            "content": " TCP Three"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "-Way Handshake\n\nThe"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " TCP (Transmission Control Protocol) hand"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "shake is a process"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " used"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " to establish a reliable"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " connection between a"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " client and a"
+          }
+        },
+        {
+          "delay": 408,
+          "event": {
+            "type": "text.delta",
+            "content": " server before"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " any data is"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " transmitted"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ".\n\n## The Three Steps"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n```"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "m"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ermaid\nsequenceDiagram"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n    participant C"
+          }
+        },
+        {
+          "delay": 504,
+          "event": {
+            "type": "text.delta",
+            "content": " as Client\n    participant S as Server"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n    C->>S: "
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "1. S"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "YN (SE"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Q=x"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ")\n    S--"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ">>C: 2. SY"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "N-"
+          }
+        },
+        {
+          "delay": 508,
+          "event": {
+            "type": "text.delta",
+            "content": "ACK (SEQ=y"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK=x+"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "1)\n    C->>S"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ": 3. ACK (AC"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "K=y+1)"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n    Note"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " over"
+          }
+        },
+        {
+          "delay": 507,
+          "event": {
+            "type": "text.delta",
+            "content": " C,S: Connection"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Established "
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "✅"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n```\n\n---"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n###"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Step 1 "
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "—"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " SYN (Synchronize"
+          }
+        },
+        {
+          "delay": 447,
+          "event": {
+            "type": "text.delta",
+            "content": ")\n- The"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "client"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "** sends a segment"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " with the"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "S"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "YN** flag set."
+          }
+        },
+        {
+          "delay": 458,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- It"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " includes"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " randomly"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " generated"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **sequence number** (SEQ="
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "x)."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- This"
+          }
+        },
+        {
+          "delay": 520,
+          "event": {
+            "type": "text.delta",
+            "content": " says"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ":"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " *"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\"I want"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " to connect"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " I'll start"
+          }
+        },
+        {
+          "delay": 409,
+          "event": {
+            "type": "text.delta",
+            "content": " counting"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " from x.\"*\n\n###"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Step 2 — SYN"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "-ACK (Synchronize +"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Acknowledge)\n- The **server"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "** receives"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the SYN and"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " responds with **"
+          }
+        },
+        {
+          "delay": 387,
+          "event": {
+            "type": "text.delta",
+            "content": "SYN-ACK**."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- It **"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "acknowledges** the client's sequence"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": " number:"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " AC"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "K ="
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " x"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "+1."
+          }
+        },
+        {
+          "delay": 419,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- It"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " also"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " sends"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " its"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " own **sequence number** (SEQ"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "=y)."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- This says: *\"I"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " got"
+          }
+        },
+        {
+          "delay": 612,
+          "event": {
+            "type": "text.delta",
+            "content": " your request"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": ", I"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "'m ready,"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and I'll start counting from y.\""
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "*\n\n### Step 3 —"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK (Acknowledge)\n-"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " The **client** sends"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 328,
+          "event": {
+            "type": "text.delta",
+            "content": " final"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "ACK** back"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " to the server:"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ACK = y+1."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- This says: *\"I"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " got your response"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 476,
+          "event": {
+            "type": "text.delta",
+            "content": " Let"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "'s communicate"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "!\""
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "*"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n- The connection is now **"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "fully"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " established**."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n---\n\n## Why Three"
+          }
+        },
+        {
+          "delay": 385,
+          "event": {
+            "type": "text.delta",
+            "content": " Steps"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": "?\n\nThe"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " three-way handshake ensures"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ":\n|"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Purpose"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " | Explanation"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " |\n|---|"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "---|\n| "
+          }
+        },
+        {
+          "delay": 443,
+          "event": {
+            "type": "text.delta",
+            "content": "✅ **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "Reliability"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "** | Both"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " sides confirm"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " they can"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " send"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " receive data |\n| "
+          }
+        },
+        {
+          "delay": 397,
+          "event": {
+            "type": "text.delta",
+            "content": "🔢"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " **Sequence"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " sync"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "** | Both"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " sides agree on initial"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " sequence numbers |\n| "
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "🔁"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " **Bid"
+          }
+        },
+        {
+          "delay": 503,
+          "event": {
+            "type": "text.delta",
+            "content": "irectional** | Communication"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " is verified"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " in"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " **"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "both directions** |\n\n---"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## Connection"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Term"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "ination ("
+          }
+        },
+        {
+          "delay": 483,
+          "event": {
+            "type": "text.delta",
+            "content": "4"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "-Way)"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\nClosing"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " a TCP connection requires"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " a **four"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "-way handshake**:"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n```"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "mermaid\nsequenceDi"
+          }
+        },
+        {
+          "delay": 410,
+          "event": {
+            "type": "text.delta",
+            "content": "agram\n    participant C as Client"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n    participant S as Server"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n    C->>S: F"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "IN"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "\n    S--"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ">>C: AC"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "K\n    S"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "--"
+          }
+        },
+        {
+          "delay": 450,
+          "event": {
+            "type": "text.delta",
+            "content": ">>C: FIN\n    C"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "->>S: AC"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "K"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n    Note over C,S: Connection"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Closed"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ✅\n```\n\nThis"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " is"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " separate"
+          }
+        },
+        {
+          "delay": 418,
+          "event": {
+            "type": "text.delta",
+            "content": " because"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " each"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " side must"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " independently"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " close"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " its"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " half"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " of the connection.\n\n---"
+          }
+        },
+        {
+          "delay": 442,
+          "event": {
+            "type": "text.delta",
+            "content": "\n\n## Key"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Flags"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": " Summary"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "\n| Flag |"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " Meaning |\n|---|"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "---|\n| **SYN**"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " | Synchronize /"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " init"
+          }
+        },
+        {
+          "delay": 412,
+          "event": {
+            "type": "text.delta",
+            "content": "iate connection |\n| **AC"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "K** | Acknowledge receipt"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " |\n| **FIN** |"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " Finish /"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " close connection |\n| **RST"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "** | Reset /"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " abort"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " connection |\n\nIn"
+          }
+        },
+        {
+          "delay": 396,
+          "event": {
+            "type": "text.delta",
+            "content": " short"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " the TCP handshake is a **"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "mutual"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " agreement"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": "** between two"
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.delta",
+            "content": " parties to"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " ensure"
+          }
+        },
+        {
+          "delay": 396,
+          "event": {
+            "type": "text.delta",
+            "content": " a"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " stable"
+          }
+        },
+        {
+          "delay": 2,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " ordered"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": ","
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " and reliable communication"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " channel before"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " any real"
+          }
+        },
+        {
+          "delay": 103,
+          "event": {
+            "type": "text.delta",
+            "content": " data flows"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 45,
+          "event": {
+            "type": "text.done",
+            "content": "# TCP Three-Way Handshake\n\nThe TCP (Transmission Control Protocol) handshake is a process used to establish a reliable connection between a client and a server before any data is transmitted.\n\n## The Three Steps\n\n```mermaid\nsequenceDiagram\n    participant C as Client\n    participant S as Server\n\n    C->>S: 1. SYN (SEQ=x)\n    S-->>C: 2. SYN-ACK (SEQ=y, ACK=x+1)\n    C->>S: 3. ACK (ACK=y+1)\n\n    Note over C,S: Connection Established ✅\n```\n\n---\n\n### Step 1 — SYN (Synchronize)\n- The **client** sends a segment with the **SYN** flag set.\n- It includes a randomly generated **sequence number** (SEQ=x).\n- This says: *\"I want to connect, and I'll start counting from x.\"*\n\n### Step 2 — SYN-ACK (Synchronize + Acknowledge)\n- The **server** receives the SYN and responds with **SYN-ACK**.\n- It **acknowledges** the client's sequence number: ACK = x+1.\n- It also sends its own **sequence number** (SEQ=y).\n- This says: *\"I got your request, I'm ready, and I'll start counting from y.\"*\n\n### Step 3 — ACK (Acknowledge)\n- The **client** sends a final **ACK** back to the server: ACK = y+1.\n- This says: *\"I got your response. Let's communicate!\"*\n- The connection is now **fully established**.\n\n---\n\n## Why Three Steps?\n\nThe three-way handshake ensures:\n| Purpose | Explanation |\n|---|---|\n| ✅ **Reliability** | Both sides confirm they can send and receive data |\n| 🔢 **Sequence sync** | Both sides agree on initial sequence numbers |\n| 🔁 **Bidirectional** | Communication is verified in **both directions** |\n\n---\n\n## Connection Termination (4-Way)\nClosing a TCP connection requires a **four-way handshake**:\n```mermaid\nsequenceDiagram\n    participant C as Client\n    participant S as Server\n\n    C->>S: FIN\n    S-->>C: ACK\n    S-->>C: FIN\n    C->>S: ACK\n\n    Note over C,S: Connection Closed ✅\n```\n\nThis is separate because each side must independently close its half of the connection.\n\n---\n\n## Key Flags Summary\n| Flag | Meaning |\n|---|---|\n| **SYN** | Synchronize / initiate connection |\n| **ACK** | Acknowledge receipt |\n| **FIN** | Finish / close connection |\n| **RST** | Reset / abort connection |\n\nIn short, the TCP handshake is a **mutual agreement** between two parties to ensure a stable, ordered, and reliable communication channel before any real data flows."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

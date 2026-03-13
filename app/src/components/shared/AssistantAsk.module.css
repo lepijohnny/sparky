@@ -1,0 +1,101 @@
+.dropdown {
+  position: fixed;
+  z-index: 1001;
+  width: 320px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  animation: fadeIn 100ms ease;
+}
+
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  color: var(--fg-subtle);
+  cursor: grab;
+  margin: -4px -4px 0;
+  padding: 2px 0;
+  border-radius: 6px 6px 0 0;
+  user-select: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--fg-subtle);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.inputRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--fg);
+  resize: none;
+  line-height: 1.5;
+  min-height: 20px;
+  max-height: 240px;
+}
+
+.input::placeholder {
+  color: var(--fg-subtle);
+}
+
+.sendBtn {
+  appearance: none;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 150ms ease;
+}
+
+.sendBtn:hover {
+  opacity: 0.9;
+}
+
+.sendBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}

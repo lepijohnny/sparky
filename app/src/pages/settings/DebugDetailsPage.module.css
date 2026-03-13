@@ -1,0 +1,46 @@
+.toggleWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+  padding: 0;
+  outline: none;
+}
+
+.toggle:hover:not(:disabled) {
+  border-color: var(--fg-subtle);
+}
+
+.toggleOn {
+  background: var(--accent, hsl(233, 65%, 58%));
+  border-color: var(--accent, hsl(233, 65%, 58%));
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+  pointer-events: none;
+  transition: transform 200ms ease, background 200ms ease;
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(18px);
+  background: white;
+}

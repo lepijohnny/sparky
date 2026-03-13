@@ -1,0 +1,84 @@
+.wrapper {
+  position: relative;
+  padding: 12px 14px 4px;
+}
+
+.editable {
+  width: 100%;
+  min-height: 64px;
+  max-height: 160px;
+  overflow-y: auto;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--fg);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.empty::before {
+  content: attr(data-placeholder);
+  color: var(--fg-subtle);
+  pointer-events: none;
+  position: absolute;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  vertical-align: baseline;
+  user-select: none;
+  cursor: default;
+}
+
+.chipSvc {
+  background: var(--accent-subtle, rgba(59, 130, 246, 0.1));
+  color: var(--accent);
+}
+
+.chipLabel {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.chipLabelDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chipPaste {
+  background: var(--bg-hover);
+  color: var(--fg-muted);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 3px 8px;
+}
+
+.pastePreview {
+  position: fixed;
+  z-index: 1000;
+  max-width: 480px;
+  max-height: 240px;
+  overflow: auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 12px 16px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--fg-muted);
+  white-space: pre;
+  pointer-events: none;
+}

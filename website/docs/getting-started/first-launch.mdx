@@ -1,0 +1,50 @@
+---
+sidebar_position: 3
+sidebar_label: First Launch
+---
+
+<span className="section-label">Getting Started</span>
+
+# First Launch
+
+<p className="header-description">What happens when you launch Sparky for the first time.</p>
+
+Sparky keeps everything inside the `~/.sparky/` folder, all data, models, and dependencies live there. Nothing is installed system-wide, and removing the folder cleanly uninstalls everything. On first launch, a few dependencies need to be downloaded into this workspace.
+
+## Splash Screen
+
+On first launch, Sparky downloads the required dependencies:
+
+- **Node.js 22.22** — runtime for the backend sidecar server
+- **Embedding model** (~78 MB) — powers the local knowledge base via llama.cpp
+
+The splash screen shows download progress for each dependency. This only happens once.
+
+## Onboarding
+
+After the splash screen, Sparky guides you through two steps:
+
+1. **Profile** — Set some basic profile information like display name, preferred language, and timezone.
+2. **LLM Connection** — Connect your first AI provider, at least one provider has to be connected.
+
+Sparky supports the following providers out of the box:
+
+| Provider | Auth Method |
+|----------|------------|
+| Anthropic Claude | OAuth (Claude Pro/Max) or API key |
+| GitHub Copilot | Device login |
+| Google Gemini | OAuth |
+| Ollama | Local — no auth needed |
+
+The connection flow is simplified, the entire authentication process is managed by Sparky. Credential storage, token refresh, and session management are all handled automatically. No need to worry about expiring tokens or manual re-authentication, once connected, it just works. Connect your agent and enjoy.
+
+## Local Storage
+
+All data is stored locally on your machine within the `~/.sparky/` folder:
+
+- **Workspaces** — Each workspace, `~/.sparky/workspaces/`, has its own folder with chats, knowledge base, and settings
+- **Conversations** — SQLite database, folders for attachments
+- **Secrets** — OS keychain (Keychain on macOS, DPAPI on Windows)
+- **Models** — `~/.sparky/models/`
+- **Node.js runtime** — `~/.sparky/vendor/fnm`
+- **No telemetry, no cloud sync, no account required**

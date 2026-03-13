@@ -1,0 +1,11 @@
+{
+  "name": "@sparky/auth-flow-pi-device",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@sparky/auth-core": "workspace:*",
+    "@mariozechner/pi-ai": "^0.57.1"
+  }
+}

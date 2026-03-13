@@ -1,0 +1,291 @@
+/* ─── LLM page-specific: card header with action button ─── */
+.cardHeaderWithAction {
+  composes: cardHeader from "../../styles/shared.module.css";
+  justify-content: space-between;
+}
+
+.addBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--fg);
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: none;
+  letter-spacing: normal;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.addBtn:hover {
+  border-color: var(--fg-subtle);
+  background: var(--bg-hover);
+}
+
+/* ─── Connection list ─── */
+.connectionList {
+  display: flex;
+  flex-direction: column;
+}
+
+.connectionRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.connectionRow:last-child {
+  border-bottom: none;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.connectionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.connectionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.connectionName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.connectionMeta {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.defaultLabel {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--fg-muted);
+  margin-left: 6px;
+}
+
+.dropdownWrap {
+  flex-shrink: 0;
+  width: 240px;
+}
+
+.toggleWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+  padding: 0;
+  outline: none;
+}
+
+.toggle:hover:not(:disabled) {
+  border-color: var(--fg-subtle);
+}
+
+.toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toggleOn {
+  background: var(--accent, hsl(233, 65%, 58%));
+  border-color: var(--accent, hsl(233, 65%, 58%));
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+  pointer-events: none;
+  transition: transform 200ms ease, background 200ms ease;
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(18px);
+  background: white;
+}
+
+/* ─── Thinking slider ─── */
+.sliderWrap {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  width: 200px;
+}
+
+.slider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent, hsl(233, 65%, 58%));
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.slider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+.sliderTicks {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 2px;
+}
+
+.sliderTick {
+  font-size: 9px;
+  color: var(--fg-muted);
+  opacity: 0.6;
+  cursor: default;
+  user-select: none;
+  text-align: center;
+  min-width: 10px;
+}
+
+.sliderTickActive {
+  opacity: 1;
+  color: var(--accent, hsl(233, 65%, 58%));
+  font-weight: 600;
+}
+
+/* ─── Version & update ─── */
+.versionBadge {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.connectionDate {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.connectionActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.checkBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color 150ms ease;
+  white-space: nowrap;
+}
+
+.checkBtn:hover {
+  color: var(--fg);
+}
+
+.checkBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.upToDate {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.updateBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 150ms ease, opacity 150ms ease;
+  white-space: nowrap;
+}
+
+.updateBtn:hover {
+  background: var(--bg-raised);
+}
+
+.updateBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -1,0 +1,80 @@
+.wrapper {
+  position: relative;
+}
+
+.trigger {
+  cursor: pointer;
+}
+
+/* ─── Dropdown menu ─── */
+.menu {
+  position: fixed;
+  width: 200px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 9999;
+}
+
+.menuItem {
+  appearance: none;
+  background: none;
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.menuItem:hover,
+.menuItemActive {
+  background: var(--bg-overlay);
+}
+
+.menuItemLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.menuItemDanger {
+  color: #ef4444;
+}
+
+.menuItemDanger:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.menuItemSuffix {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.submenuArrow {
+  margin-left: auto;
+  color: var(--fg-subtle);
+  flex-shrink: 0;
+}
+
+/* ─── Submenu (portal) ─── */
+.submenu {
+  position: fixed;
+  width: 180px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 9999;
+}

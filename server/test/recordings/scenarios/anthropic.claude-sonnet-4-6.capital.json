@@ -1,0 +1,38 @@
+{
+  "id": "anthropic-oauth.claude-sonnet-4-6.2026-03-14T15-58-49",
+  "description": "Recorded session",
+  "prompt": "The capital of France is?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 1063,
+          "event": {
+            "type": "text.delta",
+            "content": "The capital of France is **"
+          }
+        },
+        {
+          "delay": 58,
+          "event": {
+            "type": "text.delta",
+            "content": "Paris**."
+          }
+        },
+        {
+          "delay": 47,
+          "event": {
+            "type": "text.done",
+            "content": "The capital of France is **Paris**."
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

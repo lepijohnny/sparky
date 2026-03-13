@@ -1,0 +1,105 @@
+/* ─── Layout: 5-column grid (3 panes + 2 resize handles) ─── */
+.app {
+  display: grid;
+  height: 100vh;
+  background: var(--bg);
+  transition: grid-template-columns 250ms ease;
+}
+
+.resizeHandle {
+  cursor: col-resize;
+  position: relative;
+  z-index: 5;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.resizeHandle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--accent) 30%,
+    var(--accent) 70%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.resizeHandle:hover::after,
+.resizeHandleActive::after {
+  opacity: 0.5;
+}
+
+/* ─── Left pane ─── */
+.left {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.leftHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hidden {
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.middle {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.middle > * {
+  flex: 1;
+}
+
+.leftHeader {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px 0 78px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Windows: no traffic lights, reduce left padding */
+:global(.platform-win) .leftHeader {
+  padding-left: 20px;
+}
+
+.focusDrag {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  z-index: 50;
+  -webkit-app-region: drag;
+  animation: fadeIn 250ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

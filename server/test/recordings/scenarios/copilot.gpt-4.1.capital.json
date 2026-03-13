@@ -1,0 +1,73 @@
+{
+  "id": "copilot.gpt-4.1.2026-03-14T16-01-04",
+  "description": "Recorded session",
+  "prompt": "The capital of France is?",
+  "rounds": [
+    {
+      "events": [
+        {
+          "delay": 969,
+          "event": {
+            "type": "text.delta",
+            "content": "The"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " capital"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " of"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " France"
+          }
+        },
+        {
+          "delay": 0,
+          "event": {
+            "type": "text.delta",
+            "content": " is"
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "text.delta",
+            "content": " Paris"
+          }
+        },
+        {
+          "delay": 4,
+          "event": {
+            "type": "text.delta",
+            "content": "."
+          }
+        },
+        {
+          "delay": 3,
+          "event": {
+            "type": "text.done",
+            "content": "The capital of France is Paris."
+          }
+        },
+        {
+          "delay": 1,
+          "event": {
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+.icon {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  animation: sparkFloat 1.1s ease-in-out infinite;
+}
+
+.spark:nth-child(1) { animation-delay: 0s; }
+.spark:nth-child(2) { animation-delay: 0.18s; }
+.spark:nth-child(3) { animation-delay: 0.36s; }
+.spark:nth-child(4) { animation-delay: 0.54s; }
+.spark:nth-child(5) { animation-delay: 0.72s; }
+.spark:nth-child(6) { animation-delay: 0.90s; }
+
+.spark:nth-child(1) { --dx: 0px;   --dy: -7px; }
+.spark:nth-child(2) { --dx: 6px;   --dy: -4px; }
+.spark:nth-child(3) { --dx: 6px;   --dy: 4px;  }
+.spark:nth-child(4) { --dx: 0px;   --dy: 7px;  }
+.spark:nth-child(5) { --dx: -6px;  --dy: 4px;  }
+.spark:nth-child(6) { --dx: -6px;  --dy: -4px; }
+
+@keyframes sparkFloat {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+      calc(-50% + var(--dx)),
+      calc(-50% + var(--dy))
+    ) scale(0.3);
+  }
+}

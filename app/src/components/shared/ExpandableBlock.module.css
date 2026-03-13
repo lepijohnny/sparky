@@ -1,0 +1,30 @@
+.wrap {
+  position: relative;
+}
+
+.expandBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.wrap:hover .expandBtn {
+  opacity: 1;
+}
+
+.expandBtn:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}

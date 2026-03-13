@@ -1,0 +1,295 @@
+.chatView {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.loadingMore {
+  text-align: center;
+  font-size: 12px;
+  color: var(--fg-muted);
+  padding: 8px 0;
+}
+
+/* ─── Messages area ─── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-anchor: none;
+  min-width: 0;
+  animation: fadeIn 150ms ease;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 48px,
+    black calc(100% - 48px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 48px,
+    black calc(100% - 48px),
+    transparent
+  );
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+
+
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+/* ─── Message layout ─── */
+.message {
+  display: flex;
+  min-width: 0;
+  position: relative;
+}
+
+.messageUser {
+  justify-content: flex-end;
+}
+
+.messageAssistant {
+  justify-content: flex-start;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* User: compact bubble */
+.bubbleWrapUser {
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bubble {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bubbleUser {
+  background: var(--border);
+  color: var(--fg);
+  border-radius: 12px;
+  border-bottom-right-radius: 4px;
+}
+
+.userAttachments {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.userAttachThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.userAttachImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.userAttachIcon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-overlay);
+  color: var(--fg-muted);
+}
+
+.bubbleError {
+  font-size: 12px;
+  color: var(--fg-muted);
+  padding: 8px 12px;
+}
+
+
+
+.anchorBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--fg-subtle);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 100ms ease, color 100ms ease;
+  margin-top: 4px;
+  align-self: flex-end;
+}
+
+.bubbleWrapUser:hover .anchorBtn {
+  opacity: 1;
+}
+
+.anchorBtnActive {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.anchorBtn:hover {
+  color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.anchorFlash {
+  animation: anchorGlow 1.4s ease-out;
+}
+
+@keyframes anchorGlow {
+  0% {
+    outline: 4px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    outline-offset: 0px;
+  }
+  100% {
+    outline: 4px solid transparent;
+    outline-offset: 4px;
+  }
+}
+
+/* ─── Print mode ─── */
+
+.printTitle {
+  font-size: 22px;
+  font-weight: 600;
+  padding: 24px 24px 0;
+  margin: 0;
+  color: var(--fg);
+}
+
+.printToolbar {
+  position: fixed;
+  top: 6px;
+  right: 6px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.printToolbarBtn {
+  appearance: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.printToolbarBtn:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.printOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--fg-muted);
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 2;
+  border-radius: 8px;
+}
+
+.message:hover .printOverlay {
+  opacity: 1;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.printHidden .printOverlay {
+  opacity: 1;
+  background: none;
+}
+
+.printHidden {
+  opacity: 0.2;
+  transition: opacity 200ms ease;
+}
+
+.printMode :global([class*="activitiesGroup"]),
+.printMode :global([class*="contextInfo"]),
+.printMode :global([class*="contextRow"]) {
+  display: none !important;
+}
+
+@media print {
+  .printToolbar { display: none !important; }
+  .printOverlay { display: none !important; }
+  .printHidden { display: none !important; }
+  .anchorBtn { display: none !important; }
+
+  .chatView {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .messages {
+    overflow: visible !important;
+    flex: none !important;
+    height: auto !important;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .inner {
+    overflow: visible !important;
+  }
+
+  .message {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+
