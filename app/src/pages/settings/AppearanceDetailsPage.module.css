@@ -1,0 +1,45 @@
+.shortcutList {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.shortcutRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.shortcutRow:last-child {
+  border-bottom: none;
+}
+
+.shortcutLabel {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.shortcutKeys {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shortcutKey {
+  font-family: var(--font-mono, "SF Mono", "Fira Code", monospace);
+  font-size: 11px;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  min-width: 22px;
+  text-align: center;
+  white-space: nowrap;
+}
