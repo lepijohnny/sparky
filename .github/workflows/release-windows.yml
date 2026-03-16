@@ -1,0 +1,69 @@
+name: Release Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Rebuild native modules
+        working-directory: server
+        run: pnpm rebuild better-sqlite3 sqlite-vec
+
+      - name: Bundle server
+        working-directory: server
+        run: npx tsx build.ts
+
+      - name: Check dist size
+        shell: bash
+        run: |
+          du -sh server/dist/
+          ls -la server/dist/node_modules/ || echo "NO node_modules!"
+
+      - name: Build frontend
+        working-directory: app
+        run: pnpm run build
+
+      - name: Build Tauri
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: cargo tauri build --ci --bundles nsis
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/nsis/*.exe.sig
+
+
