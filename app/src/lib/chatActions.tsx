@@ -69,7 +69,7 @@ async function openChatWindow(chat: Chat, wsPort: number, sidecarToken: string) 
   }
 }
 
-async function openPrintWindow(chat: Chat, wsPort: number, sidecarToken: string) {
+export async function openPrintWindow(chat: Chat, wsPort: number, sidecarToken: string) {
   if (!window.__TAURI_INTERNALS__) return;
   try {
     const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");

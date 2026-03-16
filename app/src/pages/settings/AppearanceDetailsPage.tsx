@@ -3,6 +3,7 @@ import { useConnection } from "../../context/ConnectionContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useWsRequest } from "../../hooks/useWsRequest";
 import shared from "../../styles/shared.module.css";
+import styles from "./AppearanceDetailsPage.module.css";
 
 interface ThemeEntry {
   name: string;
@@ -11,6 +12,27 @@ interface ThemeEntry {
   accent: string | null;
   mode: "dark" | "light";
 }
+
+const isMac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+const mod = isMac ? "⌘" : "Ctrl";
+const shift = isMac ? "⇧" : "Shift";
+const del = isMac ? "⌫" : "Backspace";
+const enter = isMac ? "↩" : "Enter";
+
+
+const SHORTCUTS: { label: string; keys: string[] }[] = [
+  { label: "New chat", keys: [mod, "N"] },
+  { label: "Search chats", keys: [mod, "K"] },
+  { label: "Delete chat", keys: [mod, del] },
+  { label: "Toggle sidebar", keys: [mod, "B"] },
+  { label: "Focus input", keys: [mod, "L"] },
+  { label: "Print chat", keys: [mod, "P"] },
+  { label: "Chats", keys: [mod, "1"] },
+  { label: "Knowledge", keys: [mod, "2"] },
+  { label: "Connections", keys: [mod, "3"] },
+  { label: "Settings", keys: [mod, "4"] },
+  { label: "New line", keys: [shift, enter] },
+];
 
 export default function AppearanceDetailsPage() {
   const { conn } = useConnection();
@@ -53,6 +75,22 @@ export default function AppearanceDetailsPage() {
               />
             )}
           </div>
+        </div>
+      </div>
+
+      <div className={shared.card}>
+        <div className={shared.cardHeader}>Keyboard Shortcuts</div>
+        <div className={styles.shortcutList}>
+          {SHORTCUTS.map((s) => (
+            <div key={s.label} className={styles.shortcutRow}>
+              <span className={styles.shortcutLabel}>{s.label}</span>
+              <span className={styles.shortcutKeys}>
+                {s.keys.map((k, i) => (
+                  <kbd key={i} className={styles.shortcutKey}>{k}</kbd>
+                ))}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

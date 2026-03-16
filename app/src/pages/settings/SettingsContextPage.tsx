@@ -20,7 +20,7 @@ const ICON_SIZE = 16;
 const ICON_STROKE = 1.5;
 
 const ITEMS: { id: SettingsSub; label: string; icon: ReactNode }[] = [
-  { id: "appearance", label: "Appearance", icon: <Palette size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
+  { id: "appearance", label: "Look & Feel", icon: <Palette size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "llm", label: "LLM", icon: <Brain size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "labels", label: "Labels", icon: <Tag size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "environment", label: "Environment", icon: <Variable size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },

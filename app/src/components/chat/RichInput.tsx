@@ -526,6 +526,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
         contentEditable
         suppressContentEditableWarning
         data-placeholder={placeholder}
+        data-shortcut-input
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         onClick={handleClick}

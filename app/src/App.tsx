@@ -47,6 +47,7 @@ import DetailsPanel from "./panels/DetailsPanel";
 import MenuPanel, { type Section } from "./panels/MenuPanel";
 import type { Chat } from "./types/chat";
 import type { Source } from "./types/source";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useWsSubscriber } from "./hooks/useWsSubscriber";
 
 function SourceBatchActions({ sources, onClear }: { sources: Source[]; onClear: () => void }) {
@@ -89,7 +90,7 @@ const SECTION_LABELS: Record<Section, string> = {
 
 const SETTINGS_SUB_LABELS: Record<SettingsSub, string> = {
   profile: "Profile",
-  appearance: "Appearance",
+  appearance: "Look & Feel",
   llm: "LLM",
   labels: "Labels",
   environment: "Environment",
@@ -241,16 +242,22 @@ export default function App() {
   const handleDelete = useCallback(() => selectChat(null), [selectChat]);
   const handleSearchClose = useCallback(() => setSearching(false), [setSearching]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "f" && e.metaKey && !e.shiftKey) {
-        e.preventDefault();
-        setSearching(true);
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setSearching]);
+  const shortcutActions = useMemo(() => ({
+    onNewChat: () => handleNewChat(),
+    onDeleteChat: () => {
+      if (!conn || !selectedChat) return;
+      conn.request("chat.delete", { id: selectedChat.id });
+      selectChat(null);
+    },
+    onPrintChat: async () => {
+      if (!selectedChat || !wsPort) return;
+      const { openPrintWindow } = await import("./lib/chatActions");
+      openPrintWindow(selectedChat, wsPort, conn?.token ?? "");
+    },
+    onSearch: () => setSearching(true),
+  }), [handleNewChat, conn, selectedChat, selectChat, wsPort, setSearching]);
+
+  useKeyboardShortcuts(shortcutActions);
 
   // ── Content routing ──
 
