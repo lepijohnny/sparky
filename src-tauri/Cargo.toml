@@ -32,3 +32,4 @@ tokio = { version = "1", features = ["full"] }
 libc = "0.2"
 tauri-plugin-updater = "2.10.0"
 tauri-plugin-process = "2.3.1"
+tauri-plugin-clipboard-manager = "2.3.2"

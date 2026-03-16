@@ -252,7 +252,7 @@ export function createSparky(): Sparky {
   }
 
   bus.on("auth.start", async (data) => {
-    return auth.request(data.domain, data.provider, data.grant);
+    return auth.request(data.domain, data.provider, data.grant, data.params);
   });
   bus.on("auth.finish", async (data) => {
     return auth.verify(data.domain, data.provider, data.grant, data.params);

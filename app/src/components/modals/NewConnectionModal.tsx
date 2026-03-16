@@ -1,15 +1,10 @@
-import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
 
 import type { AuthFlowDefinition, AuthRequest, AuthRequestField, AuthVerdict } from "@sparky/auth-core";
 
 const AUTH_TIMEOUT = 600_000;
-import {
-  Check,
-  Loader2,
-  X,
-} from "lucide-react";
+import { X } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -72,15 +67,13 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
 
   const [selectedCompany, setSelectedCompany] = useState(inline ? "" : (groups[0]?.company ?? ""));
   const [selectedFlowIdx, setSelectedFlowIdx] = useState(0);
-  const [step, setStep] = useState<"select" | "install" | "connect">("select");
+  const [step, setStep] = useState<"select" | "connect">("select");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [display, setDisplay] = useState<AuthRequestField[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [installProgress, setInstallProgress] = useState(0);
-  const [installStatus, setInstallStatus] = useState<"idle" | "installing" | "done" | "error">("idle");
-  const [installError, setInstallError] = useState<string | null>(null);
+
   const overlayRef = useRef<HTMLDivElement>(null);
   const mouseDownOnOverlay = useRef(false);
 
@@ -93,9 +86,6 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     setPending(false);
     setError(null);
     setSaving(false);
-    setInstallProgress(0);
-    setInstallStatus("idle");
-    setInstallError(null);
   }, [inline, groups]);
 
   useEffect(() => {
@@ -134,24 +124,6 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     setError(null);
   };
 
-  const requiredTool = (providerId: string): string | null => {
-    if (providerId.startsWith("anthropic")) return "claude";
-    if (providerId === "copilot") return "copilot";
-    return null;
-  };
-
-  const toolLabel = (tool: string): string => {
-    if (tool === "claude") return "Claude CLI";
-    if (tool === "copilot") return "Copilot CLI";
-    return tool;
-  };
-
-  const toolIcon = (tool: string): string => {
-    if (tool === "claude") return "/icons/providers/anthropic.svg";
-    if (tool === "copilot") return "/icons/providers/copilot.svg";
-    return "";
-  };
-
   const handleAuthFlow = async () => {
     if (!conn || !selectedFlow) return;
     const { domain, provider: prov, grant } = selectedFlow;
@@ -159,7 +131,7 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     setError(null);
     try {
       const request = await conn.request<AuthRequest>(
-        "auth.start", { domain, provider: prov, grant },
+        "auth.start", { domain, provider: prov, grant, params: fieldValues },
         { timeout: AUTH_TIMEOUT },
       );
 
@@ -168,7 +140,10 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
 
       for (const item of request.display) {
         if (item.type === "code") {
-          try { await navigator.clipboard.writeText(item.value); } catch { /* ignore */ }
+          try {
+            const { writeText } = await import("@tauri-apps/plugin-clipboard-manager");
+            await writeText(item.value);
+          } catch (err) { console.error("Clipboard write failed:", err); }
         }
         if (item.type === "url") {
           try { await shellOpen(item.value); } catch { window.open(item.value, "_blank"); }
@@ -270,80 +245,6 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     }
   };
 
-  const handleStartInstall = async () => {
-    const tool = requiredTool(selectedProvider);
-    if (!tool) return;
-
-    setInstallStatus("installing");
-    setInstallProgress(0);
-    setInstallError(null);
-
-    const unlisten = await listen<{ step: string; status: string; progress: number; message?: string }>(
-      "vendor-progress",
-      (event) => {
-        if (event.payload.step === tool) {
-          setInstallProgress(event.payload.progress);
-          if (event.payload.status === "done") setInstallStatus("done");
-          else if (event.payload.status === "error") {
-            setInstallStatus("error");
-            setInstallError(event.payload.message ?? "Installation failed");
-          }
-        }
-      },
-    );
-
-    try {
-      await invoke("vendor_install", { tool });
-      setTimeout(() => {
-        setStep("connect");
-        const grant = selectedFlow?.grant;
-        if (grant === "pkce" || grant === "oauth" || grant === "device") handleAuthFlow();
-      }, 500);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setInstallStatus("error");
-      setInstallError(msg);
-    } finally {
-      unlisten();
-    }
-  };
-
-  const renderInstallStep = () => {
-    const tool = requiredTool(selectedProvider);
-    if (!tool) return null;
-
-    return (
-      <div className={styles.installSection}>
-        <img src={toolIcon(tool)} alt={toolLabel(tool)} className={styles.installIcon} />
-        <span className={styles.installTitle}>Install {toolLabel(tool)}</span>
-        <span className={styles.installHint}>
-          {toolLabel(tool)} is required to connect to {provider?.name ?? selectedCompany}. It will be installed into ~/.sparky/vendor/.
-        </span>
-
-        {installStatus === "installing" && (
-          <>
-            <div className={styles.installProgress}>
-              <div className={styles.installProgressFill} style={{ width: `${installProgress}%` }} />
-            </div>
-            <span className={styles.installStatus}>
-              <Loader2 size={12} className={styles.installSpinner} />
-              Installing…
-            </span>
-          </>
-        )}
-
-        {installStatus === "done" && (
-          <span className={styles.installStatus}>
-            <Check size={12} strokeWidth={2.5} style={{ color: "var(--success, #4caf50)" }} />
-            Installed
-          </span>
-        )}
-
-        {installStatus === "error" && <span className={styles.errorText}>{installError}</span>}
-      </div>
-    );
-  };
-
   const renderConnectStep = () => {
     if (!selectedFlow) return null;
 
@@ -441,53 +342,32 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
   };
 
   const handleConnect = async () => {
+    const autoConnect = ["pkce", "oauth", "device"].includes(selectedFlow?.grant ?? "");
+
     if (step === "select") {
-      const tool = requiredTool(selectedProvider);
-      if (tool) {
-        try {
-          const deps = await invoke<{ id: string; status: string }[]>("vendor_check");
-          const dep = deps.find((d) => d.id === tool);
-          if (dep && dep.status !== "installed") {
-            setStep("install");
-            return;
-          }
-        } catch { /* proceed */ }
-      }
-
-      const grant = selectedFlow?.grant;
-      if (grant === "pkce" || grant === "oauth" || grant === "device") {
-        setStep("connect");
-        handleAuthFlow();
-        return;
-      }
-
       setStep("connect");
+      if (!selectedFlow?.fields?.length && autoConnect) handleAuthFlow();
       return;
     }
 
-    if (step === "install") {
-      handleStartInstall();
-      return;
-    }
-
-    if (selectedFlow?.fields?.length) {
-      handleFieldSubmit();
-    }
+    if (autoConnect) handleAuthFlow();
+    else handleFieldSubmit();
   };
 
   const canConnect = () => {
     if (step === "select") return !!selectedCompany && !!selectedFlow;
-    if (step === "install") return installStatus === "idle" || installStatus === "error";
     if (pending) return false;
-    const grant = selectedFlow?.grant;
-    if (grant === "pkce" || grant === "oauth" || grant === "device") return false;
-    if (selectedFlow?.fields?.length) {
-      const requiredFilled = selectedFlow.fields.every((f) => {
+    const autoConnect = ["pkce", "oauth", "device"].includes(selectedFlow?.grant ?? "");
+    const hasFields = !!selectedFlow?.fields?.length;
+
+    if (hasFields) {
+      return selectedFlow!.fields!.every((f) => {
         const val = fieldValues[f.name]?.trim();
         return !!val || !!f.placeholder;
       });
-      return requiredFilled;
     }
+
+    if (autoConnect) return false;
     return true;
   };
 
@@ -495,11 +375,6 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     if (step === "select") {
       if (selectedFlow?.fields?.length) return "Next";
       return "Connect";
-    }
-    if (step === "install") {
-      if (installStatus === "installing") return "Installing…";
-      if (installStatus === "error") return "Retry";
-      return "Install";
     }
     if (saving) return "Connecting…";
     return "Connect";
@@ -533,7 +408,6 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
           </div>
         )}
 
-        {step === "install" && renderInstallStep()}
         {step === "connect" && renderConnectStep()}
       </div>
       <div className={`${styles.modalFooter} ${inline ? styles.inlineFooter : ""}`}>
@@ -548,8 +422,7 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
           </button>
         )}
         {inline && <div style={{ flex: 1 }} />}
-        {!(step === "install" && (installStatus === "installing" || installStatus === "done")) &&
-         !(step === "connect" && pending) && (
+        {!(step === "connect" && pending) && (
           <button
             className={styles.btnPrimary}
             onClick={handleConnect}

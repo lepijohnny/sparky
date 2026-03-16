@@ -36,6 +36,8 @@
       "allow": [{ "path": "**" }]
     },
     "updater:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-write-text"
   ]
 }
