@@ -19,13 +19,18 @@ export function createPiDeviceFlow(config: PiDeviceFlowConfig): AuthPluginFactor
         provider: config.provider,
         grant: "device",
         label: config.label,
+        fields: [
+          { name: "enterpriseDomain", label: "Enterprise Domain", placeholder: "Leave empty or slug.ghe.com if enterprise" },
+        ],
       },
 
-      async request() {
+      async request(uri?: string, params?: Record<string, string>) {
         if (abortController) {
           abortController.abort();
         }
         abortController = new AbortController();
+
+        const hostname = params?.enterpriseDomain?.trim() || "";
 
         let resolveAuth: (v: { url: string; code: string }) => void;
         const authReady = new Promise<{ url: string; code: string }>((r) => { resolveAuth = r; });
@@ -35,7 +40,7 @@ export function createPiDeviceFlow(config: PiDeviceFlowConfig): AuthPluginFactor
             const code = instructions?.replace(/^Enter code:\s*/i, "").trim() ?? "";
             resolveAuth({ url, code });
           },
-          onPrompt: async () => "",
+          onPrompt: async () => hostname,
           signal: abortController.signal,
         }).then((creds) => ({ access: creds.access, refresh: creds.refresh }));
 

@@ -4,9 +4,11 @@ import type { Credentials } from "../cred";
 import type { OAuthGateway } from "./oauth.gateway";
 import type { Socket } from "node:net";
 
+const NO_REDIRECT = "";
+
 export interface AuthManager {
   definitions(): AuthFlowDefinition[];
-  request(domain: string, provider: string, grant: string): Promise<AuthRequest>;
+  request(domain: string, provider: string, grant: string, params?: Record<string, string>): Promise<AuthRequest>;
   verify(domain: string, provider: string, grant: string, params?: Record<string, string>): Promise<AuthVerdict>;
   dispose(): void;
 }
@@ -28,7 +30,7 @@ export function createAuthManager(log: Logger, cred: Credentials, gateway: OAuth
       return flows.map((f) => f.definition);
     },
 
-    async request(domain, provider, grant) {
+    async request(domain, provider, grant, params) {
       const flow = resolve(domain, provider, grant);
       const isOAuth = grant === "pkce" || grant === "oauth";
 
@@ -37,10 +39,10 @@ export function createAuthManager(log: Logger, cred: Credentials, gateway: OAuth
         const { port, callbackPromise } = await gateway.listen();
         const redirectUri = `http://localhost:${port}/callback`;
         pending.set(sessionKey, callbackPromise);
-        return flow.request(redirectUri);
+        return flow.request(redirectUri, params);
       }
 
-      return flow.request();
+      return flow.request(NO_REDIRECT, params);
     },
 
     async verify(domain, provider, grant, params) {

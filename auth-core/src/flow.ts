@@ -5,7 +5,7 @@ import type { OAuthTokens, OAuthExchangeParams } from "./oauth";
 
 export interface AuthFlow {
   readonly definition: AuthFlowDefinition;
-  request(redirectUri?: string): Promise<AuthRequest>;
+  request(redirectUri?: string, params?: Record<string, string>): Promise<AuthRequest>;
   verify(params?: Record<string, string>): Promise<AuthVerdict>;
   onSuccess?(): Promise<void>;
   dispose?(): void;

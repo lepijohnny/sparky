@@ -17,7 +17,7 @@ export interface CoreEvents {
   "core.prefetch":              { req: void; res: { ok: boolean } };
   "core.models.ready":          { req: void; res: void };
 
-  "auth.start":                 { req: { domain: string; provider: string; grant: string }; res: AuthRequest };
+  "auth.start":                 { req: { domain: string; provider: string; grant: string; params?: Record<string, string> }; res: AuthRequest };
   "auth.finish":                { req: { domain: string; provider: string; grant: string; params?: Record<string, string> }; res: AuthVerdict };
 
   "cred.get":                   { req: { key: string }; res: { value: string | null } };
