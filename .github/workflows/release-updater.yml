@@ -1,0 +1,97 @@
+name: Release Updater
+
+on:
+  workflow_run:
+    workflows: ["Release macOS", "Release Windows"]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  updater:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get tag
+        id: tag
+        run: |
+          TAG="${{ github.event.workflow_run.head_branch }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG"
+
+      - name: Check both builds succeeded
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+
+          MACOS_OK=$(gh run list --workflow=release-macos.yml --branch="$TAG" --status=success --limit=1 --json conclusion -q '.[0].conclusion' 2>/dev/null || true)
+          WINDOWS_OK=$(gh run list --workflow=release-windows.yml --branch="$TAG" --status=success --limit=1 --json conclusion -q '.[0].conclusion' 2>/dev/null || true)
+
+          echo "macOS: $MACOS_OK"
+          echo "Windows: $WINDOWS_OK"
+
+          if [ "$MACOS_OK" = "success" ] && [ "$WINDOWS_OK" = "success" ]; then
+            echo "both=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "both=false" >> "$GITHUB_OUTPUT"
+            echo "Waiting for both builds to complete"
+          fi
+
+      - name: Download release assets
+        if: steps.check.outputs.both == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          mkdir -p assets
+          gh release download "$TAG" --dir assets --pattern "*.tar.gz" --pattern "*.tar.gz.sig" --pattern "*.exe" --pattern "*.exe.sig"
+          echo "=== Downloaded ==="
+          ls -la assets/
+
+      - name: Generate latest.json
+        if: steps.check.outputs.both == 'true'
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          MAC_TAR_PATH=$(ls assets/*.app.tar.gz 2>/dev/null | head -1)
+          MAC_TAR=$(basename "$MAC_TAR_PATH")
+          MAC_SIG=$(cat "${MAC_TAR_PATH}.sig")
+
+          WIN_EXE_PATH=$(ls assets/*.exe 2>/dev/null | head -1)
+          WIN_EXE=$(basename "$WIN_EXE_PATH")
+          WIN_SIG=$(cat "${WIN_EXE_PATH}.sig")
+
+          cat > latest.json <<EOF
+          {
+            "version": "${TAG#v}",
+            "notes": "See https://github.com/lepijohnny/sparky/releases/tag/${TAG}",
+            "pub_date": "${DATE}",
+            "platforms": {
+              "darwin-aarch64": {
+                "signature": "${MAC_SIG}",
+                "url": "https://github.com/lepijohnny/sparky/releases/download/${TAG}/${MAC_TAR}"
+              },
+              "windows-x86_64": {
+                "signature": "${WIN_SIG}",
+                "url": "https://github.com/lepijohnny/sparky/releases/download/${TAG}/${WIN_EXE}"
+              }
+            }
+          }
+          EOF
+
+          cat latest.json
+
+      - name: Upload latest.json to release
+        if: steps.check.outputs.both == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          draft: true
+          files: latest.json
