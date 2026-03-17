@@ -628,7 +628,7 @@ export class ChatDatabase {
               filename: r.filename,
               mimeType: r.mime_type,
               size: r.size,
-              filePath: workspacePath ? join(workspacePath, "attachments", r.chat_id, r.filename) : undefined,
+              filePath: workspacePath ? join(workspacePath, "chats", r.chat_id, "attachments", r.filename) : undefined,
               thumbnailDataUrl: r.thumbnail ? `data:image/jpeg;base64,${r.thumbnail.toString("base64")}` : undefined,
             }));
           }

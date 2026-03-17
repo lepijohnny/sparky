@@ -156,7 +156,7 @@ export class ChatConversation {
         ? data.services
         : [];
       const chatAttachments = role.meta.knowledge
-        ? this.db.getAllChatAttachments(data.chatId).map((a) => ({ ...a, path: join(this.wsDir, "attachments", data.chatId, a.filename) }))
+        ? this.db.getAllChatAttachments(data.chatId).map((a) => ({ ...a, path: join(this.wsDir, "chats", data.chatId, "attachments", a.filename) }))
         : [];
 
       const ctx: ContextResult = contextBuilder(contextWindow)
@@ -303,7 +303,7 @@ export class ChatConversation {
         continue;
       }
 
-      const filePath = join(this.wsDir, "attachments", att.chat_id, att.filename);
+      const filePath = join(this.wsDir, "chats", att.chat_id, "attachments", att.filename);
       if (att.mime_type.startsWith("image/") && att.mime_type !== "image/svg+xml") {
         parts.push({ type: "image", filePath, mimeType: att.mime_type });
       } else {

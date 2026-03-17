@@ -45,19 +45,14 @@ export class WorkspaceSettings {
     const activeId = this.config.get("activeWorkspace");
     const workspaces = this.readWorkspaces();
     const ws = workspaces.find((w) => w.id === activeId);
-    const dir = ws?.path ?? "";
+    if (!ws) return { conversations: 0, knowledge: 0, attachments: 0, total: 0 };
 
-    const dbPath = dir
-      ? this.storage.root(`${dir}/workspace.db`)
-      : this.storage.root("workspace.db");
+    const dbPath = this.storage.root(`${ws.path}/workspace.db`);
     const ktDbPath = dbPath.replace(/\.db$/, ".kt.db");
 
     const conversations = fileSize(dbPath);
     const knowledge = fileSize(ktDbPath);
-    const attachmentsDir = dir
-      ? this.storage.root(`${dir}/attachments`)
-      : this.storage.root("attachments");
-    const attachments = dirSize(attachmentsDir);
+    const attachments = attachmentsSize(this.storage.root(`${ws.path}/chats`));
 
     return { conversations, knowledge, attachments, total: conversations + knowledge + attachments };
   }
@@ -154,6 +149,19 @@ function dirSize(dirPath: string): number {
       const p = join(dirPath, entry.name);
       if (entry.isDirectory()) total += dirSize(p);
       else try { total += statSync(p).size; } catch {}
+    }
+  } catch {}
+  return total;
+}
+
+/** Sum size of chats/{id}/attachments/ only */
+function attachmentsSize(chatsDir: string): number {
+  let total = 0;
+  try {
+    for (const entry of readdirSync(chatsDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const attDir = join(chatsDir, entry.name, "attachments");
+      total += dirSize(attDir);
     }
   } catch {}
   return total;

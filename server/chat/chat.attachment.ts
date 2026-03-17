@@ -20,7 +20,7 @@ export function registerAttachmentHandlers(
 ): { switchDb(newDb: ChatDatabase): void } {
   let db = initialDb;
   function attachDir(chatId: string): string {
-    return join(getWorkspacePath(), "attachments", chatId);
+    return join(getWorkspacePath(), "chats", chatId, "attachments");
   }
 
   function attachPath(chatId: string, filename: string): string {
@@ -107,6 +107,6 @@ export function registerAttachmentHandlers(
 }
 
 export function cleanupChatAttachments(workspacePath: string, chatId: string): void {
-  const dir = join(workspacePath, "attachments", chatId);
+  const dir = join(workspacePath, "chats", chatId);
   try { rmSync(dir, { recursive: true, force: true }); } catch {}
 }
