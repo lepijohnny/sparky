@@ -326,7 +326,7 @@ export function createSparky(): Sparky {
   bus.subscribe("kt.source.deleted", (data) => broadcast("kt.source.deleted", data));
 
   bus.subscribe("svc.register", (data) => broadcast("svc.register", data));
-  bus.subscribe("svc.test", (data) => broadcast("svc.test", data));
+
   bus.subscribe("svc.updated", (data) => broadcast("svc.updated", data));
   bus.subscribe("svc.delete", (data) => broadcast("svc.delete", data));
   bus.subscribe("svc.guide", (data) => broadcast("svc.guide", data));

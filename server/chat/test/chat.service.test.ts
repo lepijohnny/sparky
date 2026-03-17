@@ -96,6 +96,7 @@ describe("chat.service", () => {
   });
 
   test("given staged service, when svc.list called, then staged service is not in list", async () => {
+    fetchSpy.mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }));
     createSvcCrud(bus, config, noopLogger, mockCred);
 
     await bus.emit("svc.register", makeDef());
@@ -104,30 +105,31 @@ describe("chat.service", () => {
     expect(result.services).toHaveLength(0);
   });
 
-  test("given staged service, when svc.test passes, then service is saved to config", async () => {
+  test("given valid service, when svc.register passes auto-test, then service is saved to config", async () => {
     fetchSpy.mockResolvedValueOnce(new Response('{"login":"user"}', { status: 200 }));
     createSvcCrud(bus, config, noopLogger, mockCred);
 
-    await bus.emit("svc.register", makeDef());
-    const result = await bus.emit("svc.test", { service: "test_svc" });
+    const result = await bus.emit("svc.register", makeDef());
 
-    expect(result.ok).toBe(true);
+    expect(result.status).toBe("registered");
+    expect(result.tested).toBe(true);
     expect(config.data.services).toHaveLength(1);
     expect(config.data.services[0].id).toBe("test_svc");
   });
 
-  test("given staged service, when svc.test fails (HTTP error), then service is not saved", async () => {
+  test("given valid service, when svc.register auto-test fails, then service stays staged", async () => {
     fetchSpy.mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }));
     createSvcCrud(bus, config, noopLogger, mockCred);
 
-    await bus.emit("svc.register", makeDef());
-    const result = await bus.emit("svc.test", { service: "test_svc" });
+    const result = await bus.emit("svc.register", makeDef());
 
-    expect(result.ok).toBe(false);
+    expect(result.status).toBe("registered");
+    expect(result.tested).toBe(false);
+    expect(result.error).toContain("Auto-test");
     expect(config.data.services).toBeUndefined();
   });
 
-  test("given no service registered, when svc.test called, then returns error", async () => {
+  test("given no service registered, when svc.test called, then returns deprecation error", async () => {
     createSvcCrud(bus, config, noopLogger, mockCred);
 
     const result = await bus.emit("svc.test", { service: "nonexistent" });
