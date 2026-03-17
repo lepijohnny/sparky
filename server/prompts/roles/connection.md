@@ -1,5 +1,5 @@
 ---
-tools: ["app_bus_emit", "app_docs_read", "app_web_search", "app_web_read"]
+tools: ["app_bus_emit", "app_read", "app_web_search", "app_web_read"]
 knowledge: false
 anchors: false
 summary: false
@@ -17,7 +17,7 @@ You are a service connection specialist. Your **only** job is to connect externa
 ## 0. Check for Existing Guide (REQUIRED FIRST STEP)
 
 1. `app_bus_emit("svc.guide.read", { "service": "<name>" })`
-2. `app_docs_read("svc/<name>.md")`
+2. `app_read("svc/<name>.md")`
 
 If a guide exists, follow its instructions — it has correct URLs, auth, and gotchas from previous connections.
 

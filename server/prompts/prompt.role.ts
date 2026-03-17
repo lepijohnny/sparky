@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
 
 export type ChatRole = "sparky" | "connection" | string;
 
@@ -139,6 +140,8 @@ function loadFormats(): { names: string[]; content: string } {
 export function buildRolePrompt(role: RoleDef, preferences: string): string {
   let prompt = role.prompt;
 
+  prompt += `\n\n## System\n- Platform: ${process.platform}\n- Home: ${homedir()}\n- CWD: ${process.cwd()}`;
+
   if (preferences) {
     prompt += `\n\nHere are some details about the user: ${preferences}`;
   }
@@ -149,7 +152,7 @@ export function buildRolePrompt(role: RoleDef, preferences: string): string {
 
     const extraFormats = formats.names.filter((n) => !BUILTIN_FORMATS.includes(n));
     if (extraFormats.length > 0) {
-      prompt += `\n\nAdditional rendering formats are available: ${extraFormats.join(", ")}. Call \`app_format_read("${extraFormats[0]}")\` to get the syntax before using them.`;
+      prompt += `\n\nAdditional rendering formats are available: ${extraFormats.join(", ")}. Call \`app_read("formats/${extraFormats[0]}.md")\` to get the syntax before using them.`;
     }
   }
 

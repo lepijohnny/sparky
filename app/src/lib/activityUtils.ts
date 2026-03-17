@@ -11,8 +11,6 @@ function inputField(input: unknown, key: string): unknown {
   return undefined;
 }
 
-export const HIDDEN_TOOL_NAMES = new Set(["app_docs_read"]);
-
 export function toolLabel(name: string, input: unknown): string {
   if (name === "app_bus_emit") {
     const event = String(inputField(input, "event") ?? "");
@@ -35,7 +33,7 @@ export function getActivityLabel(activity: ChatActivity): string | null {
       return "Thinking";
 
     case "agent.tool.start":
-      return toolLabel(activity.data.name, activity.data.input);
+      return activity.data.summary || toolLabel(activity.data.name, activity.data.input);
 
     case "agent.tool.result":
       return activity.data.summary ?? truncate(String(activity.data.output));
@@ -102,15 +100,7 @@ export function mergeToolActivities(activities: ChatActivity[]): ChatActivity[] 
  */
 export function filterActivities(activities: ChatActivity[]): ChatActivity[] {
   const HIDDEN_TYPES = new Set(["agent.start", "agent.thinking.start", "agent.thinking.delta", "agent.thinking.done"]);
-  return activities.filter((a) => {
-    if (HIDDEN_TYPES.has(a.type)) return false;
-    if (a.type === "agent.tool.start" && HIDDEN_TOOL_NAMES.has(a.data?.name)) return false;
-    if (a.type === "agent.tool.result" && a.data?.id) {
-      const matchingStart = activities.find((s) => s.type === "agent.tool.start" && s.data?.id === a.data.id);
-      if (matchingStart && HIDDEN_TOOL_NAMES.has(matchingStart.data?.name)) return false;
-    }
-    return true;
-  });
+  return activities.filter((a) => !HIDDEN_TYPES.has(a.type));
 }
 
 /** Module-level expanded state — survives component remounts. */

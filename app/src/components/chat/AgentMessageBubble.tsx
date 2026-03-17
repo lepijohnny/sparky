@@ -74,6 +74,7 @@ const CATEGORY_ICONS: Record<string, typeof Wrench> = {
   connection: Plug,
   workspace: FolderOpen,
   theme: Palette,
+  file: FileText,
   docs: FileText,
 };
 

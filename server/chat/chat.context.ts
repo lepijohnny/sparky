@@ -166,7 +166,7 @@ export class ContextBuilder {
   attachments(files: { filename: string; mime_type: string; path?: string }[]): this {
     if (files.length === 0) return this;
     const lines = files.map((f) => f.path ? `- ${f.filename} (${f.mime_type}) path: ${f.path}` : `- ${f.filename} (${f.mime_type})`).join("\n");
-    const block = `\n\n## Attachments\nThe user has attached files to this conversation. Images are provided as visual content in messages — do NOT use app_attachment_read for images. Use \`app_attachment_read({ "path": "<path>" })\` for text-based files (code, CSV, JSON, etc.).\n${lines}`;
+    const block = `\n\n## Attachments\nThe user has attached files to this conversation. Images are provided as visual content in messages — do NOT use app_read for images. Use \`app_read({ "path": "<path>" })\` for text-based files (code, CSV, JSON, etc.).\n${lines}`;
     this.systemPrompt += block;
     const cost = estimateTokens(block);
     this.systemTokens += cost;
