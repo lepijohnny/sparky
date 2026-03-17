@@ -292,6 +292,8 @@ export function createSparky(): Sparky {
     return { lines };
   });
 
+
+
   bus.subscribe("settings.appearance.theme.changed", (data) => broadcast("settings.appearance.theme.changed", data));
   bus.subscribe("settings.appearance.theme.created", (data) => broadcast("settings.appearance.theme.created", data));
 

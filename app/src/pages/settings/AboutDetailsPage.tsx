@@ -7,41 +7,27 @@ const VERSION = __APP_VERSION__;
 
 const LINKS = [
   { label: "Website", url: "https://getsparky.chat" },
-  { label: "GitHub", url: "https://github.com/nicoradin/sparky" },
+  { label: "GitHub", url: "https://github.com/lepijohnny/sparky" },
   { label: "Documentation", url: "https://getsparky.chat/docs/getting-started/introduction" },
 ];
 
-const NOTES_KEY = "sparky:release-notes";
-
-function loadNotes(): string[] {
-  try {
-    const stored = localStorage.getItem(NOTES_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.version === VERSION && Array.isArray(parsed.lines)) return parsed.lines;
-    }
-  } catch {}
-  return [];
-}
-
-function saveNotes(version: string, body: string): void {
-  const lines = body
+function parseNotes(body: string): string[] {
+  return body
     .split("\n")
     .map((l) => l.replace(/^[-*]\s+/, "").trim())
     .filter((l) => l.length > 0 && !l.startsWith("#"));
-  localStorage.setItem(NOTES_KEY, JSON.stringify({ version, lines }));
 }
 
 interface UpdateState {
   status: "idle" | "checking" | "available" | "downloading" | "ready" | "error" | "unavailable";
   version?: string;
+  notes?: string[];
   progress?: number;
   error?: string;
 }
 
 export default function AboutDetailsPage() {
   const [update, setUpdate] = useState<UpdateState>({ status: "idle" });
-  const [changelog] = useState<string[]>(loadNotes);
 
   const checkForUpdates = useCallback(async () => {
     if (!window.__TAURI_INTERNALS__) {
@@ -59,8 +45,8 @@ export default function AboutDetailsPage() {
         setUpdate({ status: "idle" });
         return;
       }
-      if (result.body) saveNotes(result.version, result.body);
-      setUpdate({ status: "available", version: result.version });
+      const notes = result.body ? parseNotes(result.body) : [];
+      setUpdate({ status: "available", version: result.version, notes });
     } catch {
       const elapsed = Date.now() - start;
       if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
@@ -113,19 +99,6 @@ export default function AboutDetailsPage() {
         </div>
       </div>
 
-      {changelog.length > 0 && (
-        <div className={shared.card}>
-          <div className={shared.cardHeader}>What's New in {VERSION}</div>
-          <div className={shared.cardBody}>
-            <ul className={styles.changelog}>
-              {changelog.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
       <div className={shared.card}>
         <div className={shared.cardHeader}>Update</div>
         <div className={`${shared.cardBody} ${styles.updateBody}`}>
@@ -150,6 +123,13 @@ export default function AboutDetailsPage() {
           {update.status === "available" && (
             <div className={styles.updateAvailable}>
               <p className={styles.updateStatus}>Version {update.version} is available</p>
+              {update.notes && update.notes.length > 0 && (
+                <ul className={styles.changelog}>
+                  {update.notes.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              )}
               <button className={styles.updateBtn} onClick={downloadAndInstall}>Download and install</button>
             </div>
           )}
