@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Globe } from "lucide-react";
 import { useStore } from "../../store";
 
@@ -67,19 +68,13 @@ export default function ConnectionsDetailsPage({ connectionId }: ConnectionsDeta
               <div className={styles.rows}>
                 <div className={styles.row}>
                   <span className={styles.rowLabel}>Transport</span>
-                  <span className={styles.rowValue}>{transport}</span>
-                </div>
-                <div className={styles.row}>
-                  <span className={styles.rowLabel}>Auth</span>
-                  <span className={styles.rowValue}>{service.auth.strategy}</span>
-                </div>
-                <div className={styles.row}>
-                  <span className={styles.rowLabel}>URL</span>
-                  <span className={styles.rowValueMono}>{service.baseUrl}</span>
+                  <span className={styles.rowValue}>
+                    <span className={styles.rowValueMono}>{service.baseUrl}</span> <span className={styles.rowValueMono}>{service.auth.strategy}</span>
+                  </span>
                 </div>
                 {service.lastTestedAt && (
                   <div className={styles.row}>
-                    <span className={styles.rowLabel}>Last tested</span>
+                    <span className={styles.rowLabel}>Last used</span>
                     <span className={styles.rowValue}>{formatDate(service.lastTestedAt)}</span>
                   </div>
                 )}
@@ -121,7 +116,7 @@ export default function ConnectionsDetailsPage({ connectionId }: ConnectionsDeta
           <div className={shared.card} style={{ margin: "16px 20px 20px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div className={shared.cardHeader}>Documentation</div>
             <div className={`${shared.cardBody} ${styles.guide} ${styles.docsScroll}`}>
-              <ReactMarkdown>{guide}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{guide}</ReactMarkdown>
             </div>
           </div>
         )}

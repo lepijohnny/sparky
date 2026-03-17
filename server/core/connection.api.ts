@@ -115,7 +115,6 @@ const ROUTES: RouteEntry[] = [
   "svc.list",
   "svc.list.compact",
   "svc.call",
-  ["svc.test", { notifiable: true }],
   ["svc.delete", { notifiable: true }],
   ["svc.guide", { notifiable: true }],
   "svc.guide.read",

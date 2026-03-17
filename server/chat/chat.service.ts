@@ -4,8 +4,18 @@ import type { Configuration } from "../core/config";
 import type { EventBus } from "../core/bus";
 import type { Logger } from "../logger.types";
 import type { Credentials } from "../core/cred";
-import { ServiceSchema, formatZodError, type ServiceDef } from "../core/proxy/proxy.schema";
+import { ServiceSchema, formatZodError, getDefaults, type ServiceDef } from "../core/proxy/proxy.schema";
 import { createServiceRouter, listMcpTools, mcpToolsToEndpoints, summarizeMcpTools, type ServiceRouter } from "../core/proxy/proxy.router";
+
+function normalizeMarkdown(raw: string): string {
+  return raw
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\"/g, '"')
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 function servicesDir(): string {
   const home = process.env.HOME ?? process.env.USERPROFILE ?? "";
@@ -121,7 +131,10 @@ export function createSvcCrud(
     disposeRouter(def.id);
 
     log.info("Service staged", { id: def.id, endpoints: def.endpoints.length });
-    return { status: "registered" };
+
+    const testResult = await promoteStaged(def);
+    
+    return { status: "registered", endpointCount: def.endpoints.length, ...testResult };
   });
 
   bus.on("svc.list", () => {
@@ -189,28 +202,8 @@ export function createSvcCrud(
 
   bus.on("svc.test", async (data) => {
     const def = findDef(data.service);
-    if (!def) return { ok: false, error: `Service "${data.service}" not found` };
-
-    const testEndpoint = findTestEndpoint(def);
-    if (!testEndpoint) return { ok: false, error: "No testable endpoint found — register at least one GET endpoint" };
-
-    try {
-      const router = getRouter(def);
-      const result = await router.call(testEndpoint, {});
-
-      if (!result.ok) {
-        await refreshEndpointStatus(def, testEndpoint, false);
-        return { ok: false, error: result.text.slice(0, 500), retry: "Fix the issue above, update the service definition with svc.register, then call svc.test again." };
-      }
-
-      staged.delete(data.service);
-      await refreshEndpointStatus(def, testEndpoint, true);
-
-      log.info("Service test passed", { service: data.service, endpoint: testEndpoint });
-      return { ok: true };
-    } catch (err) {
-      return { ok: false, error: String(err).slice(0, 300) };
-    }
+    if (!def) return { ok: false, error: `Service "${data.service}" not found. Use svc.call to test with proper params.` };
+    return { ok: false, error: "Deprecated. Use svc.call with proper params to test the service." };
   });
 
   bus.on("svc.delete", async (data) => {
@@ -235,7 +228,10 @@ export function createSvcCrud(
     const dir = servicesDir();
     await mkdir(dir, { recursive: true });
     const file = join(dir, `${data.service}.md`);
-    await writeFile(file, data.content, "utf-8");
+
+    const content = normalizeMarkdown(data.content);
+
+    await writeFile(file, content, "utf-8");
     log.info("Service guide written", { service: data.service, path: file });
     return { ok: true };
   });
@@ -262,13 +258,40 @@ export function createSvcCrud(
     try {
       const router = getRouter(def);
       const result = await router.call(action, params);
-      await refreshEndpointStatus(def, action, result.ok);
+      if (result.ok) {
+        staged.delete(data.service);
+        await refreshEndpointStatus(def, action, true);
+      } else {
+        await refreshEndpointStatus(def, action, false);
+      }
       return result.text;
     } catch (err) {
       log.error("Proxy execute failed", { service: data.service, action, error: String(err) });
       return `Error: ${String(err)}`;
     }
   });
+
+  async function promoteStaged(def: ServiceDef): Promise<{ tested: boolean; error?: string }> {
+    const testEp = findTestEndpoint(def);
+    if (!testEp) return { tested: false };
+
+    const ep = def.endpoints.find((e) => e.name === testEp);
+    const testParams = getDefaults(ep?.input ?? {});
+    try {
+      const router = getRouter(def);
+      const result = await router.call(testEp, testParams);
+      if (result.ok) {
+        staged.delete(def.id);
+        await refreshEndpointStatus(def, testEp, true);
+        log.info("Service auto-tested successfully", { id: def.id, endpoint: testEp });
+        return { tested: true };
+      }
+      await refreshEndpointStatus(def, testEp, false);
+      return { tested: false, error: `Auto-test of ${testEp} failed: ${result.text.slice(0, 300)}. Use svc.call with proper params to test.` };
+    } catch (err) {
+      return { tested: false, error: `Auto-test error: ${String(err).slice(0, 200)}. Use svc.call with proper params to test.` };
+    }
+  }
 }
 
 const ACTION_KEYS = new Set(["action", "endpoint", "target", "method", "name"]);

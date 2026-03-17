@@ -166,7 +166,6 @@ export const BUS_EVENTS: Record<string, BusEventDef> = {
       return null;
     },
   }),
-  "svc.test": def(SvcTest),
   "svc.delete": def(SvcDelete, destructive("Delete service")),
   "svc.guide": def(SvcGuide),
 

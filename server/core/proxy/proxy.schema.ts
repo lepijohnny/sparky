@@ -158,6 +158,43 @@ export function buildZodObject(shape: Record<string, FieldDef>): z.ZodObject<any
   return z.object(obj);
 }
 
+export function getDefaults(shape: Record<string, FieldDef>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, def] of Object.entries(shape)) {
+    if (def.optional) continue;
+    const val = getFieldDefault(def);
+    if (val !== undefined) result[key] = val;
+  }
+  return result;
+}
+
+function getFieldDefault(def: FieldDef): unknown {
+  if (def.default !== undefined) return def.default;
+
+  switch (def.type) {
+    case "string":
+      if (def.values?.[0]) return def.values[0];
+      if (def.format === "email") return "test@test.com";
+      if (def.format === "url" || def.format === "uri") return "https://example.com";
+      if (def.format === "uuid") return "00000000-0000-0000-0000-000000000000";
+      if (def.format === "date") return "2025-01-01";
+      if (def.format === "datetime" || def.format === "iso8601") return "2025-01-01T00:00:00Z";
+      if (def.format === "json") return "{}";
+      return "test";
+    case "number":
+      return 1;
+    case "boolean":
+      return true;
+    case "enum":
+      return def.values?.[0];
+    case "array":
+      return [];
+    case "object":
+      if (def.fields) return getDefaults(def.fields);
+      return {};
+  }
+}
+
 export function formatZodError(error: z.ZodError): string {
   return error.issues.map((i) => {
     const path = i.path.length > 0 ? i.path.join(".") : "(root)";

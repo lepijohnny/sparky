@@ -111,4 +111,4 @@ Convert each discovered tool to an endpoint. Map the tool's `inputSchema` to `Fi
 
 Each endpoint's transport is `{ "type": "mcp", "url": "https://api.githubcopilot.com/mcp/" }`.
 
-Then `svc.test` as normal.
+Then proceed with the connection flow as normal.
