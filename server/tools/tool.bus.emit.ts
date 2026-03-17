@@ -56,7 +56,7 @@ export const busEmit = defineTool({
     event: z.string().describe("Bus event name exactly as listed in the API docs, e.g. 'settings.sandbox.allowlist.add'"),
     params: z.record(z.string(), z.unknown()).optional().describe("Event parameters as an object"),
   }),
-  recovery: "Read the API docs first: app_docs_read(\"api/<domain>.md\") to see available events and their expected params.",
+  recovery: "Read the API docs first: app_read(\"api/<domain>.md\") to see available events and their expected params.",
   summarize,
   async execute(input, ctx) {
     const eventDef = BUS_EVENTS[input.event];

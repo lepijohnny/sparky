@@ -7,7 +7,6 @@ import {
   mergeToolActivities,
   filterActivities,
   expandedGroups,
-  HIDDEN_TOOL_NAMES,
 } from "../../../lib/activityUtils";
 
 function activity(type: string, data?: any): ChatActivity {
@@ -62,6 +61,11 @@ describe("getActivityLabel", () => {
     expect(getActivityLabel(a)).toBe("settings.labels.list");
   });
 
+  test("given tool.start with summary, when labeled, then returns summary", () => {
+    const a = activity("agent.tool.start", { name: "app_read", input: { path: "src/index.ts" }, summary: "Reading src/index.ts" });
+    expect(getActivityLabel(a)).toBe("Reading src/index.ts");
+  });
+
   test("given tool.result with summary, when labeled, then returns summary", () => {
     const a = activity("agent.tool.result", { id: "1", output: "{}", summary: "Listed labels, 3 found" });
     expect(getActivityLabel(a)).toBe("Listed labels, 3 found");
@@ -109,17 +113,10 @@ describe("filterActivities", () => {
     expect(result).toHaveLength(0);
   });
 
-  test("given docs_read tool.start, when filtered, then removed", () => {
-    const start = activity("agent.tool.start", { id: "1", name: "app_docs_read" });
+  test("given app_read tool.start, when filtered, then kept", () => {
+    const start = activity("agent.tool.start", { id: "1", name: "app_read", input: { path: "readme.md" } });
     const result = filterActivities([start]);
-    expect(result).toHaveLength(0);
-  });
-
-  test("given docs_read tool.result with matching start, when filtered, then both removed", () => {
-    const start = activity("agent.tool.start", { id: "1", name: "app_docs_read" });
-    const end = activity("agent.tool.result", { id: "1", output: "content" });
-    const result = filterActivities([start, end]);
-    expect(result).toHaveLength(0);
+    expect(result).toHaveLength(1);
   });
 
   test("given visible tool, when filtered, then kept", () => {

@@ -66,7 +66,8 @@ function toEntry(
       const cleanName = stripToolPrefix(event.name);
       const def = tools?.defs.find((d) => d.name === cleanName);
       const category = def?.category ?? inferCategory(cleanName, event.input);
-      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: cleanName, input: event.input, category } };
+      const summary = def?.summarize?.(event.input, "") || undefined;
+      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: cleanName, input: event.input, category, summary } };
     }
     case "tool.result": {
       const pending = pendingTools?.get(event.id);
