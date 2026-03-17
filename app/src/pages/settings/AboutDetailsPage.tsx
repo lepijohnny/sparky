@@ -11,28 +11,26 @@ const LINKS = [
   { label: "Documentation", url: "https://getsparky.chat/docs/getting-started/introduction" },
 ];
 
-const CHANGELOG: string[] = [
-  "Unified Sparky role for all chats (merged assistant and regular)",
-  "Service connections via @mention (GitHub, Gmail, Todoist, Telegram)",
-  "MCP protocol support with auto-discovery",
-  "Google Gemini via OAuth PKCE (Cloud Code Assist)",
-  "Streaming ticker for tool call responses",
-  "Onboarding wizard for first launch",
-  "Print chat to PDF with title and per-message visibility",
-  "Windows support (DPAPI keychain, fnm node)",
-  "Local RAG with hybrid search (BM25 + semantic)",
-  "Extractor plugins (Mozilla Readability, markdown output)",
-  "Rolling summary at 80% context window",
-  "Anchors and labels for chat organization",
-  "Focus mode (⌘B) for distraction-free writing",
-  "Downloadable code blocks (PNG, CSV)",
-  "ECharts for data visualization (radar, pie, bar, line)",
-  "Mermaid diagram rendering",
-  "LaTeX math rendering",
-  "Themed log viewer with auto-pruning",
-  "Tool approval system with configurable rules",
-  "DDG Lite fallback for web search",
-];
+const NOTES_KEY = "sparky:release-notes";
+
+function loadNotes(): string[] {
+  try {
+    const stored = localStorage.getItem(NOTES_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.version === VERSION && Array.isArray(parsed.lines)) return parsed.lines;
+    }
+  } catch {}
+  return [];
+}
+
+function saveNotes(version: string, body: string): void {
+  const lines = body
+    .split("\n")
+    .map((l) => l.replace(/^[-*]\s+/, "").trim())
+    .filter((l) => l.length > 0 && !l.startsWith("#"));
+  localStorage.setItem(NOTES_KEY, JSON.stringify({ version, lines }));
+}
 
 interface UpdateState {
   status: "idle" | "checking" | "available" | "downloading" | "ready" | "error" | "unavailable";
@@ -43,6 +41,7 @@ interface UpdateState {
 
 export default function AboutDetailsPage() {
   const [update, setUpdate] = useState<UpdateState>({ status: "idle" });
+  const [changelog] = useState<string[]>(loadNotes);
 
   const checkForUpdates = useCallback(async () => {
     if (!window.__TAURI_INTERNALS__) {
@@ -60,6 +59,7 @@ export default function AboutDetailsPage() {
         setUpdate({ status: "idle" });
         return;
       }
+      if (result.body) saveNotes(result.version, result.body);
       setUpdate({ status: "available", version: result.version });
     } catch {
       const elapsed = Date.now() - start;
@@ -113,16 +113,18 @@ export default function AboutDetailsPage() {
         </div>
       </div>
 
-      <div className={shared.card}>
-        <div className={shared.cardHeader}>What's New in {VERSION}</div>
-        <div className={shared.cardBody}>
-          <ul className={styles.changelog}>
-            {CHANGELOG.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
-          </ul>
+      {changelog.length > 0 && (
+        <div className={shared.card}>
+          <div className={shared.cardHeader}>What's New in {VERSION}</div>
+          <div className={shared.cardBody}>
+            <ul className={styles.changelog}>
+              {changelog.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={shared.card}>
         <div className={shared.cardHeader}>Update</div>
