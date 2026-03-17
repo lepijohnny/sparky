@@ -54,11 +54,21 @@ jobs:
           echo "=== Downloaded ==="
           ls -la assets/
 
+      - name: Generate release notes
+        if: steps.check.outputs.both == 'true'
+        uses: orhun/git-cliff-action@v4
+        with:
+          args: --latest --strip header
+        env:
+          OUTPUT: release-notes.md
+
       - name: Generate latest.json
         if: steps.check.outputs.both == 'true'
         run: |
           TAG="${{ steps.tag.outputs.tag }}"
           DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          NOTES=$(cat release-notes.md | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))" | sed 's/^"//;s/"$//')
 
           MAC_TAR_PATH=$(ls assets/*.app.tar.gz 2>/dev/null | head -1)
           MAC_TAR=$(basename "$MAC_TAR_PATH")
@@ -71,7 +81,7 @@ jobs:
           cat > latest.json <<EOF
           {
             "version": "${TAG#v}",
-            "notes": "See https://github.com/lepijohnny/sparky/releases/tag/${TAG}",
+            "notes": "${NOTES}",
             "pub_date": "${DATE}",
             "platforms": {
               "darwin-aarch64": {
