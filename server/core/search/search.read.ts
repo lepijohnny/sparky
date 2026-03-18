@@ -1,7 +1,5 @@
 import * as cheerio from "cheerio";
 import { createThrottle } from "./search.throttle";
-
-const USER_AGENT = "Sparky/1.0 (Desktop App)";
 const FETCH_TIMEOUT = 15_000;
 const MAX_CHARS = 8_000;
 
@@ -9,7 +7,7 @@ export interface WebReader {
   read(url: string): Promise<string>;
 }
 
-export function createWebReader(): WebReader {
+export function createWebReader(headers: HeadersInit): WebReader {
   const throttle = createThrottle(2_000, 10_000);
 
   return {
@@ -17,7 +15,7 @@ export function createWebReader(): WebReader {
       await throttle.acquire();
 
       const res = await fetch(url, {
-        headers: { "User-Agent": USER_AGENT },
+        headers,
         signal: AbortSignal.timeout(FETCH_TIMEOUT),
         redirect: "follow",
       });
