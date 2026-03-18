@@ -3,7 +3,6 @@ import { createThrottle } from "./search.throttle";
 
 const DDG_HTML_URL = "https://html.duckduckgo.com/html/";
 const DDG_LITE_URL = "https://lite.duckduckgo.com/lite/";
-const USER_AGENT = "Sparky/1.0 (Desktop App)";
 const FETCH_TIMEOUT = 10_000;
 
 export interface SearchResult {
@@ -18,27 +17,27 @@ export interface WebSearch {
 
 const globalThrottle = createThrottle(5_000, 30_000);
 
-export function createWebSearch(): WebSearch {
+export function createWebSearch(headers: HeadersInit): WebSearch {
   return {
     async search(query: string, maxResults = 10): Promise<SearchResult[]> {
       await globalThrottle.acquire();
 
-      const results = await fetchDdg(DDG_HTML_URL, query, maxResults, parseHtmlResults);
+      const results = await fetchDdg(DDG_HTML_URL, query, maxResults, headers, parseHtmlResults);
       if (results !== null) return results;
 
       globalThrottle.backoff();
-      return await fetchDdg(DDG_LITE_URL, query, maxResults, parseLiteResults)
+      return await fetchDdg(DDG_LITE_URL, query, maxResults, headers, parseLiteResults)
         ?? [{ title: "Rate limited", url: "", snippet: "DuckDuckGo rate limit hit. Try again in 30 seconds." }];
     },
   };
 }
 
-async function fetchDdg(url: string, query: string, maxResults: number, parse: (html: string, max: number) => SearchResult[]): Promise<SearchResult[] | null> {
+async function fetchDdg(url: string, query: string, maxResults: number, headers: HeadersInit, parse: (html: string, max: number) => SearchResult[]): Promise<SearchResult[] | null> {
   try {
     const body = new URLSearchParams({ q: query });
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT },
+      headers: { ...headers, "Content-Type": "application/x-www-form-urlencoded" },
       body: body.toString(),
       signal: AbortSignal.timeout(FETCH_TIMEOUT),
     });
