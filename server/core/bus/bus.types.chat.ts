@@ -17,6 +17,7 @@ export interface ChatEvents {
   "chat.model":               { req: { id: string; provider: string; model: string }; res: { chat: Chat } };
   "chat.thinking":            { req: { id: string; thinking: number | null }; res: { chat: Chat } };
   "chat.knowledge":           { req: { id: string; knowledge: boolean }; res: { chat: Chat } };
+  "chat.mode":                { req: { id: string; mode: string | null }; res: { chat: Chat } };
   "chat.get.id":              { req: { id: string }; res: { chat: Chat; entries: ChatEntry[]; hasMore: boolean; streaming: boolean; partialContent: string | null } | null };
   "chat.entries":             { req: { chatId: string; before?: number }; res: { entries: ChatEntry[]; hasMore: boolean } };
   "chat.anchor.add":          { req: { chatId: string; rowid: number }; res: void };
@@ -30,7 +31,7 @@ export interface ChatEvents {
   "chat.ask":                 { req: { chatId: string; content: string; attachmentIds?: string[]; services?: string[] }; res: { ok: boolean } };
   "chat.stop":                { req: { chatId: string }; res: { ok: boolean } };
   "chat.search":              { req: { query: string; flagged?: boolean; archived?: boolean; labelId?: string }; res: { results: { chat: Chat; matchCount: number }[] } };
-  "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" }; res: { chatId: string } };
+  "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" | "permissions" }; res: { chatId: string } };
   "chat.created":             { req: { chat: Chat }; res: void };
   "chat.updated":             { req: { chat: Chat }; res: void };
   "chat.deleted":             { req: { id: string }; res: void };

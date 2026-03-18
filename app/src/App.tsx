@@ -1,6 +1,7 @@
-import { Plus, Search, Trash2 } from "lucide-react";
+import { Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./App.module.css";
+import shared from "./styles/shared.module.css";
 import ChatDetailHeader from "./components/chat/ChatDetailHeader";
 import RenameModal from "./components/modals/RenameModal";
 
@@ -37,6 +38,7 @@ import AboutDetailsPage from "./pages/settings/AboutDetailsPage";
 import ExtractorsDetailsPage from "./pages/settings/ExtractorsDetailsPage";
 import ProfileDetailsPage from "./pages/settings/ProfileDetailsPage";
 import WorkspaceDetailsPage from "./pages/settings/WorkspaceDetailsPage";
+import PermissionsDetailsPage from "./pages/settings/PermissionsDetailsPage";
 import SourceAddButton from "./components/knowledge/SourceAddButton";
 import SourceListPage from "./pages/knowledge/SourceListPage";
 import SourceDetailsPage from "./pages/knowledge/SourceDetailsPage";
@@ -96,6 +98,7 @@ const SETTINGS_SUB_LABELS: Record<SettingsSub, string> = {
   environment: "Environment",
   workspace: "Workspace",
   extractors: "Extractors",
+  permissions: "Permissions",
   about: "About",
   debug: "Debug",
 };
@@ -108,6 +111,7 @@ const SETTINGS_PAGES: Record<SettingsSub, React.FC> = {
   environment: EnvironmentDetailsPage,
   workspace: WorkspaceDetailsPage,
   extractors: ExtractorsDetailsPage,
+  permissions: PermissionsDetailsPage,
   about: AboutDetailsPage,
   debug: DebugDetailsPage,
 };
@@ -406,7 +410,7 @@ export default function App() {
                 }}
                 title="Add connection"
               >
-                <Plus size={14} strokeWidth={1.5} />
+                <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
               </button>
             ) : section !== "settings" ? (
               <button

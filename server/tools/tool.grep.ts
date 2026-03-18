@@ -1,8 +1,7 @@
 import { z } from "zod/v4";
 import { execFileSync } from "node:child_process";
-import { statSync } from "node:fs";
 import { defineTool } from "./tool.registry";
-import { home } from "./tool.path";
+import { home, requirePath } from "./tool.path";
 
 const MAX_MATCHES = 100;
 const MAX_LINE_LENGTH = 500;
@@ -28,8 +27,8 @@ export const grep = defineTool({
     const searchPath = input.path ? home(input.path) : process.cwd();
     ctx.log.info("app_grep", { pattern: input.pattern, path: searchPath });
 
-    const stat = statSync(searchPath, { throwIfNoEntry: false });
-    if (!stat) return `Error: path not found "${input.path ?? searchPath}"`;
+    const err = requirePath(searchPath, input.path ?? searchPath);
+    if (err) return err;
 
     const args = ["-rn"];
     if (input.ignoreCase) args.push("-i");

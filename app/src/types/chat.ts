@@ -7,6 +7,7 @@ export interface Chat {
   connectionId?: string;
   thinking?: number | null;
   knowledge?: boolean;
+  mode?: string | null;
   flagged?: boolean;
   archived?: boolean;
   role?: string;

@@ -7,6 +7,7 @@ import type { LlmConnection, LlmDefault } from "../types/llm";
 import type { AuthFlowDefinition } from "@sparky/auth-core";
 import type { ProviderDefinition } from "../types/registry";
 import type { Workspace } from "../types/workspace";
+import type { TrustData } from "./trust";
 import { useStore } from "./index";
 
 type Unsubscribe = () => void;
@@ -90,6 +91,10 @@ export function syncStore(conn: WsConnection): Unsubscribe {
 
   sub("core.models.ready", () => refetchAgent(conn));
 
+  sub<TrustData>("trust.changed", (data) => {
+    useStore.getState().setTrust(data);
+  });
+
   sub("settings.workspace.changed", () => {
     fetchInitialData(conn);
     useStore.setState({ selectedSourceId: null });
@@ -126,6 +131,7 @@ async function fetchInitialData(conn: WsConnection) {
     store.setLabels(labels.labels);
 
     refetchWorkspace(conn);
+    refetchTrust(conn);
 
     if (!store.anchorChat && chats.chats.length > 0) {
       const first = chats.chats.find((c) => !c.archived);
@@ -166,6 +172,13 @@ async function refetchWorkspace(conn: WsConnection) {
     ]);
     const ws = listRes.workspaces.find((w) => w.id === activeRes.activeWorkspace) ?? null;
     useStore.getState().setWorkspace(ws);
+  } catch {}
+}
+
+async function refetchTrust(conn: WsConnection) {
+  try {
+    const data = await conn.request<TrustData>("trust.data.get");
+    useStore.getState().setTrust(data);
   } catch {}
 }
 

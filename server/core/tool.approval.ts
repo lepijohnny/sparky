@@ -34,6 +34,27 @@ export interface ApprovalField {
 export interface ApprovalContext {
   chatId: string;
   turnId?: string;
+  requestApproval(tool: string, label: string, extra?: ApprovalExtra): Promise<boolean>;
+}
+
+export interface ApprovalExtra {
+  type?: ApprovalRequestType;
+  service?: string;
+  description?: string;
+  fields?: ApprovalField[];
+  link?: string;
+  timeoutMs?: number;
+  oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string };
+}
+
+export function createApprovalContext(approval: ToolApproval, role: string, chatId: string, turnId?: string): ApprovalContext {
+  return {
+    chatId,
+    turnId,
+    requestApproval(tool, label, extra?) {
+      return approval.requestApproval(role, tool, label, { chatId, turnId }, extra);
+    },
+  };
 }
 
 export interface PendingApprovalInfo {
@@ -126,7 +147,7 @@ export class ToolApproval {
     return true;
   }
 
-  async requestApproval(scope: string, tool: string, target: string, ctx: ApprovalContext, extra?: {
+  async requestApproval(scope: string, tool: string, target: string, ctx: { chatId: string; turnId?: string }, extra?: {
     type?: ApprovalRequestType;
     service?: string;
     description?: string;

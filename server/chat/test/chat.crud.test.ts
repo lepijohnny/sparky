@@ -5,6 +5,7 @@ import { tmpdir } from "os";
 import { createStorage } from "../../core/storage";
 import { createConfiguration } from "../../core/config";
 import { createChatWorkspace } from "../chat";
+import { createNoopTrustStore } from "../../core/trust";
 import { createEventBus } from "../../core/bus";
 import { noopLogger } from "../../logger";
 
@@ -21,7 +22,7 @@ function setup() {
     workspaces: [{ id: "ws-1", name: "Test", path: wsPath, createdAt: "2026-01-01" }],
   });
   const dbPath = storage.root(`${wsPath}/workspace.db`);
-  const chatManager = createChatWorkspace(bus, config, noopLogger, dbPath, "");
+  const chatManager = createChatWorkspace(bus, config, noopLogger, dbPath, "", createNoopTrustStore());
   return { bus, storage, config, chatManager };
 }
 

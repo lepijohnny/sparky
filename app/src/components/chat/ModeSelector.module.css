@@ -1,0 +1,92 @@
+.trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 6px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 150ms ease, background 150ms ease;
+  width: 88px;
+}
+
+.trigger:hover {
+  border-color: var(--fg-subtle);
+  background: var(--bg-hover);
+}
+
+.mode_read { composes: mode_read from "../../styles/shared.module.css"; }
+.mode_write { composes: mode_write from "../../styles/shared.module.css"; }
+.mode_execute { composes: mode_execute from "../../styles/shared.module.css"; }
+
+.triggerLabel {
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.list {
+  position: fixed;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 1000;
+  padding: 4px;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.item:hover,
+.itemFocused {
+  background: var(--bg-overlay);
+}
+
+.itemSelected {
+  background: var(--accent-soft);
+}
+
+.itemSelected.itemFocused {
+  background: var(--accent-soft);
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.itemLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.itemDesc {
+  font-size: 11px;
+  color: var(--fg-muted);
+  padding-left: 22px;
+}
+
+.icon_read { composes: mode_read from "../../styles/shared.module.css"; }
+.icon_write { composes: mode_write from "../../styles/shared.module.css"; }
+.icon_execute { composes: mode_execute from "../../styles/shared.module.css"; }

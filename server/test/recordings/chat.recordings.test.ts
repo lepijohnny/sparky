@@ -3,6 +3,7 @@ import { readdirSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { createChatWorkspace } from "../../chat/chat";
+import { createNoopTrustStore } from "../../core/trust";
 import type { ChatActivity, ChatEntry, ChatMessage } from "../../chat/chat.types";
 import { MockAgent, type MockScenario } from "../../core/adapters/agent.mock";
 import type { Agent } from "../../core/agent.types";
@@ -41,7 +42,7 @@ function setup(agent?: Agent) {
   });
   const dbPath = storage.root(`${wsPath}/workspace.db`);
   const factory = agent ? () => ({ agent }) : undefined;
-  const chatManager = createChatWorkspace(bus, config, noopLogger, dbPath, "", factory);
+  const chatManager = createChatWorkspace(bus, config, noopLogger, dbPath, "", createNoopTrustStore(), factory);
   return { bus, chatManager };
 }
 

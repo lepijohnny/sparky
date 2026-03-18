@@ -63,6 +63,7 @@ const ROUTES: RouteEntry[] = [
   ["chat.model", { notifiable: true }],
   ["chat.thinking", { notifiable: true }],
   ["chat.knowledge", { notifiable: true }],
+  ["chat.mode", { notifiable: true }],
   "chat.get.id",
   "chat.entries",
   "chat.anchor.add",
@@ -103,6 +104,14 @@ const ROUTES: RouteEntry[] = [
   "cred.delete",
   "cred.list",
   "cred.clear",
+
+  "trust.mode.get",
+  ["trust.mode.set", { notifiable: true }],
+  "trust.data.get",
+  ["trust.rule.add", { notifiable: true }],
+  ["trust.rule.remove", { notifiable: true }],
+  ["trust.reset", { notifiable: true }],
+  ["trust.clear", { notifiable: true }],
 
   "core.prefetch",
 

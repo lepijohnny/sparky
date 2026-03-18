@@ -1,6 +1,7 @@
 import type { EventBus } from "../core/bus";
 import type { Configuration } from "../core/config";
 import { ToolApproval } from "../core/tool.approval";
+import type { TrustStore } from "../core/trust";
 import type { Logger } from "../logger.types";
 import { type AgentFactory, type KnowledgeSearch, ChatConversation } from "./chat.conversation";
 
@@ -29,6 +30,7 @@ export function createChatWorkspace(
   log: Logger,
   dbPath: string,
   workspacePath: string,
+  trust: TrustStore,
   agentFactory: AgentFactory = () => Promise.resolve(null),
   defaultAgentFactory: AgentFactory = () => Promise.resolve(null),
   knowledge: KnowledgeSearch | null = null,
@@ -50,7 +52,7 @@ export function createChatWorkspace(
     return parts.join(" ");
   };
 
-  const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, knowledge, getSystemPromptPreferences);
+  const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences);
   conversation.wsDir = workspacePath;
 
   bus.on("tool.approval.pending", (data) => approval.getPending(data.chatId));
@@ -87,6 +89,7 @@ export function createChatWorkspace(
   bus.on("chat.model", (data) => crud.model(data));
   bus.on("chat.thinking", (data) => crud.thinking(data));
   bus.on("chat.knowledge", (data) => crud.knowledge(data));
+  bus.on("chat.mode", (data) => crud.mode(data));
   bus.on("chat.get.id", (data) => {
     const result = crud.get(data);
     if (!result) return null;

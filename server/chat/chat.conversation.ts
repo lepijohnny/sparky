@@ -1,10 +1,11 @@
 import { join } from "node:path";
 import { v7 as randomUUIDv7 } from "uuid";
 import { RecordingAgent } from "../core/adapters/agent.recording";
-import type { Agent, AgentMessage, AgentTools, MessageContent } from "../core/agent.types";
+import type { Agent, AgentMessage, AgentTools, MessageContent, MessagePart } from "../core/agent.types";
 import { createRoleToolSet } from "../tools";
 import type { EventBus } from "../core/bus";
-import type { ToolApproval } from "../core/tool.approval";
+import { type ToolApproval, createApprovalContext } from "../core/tool.approval";
+import { type PermissionMode, type TrustStore, withModeOverride } from "../core/trust";
 import type { Logger } from "../logger.types";
 import { type ContextResult, contextBuilder } from "./chat.context";
 import { generateSummary, shouldSummarize } from "./agent.summarize";
@@ -36,6 +37,7 @@ export class ChatConversation {
     private agentFactory: AgentFactory,
     private defaultAgentFactory: AgentFactory,
     private approval: ToolApproval,
+    private trust: TrustStore,
     private knowledge: KnowledgeSearch | null = null,
     private getSystemPromptPreferences: SystemPromptPreferencesFn = () => DEFAULT_PREFERENCES,
   ) {}
@@ -141,10 +143,13 @@ export class ChatConversation {
 
       const fetcherFn = (pageSize: number, beforeRowid?: number) => this.db.getEntries(data.chatId, pageSize, beforeRowid);
 
-      const toolCtx = { bus: this.bus, log: this.log, role: chat.role ?? "sparky", signal, approval: this.approval, approvalCtx: { chatId: chat.id, turnId } };
+      const roleName = chat.role ?? "sparky";
+      const chatMode = (chat.mode as PermissionMode | undefined) ?? this.trust.data().mode;
+      const chatTrust = withModeOverride(this.trust, chatMode);
+      const toolCtx = { bus: this.bus, log: this.log, role: roleName, signal, approvalCtx: createApprovalContext(this.approval, roleName, chat.id, turnId), trust: chatTrust };
       const tools = createRoleToolSet(role, toolCtx, { webSearch: resolved.webSearch });
 
-      const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences());
+      const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences(), chatMode);
 
       const shouldSearch = role.meta.knowledge && chat.knowledge !== false;
       const knowledgeResults = shouldSearch
@@ -294,7 +299,7 @@ export class ChatConversation {
   private buildCurrentTurnContent(text: string, attachmentIds?: string[]): MessageContent | undefined {
     if (!attachmentIds || attachmentIds.length === 0) return undefined;
 
-    const parts: import("../core/agent.types").MessagePart[] = [{ type: "text", text }];
+    const parts: MessagePart[] = [{ type: "text", text }];
 
     for (const id of attachmentIds) {
       const att = this.db.getAttachment(id);

@@ -2,21 +2,30 @@ import { z, toJSONSchema } from "zod/v4";
 import type { AgentToolDef, AgentTools, ToolAttachment } from "../core/agent.types";
 import type { EventBus } from "../core/bus";
 import type { Logger } from "../logger.types";
-import type { ToolApproval, ApprovalContext } from "../core/tool.approval";
+import type { ApprovalContext } from "../core/tool.approval";
+import type { Scope, TrustStore } from "../core/trust";
 
 export interface ToolContext {
   bus: EventBus;
   log: Logger;
   role: string;
   signal: AbortSignal;
-  approval: ToolApproval;
   approvalCtx: ApprovalContext;
+  trust: TrustStore;
+  /** Injected by createToolSet — forwards a call to another tool in the set. */
+  forward?: (tool: string, args: Record<string, unknown>) => Promise<string | ToolAttachment>;
+}
+
+export interface ToolSet extends AgentTools {
+  forward(tool: string, args: Record<string, unknown>): Promise<string | ToolAttachment>;
 }
 
 export interface ToolDef<T extends z.ZodObject = z.ZodObject> {
   name: string;
   description: string;
   schema: T;
+  trustScope?: Scope;
+  trustTarget?: (input: z.infer<T>) => string;
   category?: string;
   recovery?: string;
   execute: (input: z.infer<T>, ctx: ToolContext) => Promise<string | ToolAttachment>;
@@ -27,7 +36,7 @@ export function defineTool<T extends z.ZodObject>(def: ToolDef<T>): ToolDef<T> {
   return def;
 }
 
-export function createToolSet(tools: ToolDef[], ctx: ToolContext): AgentTools {
+export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
   const map = new Map(tools.map((t) => [t.name, t]));
 
   const defs: AgentToolDef[] = tools.map((t) => {
@@ -47,9 +56,9 @@ export function createToolSet(tools: ToolDef[], ctx: ToolContext): AgentTools {
     };
   });
 
-  return {
-    defs,
-    execute: async (name, args) => {
+  const ctx: ToolContext = { ...baseCtx, forward: (tool, args) => execute(tool, args) };
+
+  const execute = async (name: string, args: unknown): Promise<string | ToolAttachment> => {
       if (ctx.signal.aborted) return "Error: cancelled";
 
       const tool = map.get(name);
@@ -62,6 +71,28 @@ export function createToolSet(tools: ToolDef[], ctx: ToolContext): AgentTools {
         return `Try again: ${issues}. You sent: ${JSON.stringify(args)}${hint}`;
       }
 
+      if (tool.trustScope && tool.trustTarget) {
+        const target = tool.trustTarget(parsed.data);
+        const { decision, rule } = ctx.trust.resolve(tool.trustScope, target);
+        ctx.log.info("Trust gate", { tool: name, scope: tool.trustScope, target, decision, rule: rule?.label });
+        if (decision === "deny") {
+          await ctx.bus.emit("chat.event", {
+            chatId: ctx.approvalCtx.chatId,
+            kind: "activity",
+            messageId: ctx.approvalCtx.turnId ?? "",
+            source: "agent",
+            type: "agent.trust.denied",
+            timestamp: new Date().toISOString(),
+            data: { scope: tool.trustScope, tool: name, target, rule: rule?.label },
+          });
+          return `Blocked by trust rules: ${rule?.label ?? target}`;
+        }
+        if (decision === "prompt") {
+          const ok = await ctx.approvalCtx.requestApproval(name, rule?.label ?? target, { type: "confirm:yesno" });
+          if (!ok) return "Denied by the user.";
+        }
+      }
+
       try {
         return await tool.execute(parsed.data, ctx);
       } catch (err) {
@@ -69,6 +100,7 @@ export function createToolSet(tools: ToolDef[], ctx: ToolContext): AgentTools {
         const hint = tool.recovery ? `\nRecovery: ${tool.recovery}` : "";
         return `Error: ${msg}${hint}`;
       }
-    },
   };
+
+  return { defs, execute, forward: ctx.forward! };
 }

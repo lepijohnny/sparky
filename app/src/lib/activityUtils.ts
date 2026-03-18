@@ -50,6 +50,9 @@ export function getActivityLabel(activity: ChatActivity): string | null {
     case "agent.approval.denied":
       return `Denied: ${activity.data.tool}:${activity.data.target}${activity.data.reason === "timeout" ? " (timeout)" : ""}`;
 
+    case "agent.trust.denied":
+      return `Blocked: ${activity.data.rule ?? activity.data.target}`;
+
     case "agent.knowledge":
       return activity.data.summary ?? `${activity.data.sources.length} sources`;
 

@@ -30,4 +30,13 @@ export interface CoreEvents {
 
   "debug.recording.set":        { req: { enabled: boolean }; res: { ok: boolean } };
   "debug.recording.get":        { req: void; res: { enabled: boolean } };
+
+  "trust.mode.get":             { req: void; res: { mode: string } };
+  "trust.mode.set":             { req: { mode: string }; res: { ok: boolean } };
+  "trust.data.get":             { req: void; res: any };
+  "trust.rule.add":             { req: { scope: string; list: string; label: string; pattern: string }; res: { ok: boolean } };
+  "trust.rule.remove":          { req: { scope: string; list: string; pattern: string }; res: { ok: boolean } };
+  "trust.reset":                { req: void; res: { ok: boolean } };
+  "trust.clear":                { req: void; res: { ok: boolean } };
+  "trust.changed":              { req: any; res: void };
 }
