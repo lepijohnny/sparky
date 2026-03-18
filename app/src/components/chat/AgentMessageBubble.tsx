@@ -88,6 +88,7 @@ function getActivityIcon(activity: ChatActivity): ReactElement {
   if (type === "agent.approval.requested") return <ShieldQuestion size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.approval.approved") return <ShieldCheck size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.approval.denied") return <ShieldX size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
+  if (type === "agent.trust.denied") return <ShieldX size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.knowledge") return <BookOpen size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type.includes("thinking")) return <Brain size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.tool.start" || type === "agent.tool.result") return getCategoryIcon(data?.category);
@@ -199,7 +200,7 @@ function ActivitiesGroup({ messageId, activities: raw }: ActivitiesGroupProps): 
               <div
                 key={`${a.type}-${i}`}
                 className={`${styles.activityRow}${
-                  a.type === "agent.error" || a.type === "agent.approval.denied" ? ` ${styles.activityError}` :
+                  a.type === "agent.error" || a.type === "agent.approval.denied" || a.type === "agent.trust.denied" ? ` ${styles.activityError}` :
                   a.type === "agent.approval.approved" ? ` ${styles.activityApproved}` :
                   a.type === "agent.approval.requested" ? ` ${styles.activityPending}` : ""
                 }`}

@@ -1,6 +1,16 @@
-/** SQLite schema for workspace.db — v0.3.0 clean schema, no migrations. */
+/**
+ * SQLite schema for workspace.db
+ *
+ * Base schema (v0) is applied via CREATE IF NOT EXISTS.
+ * Incremental migrations run sequentially from the current version.
+ * Version is tracked in the `schema_version` table.
+ */
 
-const SCHEMA = `
+const BASE_SCHEMA = `
+  CREATE TABLE IF NOT EXISTS schema_version (
+    version INTEGER NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS chats (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -78,6 +88,19 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_attachments_entry ON attachments(entry_rowid);
 `;
 
+type Migration = (db: MigratableDb) => void;
+
+const MIGRATIONS: Migration[] = [
+  /** v1: add per-chat permission mode */
+  (db) => db.exec("ALTER TABLE chats ADD COLUMN mode TEXT"),
+];
+
+interface MigratableDb {
+  exec(sql: string): void;
+  pragma(sql: string, opts?: any): any;
+  prepare(sql: string): { get(...args: any[]): any; run(...args: any[]): any };
+}
+
 /** Create vec0 virtual table — only if sqlite-vec extension loaded */
 export function vecSchema(dimension: number): string {
   return `
@@ -88,9 +111,36 @@ export function vecSchema(dimension: number): string {
   `;
 }
 
-export function migrate(db: { exec: (sql: string) => void; pragma: (sql: string, opts?: any) => any }, log?: (msg: string) => void): void {
+export function migrate(db: MigratableDb, log?: (msg: string) => void): void {
   const info = log ?? (() => {});
-  info("migrate: executing schema");
-  db.exec(SCHEMA);
-  info("migrate: complete");
+
+  info("migrate: applying base schema");
+  db.exec(BASE_SCHEMA);
+
+  db.pragma("journal_mode = WAL");
+
+  const row = db.prepare("SELECT version FROM schema_version LIMIT 1").get() as { version: number } | undefined;
+  let current = row?.version ?? 0;
+
+  if (!row) {
+    db.prepare("INSERT INTO schema_version (version) VALUES (0)").run();
+  }
+
+  for (let i = current; i < MIGRATIONS.length; i++) {
+    const version = i + 1;
+    try {
+      db.exec("BEGIN");
+      MIGRATIONS[i](db);
+      db.prepare(`UPDATE schema_version SET version = ${version}`).run();
+      db.exec("COMMIT");
+      current = version;
+      info(`migrate: v${version} ok`);
+    } catch (err) {
+      try { db.exec("ROLLBACK"); } catch {}
+      info(`migrate: v${version} error — ${err instanceof Error ? err.message : String(err)}`);
+      throw err;
+    }
+  }
+
+  info(`migrate: complete (v${current})`);
 }

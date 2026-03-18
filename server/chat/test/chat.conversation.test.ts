@@ -9,6 +9,7 @@ import { createConfiguration } from "../../core/config";
 import { createStorage } from "../../core/storage";
 import { noopLogger } from "../../logger";
 import { createChatWorkspace } from "../chat";
+import { createNoopTrustStore } from "../../core/trust";
 import type { ChatActivity, ChatEntry, ChatMessage } from "../chat.types";
 
 const TEST_ROOT = join(tmpdir(), `sparky-chat-conv-test-${Date.now()}`);
@@ -95,7 +96,7 @@ function setup(agent?: Agent) {
   });
   const dbPath = storage.root(`${wsPath}/workspace.db`);
   const factory = agent ? () => ({ agent }) : undefined;
-  const chatManager = createChatWorkspace(bus, config, noopLogger, dbPath, "", factory);
+  const chatManager = createChatWorkspace(bus, config, noopLogger, dbPath, "", createNoopTrustStore(), factory);
   return { bus, config, chatManager };
 }
 

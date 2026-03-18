@@ -1,0 +1,314 @@
+/* ─── Mode ─── */
+.modeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modeSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--fg);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 150ms ease;
+  width: 120px;
+}
+
+.modeSelect:hover {
+  border-color: var(--fg-subtle);
+  background: var(--bg-hover);
+}
+
+.modeList {
+  position: fixed;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 1000;
+  padding: 4px;
+}
+
+.modeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--fg);
+  transition: background 100ms ease;
+}
+
+.modeItem:hover,
+.modeItemFocused {
+  background: var(--bg-overlay);
+}
+
+.modeItemSelected {
+  background: var(--accent-soft);
+  font-weight: 500;
+}
+
+.mode_read { composes: mode_read from "../../styles/shared.module.css"; }
+.mode_write { composes: mode_write from "../../styles/shared.module.css"; }
+.mode_execute { composes: mode_execute from "../../styles/shared.module.css"; }
+
+.modeHint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+/* ─── Ask button ─── */
+.askBtn {
+  appearance: none;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  transition: color 150ms ease;
+}
+
+.askBtn:hover {
+  color: var(--accent);
+}
+
+/* ─── Filter ─── */
+.filterRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filterInput {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--fg);
+  outline: none;
+  transition: border-color 150ms ease;
+  min-width: 0;
+}
+
+.filterInput:focus {
+  border-color: var(--accent);
+}
+
+.filterInput::placeholder {
+  color: var(--fg-muted);
+}
+
+/* ─── Rules list ─── */
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.itemRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ruleLabel {
+  font-size: 13px;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rulePattern {
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Badges ─── */
+.badge {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-block;
+  text-align: center;
+}
+
+.badgeScope {
+  min-width: 38px;
+}
+
+.badgeList {
+  min-width: 52px;
+}
+
+.badgeRead {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.badgeWrite {
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+}
+
+.badgeBus {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.badgeExecute {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.badgeAllow {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.badgeAsk {
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+}
+
+.badgeDeny {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.removeBtn {
+  border: none;
+  background: none;
+  padding: 4px 8px;
+}
+
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ─── Add form ─── */
+.addForm {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  align-items: center;
+}
+
+.addInput {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--fg);
+  outline: none;
+  transition: border-color 150ms ease;
+  min-width: 0;
+}
+
+.addInput:focus {
+  border-color: var(--accent);
+}
+
+.addInput::placeholder {
+  color: var(--fg-muted);
+}
+
+.addInputMono {
+  composes: addInput;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+}
+
+.kindSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 28px 7px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--fg);
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.kindSelect:focus {
+  border-color: var(--accent);
+}
+
+/* ─── Footer ─── */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

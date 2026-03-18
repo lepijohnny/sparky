@@ -9,6 +9,7 @@ import { createRegistry } from "./core/registry";
 import { createRegistryCrud } from "./core/registry.crud";
 import { createPlatformKeychain } from "./core/keychain";
 import { createCredStore } from "./core/cred";
+import { createTrustStore, type PermissionMode, type Scope, type RuleList } from "./core/trust";
 import type { AuthPluginContext, AuthFlow } from "@sparky/auth-core";
 import { createAuthManager } from "./core/auth/auth";
 import { createOAuthGateway } from "./core/auth/oauth.gateway";
@@ -43,7 +44,9 @@ export function createSparky(): Sparky {
   const bus = createEventBus(logger.createLogger("bus"));
   const storage = createStorage(logger.createLogger("storage")).seed();
   const config = createConfiguration(storage);
-  const cred = createCredStore(logger.createLogger("cred"), storage.root(""), createPlatformKeychain());
+  const keychain = createPlatformKeychain();
+  const cred = createCredStore(logger.createLogger("cred"), storage.root(""), keychain);
+  const trustStore = createTrustStore(logger.createLogger("trust"), storage.root(""), keychain);
 
   const adapters = createAdapters(cred, logger.createLogger("adapters"));
   const authLog = logger.createLogger("auth");
@@ -58,8 +61,15 @@ export function createSparky(): Sparky {
   const knowledgeManager = createKtManager(bus, ktDb, config, logger.createLogger("knowledge"), storage.root(""), storage);
 
   const chatManager = createChatWorkspace(
-    bus, config, logger.createLogger("chat"), workspace.dbPath, currentWorkspacePath,
-    agentFn, defaultAgentFn, knowledgeManager);
+    bus, 
+    config, 
+    logger.createLogger("chat"), 
+    workspace.dbPath, 
+    currentWorkspacePath,
+    trustStore, 
+    agentFn, 
+    defaultAgentFn, 
+    knowledgeManager);
 
   let hub: Connection | null = null;
 
@@ -279,6 +289,38 @@ export function createSparky(): Sparky {
     return {};
   });
 
+  bus.on("trust.mode.get", () => {
+    return { mode: trustStore.data().mode };
+  });
+  bus.on("trust.mode.set", (data) => {
+    trustStore.setMode(data.mode as PermissionMode);
+    broadcast("trust.changed", trustStore.data());
+    return { ok: true };
+  });
+  bus.on("trust.data.get", () => {
+    return trustStore.data();
+  });
+  bus.on("trust.rule.add", (data) => {
+    trustStore.addRule(data.scope as Scope, data.list as RuleList, { label: data.label, pattern: data.pattern });
+    broadcast("trust.changed", trustStore.data());
+    return { ok: true };
+  });
+  bus.on("trust.rule.remove", (data) => {
+    trustStore.removeRule(data.scope as Scope, data.list as RuleList, data.pattern);
+    broadcast("trust.changed", trustStore.data());
+    return { ok: true };
+  });
+  bus.on("trust.reset", () => {
+    trustStore.reset();
+    broadcast("trust.changed", trustStore.data());
+    return { ok: true };
+  });
+  bus.on("trust.clear", () => {
+    trustStore.clear();
+    broadcast("trust.changed", trustStore.data());
+    return { ok: true };
+  });
+
   bus.on("core.config.get", (data) => {
     return config.get(data.key as any) ?? null;
   });
@@ -339,6 +381,7 @@ export function createSparky(): Sparky {
       await logger.init();
       log.info("Starting Sparky");
       await cred.init();
+      await trustStore.init();
       await bus.emit("storage.ready");
       await knowledgeManager.init();
 

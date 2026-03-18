@@ -10,6 +10,7 @@ import { createStreamsSlice, type StreamsSlice } from "./streams";
 import { createSelectionSlice, type SelectionSlice } from "./selection";
 import { createSourceSelectionSlice, type SourceSelectionSlice } from "./sourceSelection";
 import { createWorkspaceSlice, type WorkspaceSlice } from "./workspace";
+import { createTrustSlice, type TrustSlice } from "./trust";
 
 export type AppState =
   & NavigationSlice
@@ -21,7 +22,8 @@ export type AppState =
   & StreamsSlice
   & SelectionSlice
   & SourceSelectionSlice
-  & WorkspaceSlice;
+  & WorkspaceSlice
+  & TrustSlice;
 
 export const useStore = create<AppState>()(
   persist(
@@ -36,6 +38,7 @@ export const useStore = create<AppState>()(
       ...createSelectionSlice(...a),
       ...createSourceSelectionSlice(...a),
       ...createWorkspaceSlice(...a),
+      ...createTrustSlice(...a),
     }),
     {
       name: "sparky-app",

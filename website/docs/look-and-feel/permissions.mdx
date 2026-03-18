@@ -1,0 +1,167 @@
+---
+sidebar_position: 4
+sidebar_label: Permissions
+---
+
+<span className="section-label">Look and Feel</span>
+
+# Permissions
+
+<p className="header-description">Control what the agent can do.</p>
+
+Sparky uses a permission system that gives you full control over what the agent is allowed to do. It's built around two concepts: **modes** and **trust rules**.
+
+## Modes
+
+Every chat runs in one of three permission modes. The mode determines which tools the agent has access to.
+
+import { Eye, Pencil, Terminal } from "lucide-react";
+
+| Mode | Icon | Tools available |
+|------|------|-----------------|
+| **Read** | <Eye size={16} /> | `app_read`, `app_glob`, `app_grep`, `app_bus_emit` |
+| **Write** | <Pencil size={16} /> | Everything in Read + `app_write`, `app_edit` |
+| **Execute** | <Terminal size={16} /> | Everything in Write + `app_bash` |
+
+In **Read** mode, the agent can browse files and search but cannot modify anything. **Write** mode adds the ability to create and edit files. **Execute** mode unlocks shell commands.
+
+### Global mode
+
+Set the default mode for all new chats from **Settings → Permissions**. This is the baseline — every chat inherits it unless overridden.
+
+### Per-chat mode
+
+Each chat can override the global mode. Use the mode selector in the chat input area (the icon next to the model picker) to switch a specific chat to a different mode. For example, you might keep most chats in Read mode but switch one to Execute for a coding task.
+
+To reset a chat back to the global default, select **Default** from the mode dropdown.
+
+The per-chat mode is persisted in the database. Reopening the app or switching between chats preserves each chat's mode.
+
+## Trust Rules
+
+Trust rules let you fine-tune what the agent can and cannot access, regardless of mode. Rules are pattern-based and apply to four scopes:
+
+| Scope | What it gates | Pattern matches against |
+|-------|--------------|------------------------|
+| **read** | `app_read`, `app_glob`, `app_grep` | File path |
+| **write** | `app_write`, `app_edit` | File path |
+| **bash** | `app_bash` | Command string |
+| **bus** | `app_bus_emit` | Event name |
+
+Each scope has three rule lists:
+
+- **Allow** — explicitly permit matching targets
+- **Deny** — block matching targets
+- **Ask** — prompt the user for approval before proceeding
+
+### How rules resolve
+
+When the agent tries to use a tool, Sparky checks all matching rules across the three lists. If multiple rules from different lists match, **the most recently added rule wins**. This means you can always override a default by adding a new rule — no need to delete the old one.
+
+**Default rules** (the ones Sparky ships with) have the lowest priority. Any rule you add will take precedence over them.
+
+For example:
+
+1. Sparky ships with a default deny rule for `.py` files in the write scope.
+2. You add an allow rule for `.py` files under your project directory.
+3. Result: writing `.py` files in your project is allowed, but writing them elsewhere is still denied.
+
+### Default deny rules
+
+Sparky ships with sensible defaults to protect sensitive files and dangerous commands:
+
+**Read scope:**
+- `.enc` files (encrypted secrets)
+- `.key` and `.pem` files (private keys)
+- SSH keys (`id_rsa`, `id_ed25519`, etc.)
+
+**Write scope:**
+- System directories (`/etc/`, `/usr/`, `/System/`)
+- `.env` files
+- Encrypted files (`.enc`)
+- SQLite databases (`.db`, `.db-wal`, `.db-shm`)
+
+**Bash scope:**
+- `sudo`
+- `rm -rf /`
+- `git push --force`, `git reset --hard`, `git clean`
+- `curl | bash` (pipe to shell)
+- `dd`, `mkfs`, `eval`
+
+**Bus scope:**
+- Workspace deletion (denied)
+- Destructive actions like deleting chats, labels, sources, connections (ask for approval)
+
+### Managing rules
+
+Go to **Settings → Permissions** to view, add, and remove rules. Each rule has:
+
+- **Label** — a human-readable description (e.g., "Allow project .py files")
+- **Pattern** — a regular expression matched against the target (file path, command, or event name)
+- **Scope** — which tool scope the rule applies to
+- **List** — allow, deny, or ask
+
+### Rule patterns
+
+Patterns are regular expressions. Some examples:
+
+| Pattern | Matches |
+|---------|---------|
+| `\.py$` | Any path ending in `.py` |
+| `^/etc/` | Any path starting with `/etc/` |
+| `^sudo\b` | Commands starting with `sudo` |
+| `^git\s+push\s+--force` | `git push --force` commands |
+| `^/Users/me/projects/.*\.ts$` | TypeScript files under a specific directory |
+| `^chat\.delete$` | The `chat.delete` bus event |
+
+### Example: allow writing in a project but deny elsewhere
+
+```
+Deny:   \.ts$            (write scope)
+Allow:  ^/Users/me/myapp/.*\.ts$  (write scope)
+```
+
+The allow rule is added after the deny rule, so it takes priority for files under `/Users/me/myapp/`. TypeScript files elsewhere remain denied.
+
+## Adding Rules
+
+You don't need to write regex patterns yourself. Each rule section in **Settings → Permissions** has a ✨ button that opens a chat with the agent. Just describe what you want in plain language and the agent creates the rule for you.
+
+### Example: "It is not allowed to read secrets"
+
+1. Go to **Settings → Permissions**
+2. Click the ✨ button next to the Read rules
+3. Type: **"Block reading any file under a secrets directory"**
+4. The agent creates a deny rule with the right pattern (e.g., `secrets/`) and adds it for you
+
+Now any `app_read`, `app_glob`, or `app_grep` call targeting a path containing `secrets/` will be blocked. The agent sees a denial message and can tell the user why it can't proceed.
+
+### Example: "Always ask before git push origin"
+
+1. Go to **Settings → Permissions**
+2. Click the ✨ button next to the Bash rules
+3. Type: **"Ask me before any git push to origin"**
+4. The agent creates an ask rule matching `git push origin` commands
+
+When the agent runs `git push origin main` (or any push to origin), Sparky pauses and shows an approval prompt. You can approve or deny it on the spot. Other git commands like `git status` or `git log` run without interruption.
+
+You can also add rules manually with the **+** button if you prefer to write the pattern yourself.
+
+## Encryption
+
+Trust rules are stored in `~/.sparky/trust.enc`, encrypted with AES-256-GCM. The encryption key is stored in your OS native keychain (macOS Keychain or Windows DPAPI) — never in plain text on disk.
+
+## How it all fits together
+
+```
+User sends message
+  → Agent decides to use a tool (e.g., app_write)
+  → Mode check: is app_write available in this chat's mode?
+    → No → tool not offered to the model at all
+    → Yes → Trust check: resolve(write, "/path/to/file.ts")
+      → Allow → tool executes
+      → Deny  → blocked, agent sees the denial
+      → Ask   → user prompted for approval
+```
+
+The mode acts as a coarse filter (which tools exist), and trust rules act as a fine filter (which specific targets are allowed). Together, they give you layered control without getting in the way of everyday use.

@@ -3,19 +3,20 @@ import { z } from "zod/v4";
 import { defineTool, createToolSet } from "../tool.registry";
 import type { ToolContext } from "../tool.registry";
 import { createEventBus } from "../../core/bus";
-import { ToolApproval } from "../../core/tool.approval";
 import { noopLogger } from "../../logger";
+
+const mockTrust = { init: async () => {}, data: () => ({} as any), setMode: () => {}, addRule: () => {}, removeRule: () => {}, resolve: () => ({ decision: "allow" as const }), reset: () => {}, clear: () => {} };
+const mockApprovalCtx = { chatId: "c1", turnId: "t1", requestApproval: async () => true };
 
 function makeCtx(signal?: AbortSignal): ToolContext {
   const bus = createEventBus(noopLogger);
-  const approval = new ToolApproval(bus, noopLogger);
   return {
     bus,
     log: noopLogger,
     role: "sparky",
     signal: signal ?? new AbortController().signal,
-    approval,
-    approvalCtx: { chatId: "c1", turnId: "t1" },
+    approvalCtx: mockApprovalCtx,
+    trust: mockTrust,
   };
 }
 

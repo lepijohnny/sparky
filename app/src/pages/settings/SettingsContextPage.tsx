@@ -5,6 +5,7 @@ import {
   Info,
   Palette,
   Plug,
+  Shield,
   Tag,
   User,
   Variable,
@@ -26,6 +27,7 @@ const ITEMS: { id: SettingsSub; label: string; icon: ReactNode }[] = [
   { id: "environment", label: "Environment", icon: <Variable size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "workspace", label: "Workspace", icon: <FolderCog size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "extractors", label: "Extractors", icon: <Plug size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
+  { id: "permissions", label: "Permissions", icon: <Shield size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "profile", label: "Profile", icon: <User size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "about", label: "About", icon: <Info size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
 ];

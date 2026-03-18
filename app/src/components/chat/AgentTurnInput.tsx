@@ -5,6 +5,7 @@ import { useStore } from "../../store";
 import type { WsConnection } from "../../lib/ws";
 import type { Chat } from "../../types/chat";
 import ApprovalPopup from "./ApprovalPopup";
+import ModeSelector from "./ModeSelector";
 import ModelSelector from "./ModelSelector";
 import ThinkingSelector from "./ThinkingSelector";
 import RichInput, { type RichInputHandle, type TriggerInfo } from "./RichInput";
@@ -381,25 +382,28 @@ export default memo(function ChatInput({
             />
 
           </div>
-          {streaming || sending ? (
-            <button className={`${styles.sendBtn} ${styles.stopBtn}`} onClick={onStop} disabled={!streaming}>
-              {sending && !streaming ? (
-                <Loader2 size={14} strokeWidth={1.5} className={styles.spinner} />
-              ) : (
-                <Square size={12} strokeWidth={1.5} />
-              )}
-              Stop
-            </button>
-          ) : (
-            <button
-              className={styles.sendBtn}
-              onClick={handleSend}
-              disabled={!hasContent}
-            >
-              <Send size={14} strokeWidth={1.5} />
-              Send
-            </button>
-          )}
+          <div className={styles.toolbarRight}>
+            <ModeSelector chat={chat} />
+            {streaming || sending ? (
+              <button className={`${styles.sendBtn} ${styles.stopBtn}`} onClick={onStop} disabled={!streaming}>
+                {sending && !streaming ? (
+                  <Loader2 size={14} strokeWidth={1.5} className={styles.spinner} />
+                ) : (
+                  <Square size={12} strokeWidth={1.5} />
+                )}
+                Stop
+              </button>
+            ) : (
+              <button
+                className={styles.sendBtn}
+                onClick={handleSend}
+                disabled={!hasContent}
+              >
+                <Send size={14} strokeWidth={1.5} />
+                Send
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

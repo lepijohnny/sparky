@@ -57,17 +57,17 @@ describe("ToolApproval", () => {
     });
   });
 
-  describe("destructive events in BUS_EVENTS", () => {
-    test("destructive events are flagged in bus schema", async () => {
+  describe("destructive events governed by trust rules", () => {
+    test("formerly destructive events have no destructive flag", async () => {
       const { BUS_EVENTS } = await import("../bus");
-      const destructive = [
+      const governed = [
         "chat.rename", "chat.archive",
         "svc.delete",
         "settings.labels.delete",
         "settings.sandbox.allowlist.remove",
       ];
-      for (const event of destructive) {
-        expect(BUS_EVENTS[event]?.destructive).toBeTruthy();
+      for (const event of governed) {
+        expect(BUS_EVENTS[event]?.destructive).toBeFalsy();
       }
     });
 

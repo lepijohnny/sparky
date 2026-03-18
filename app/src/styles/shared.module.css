@@ -153,3 +153,17 @@
   transition: width 0.2s;
   min-width: 2%;
 }
+
+/* ─── Mode colors ─── */
+.mode_read { color: var(--fg-muted); }
+.mode_write { color: #f5a623; border-color: rgba(245, 166, 35, 0.3); }
+.mode_execute { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
+
+@keyframes sparkle-pulse {
+  0%, 100% { color: var(--fg-muted); opacity: 0.5; }
+  50% { color: var(--accent); opacity: 1; }
+}
+
+.sparkle {
+  animation: sparkle-pulse 1.5s ease-in-out infinite;
+}

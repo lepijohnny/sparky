@@ -7,6 +7,7 @@ import { createEventBus, type EventBus } from "../../core/bus";
 import { createConfiguration, type Configuration } from "../../core/config";
 import { createStorage } from "../../core/storage";
 import { createChatWorkspace, type ChatWorkspace } from "../chat";
+import { createNoopTrustStore } from "../../core/trust";
 
 const noop = { info() {}, warn() {}, error() {}, debug() {} } as any;
 
@@ -41,7 +42,7 @@ describe("ChatManager", () => {
       { type: "done" },
     ];
 
-    manager = createChatWorkspace(bus, config, noop, join(tmpDir, "test.db"), "", async () => ({
+    manager = createChatWorkspace(bus, config, noop, join(tmpDir, "test.db"), "", createNoopTrustStore(), async () => ({
       agent: makeAgent(agentEvents),
       contextWindow: 200_000,
     }));

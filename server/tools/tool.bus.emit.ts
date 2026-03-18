@@ -56,9 +56,15 @@ export const busEmit = defineTool({
     event: z.string().describe("Bus event name exactly as listed in the API docs, e.g. 'settings.sandbox.allowlist.add'"),
     params: z.record(z.string(), z.unknown()).optional().describe("Event parameters as an object"),
   }),
+  trustScope: "bus",
+  trustTarget: (input) => input.event,
   recovery: "Read the API docs first: app_read(\"api/<domain>.md\") to see available events and their expected params.",
   summarize,
   async execute(input, ctx) {
+    if (input.event.startsWith("app_")) {
+      return `Error: "${input.event}" is a tool, not a bus event. Call it directly as a function call.`;
+    }
+
     const eventDef = BUS_EVENTS[input.event];
 
     const guideError = guide(input.event, input.params);
@@ -73,20 +79,19 @@ export const busEmit = defineTool({
     }
 
     const approvalHook = eventDef?.hooks?.requestApproval?.(input.params);
-    const needsApproval = approvalHook || eventDef?.destructive;
-    if (needsApproval) {
-      const label = approvalHook?.label ?? eventDef?.destructive?.message ?? input.event;
-      const ok = await ctx.approval.requestApproval(ctx.role, "app_bus_emit", label, ctx.approvalCtx, {
-        type: approvalHook?.type,
-        ...approvalHook?.meta,
-        timeoutMs: approvalHook?.timeoutMs ?? 30_000,
+    if (approvalHook) {
+      const ok = await ctx.approvalCtx.requestApproval("app_bus_emit", approvalHook.label, {
+        type: approvalHook.type,
+        ...approvalHook.meta,
+        timeoutMs: approvalHook.timeoutMs ?? 30_000,
       });
       if (!ok) throw new Error("Denied by the user.");
-      if (approvalHook?.successMessage) return approvalHook.successMessage;
+      if (approvalHook.successMessage) return approvalHook.successMessage;
     }
 
     ctx.log.info("app_bus_emit", { event: input.event, params: input.params });
     const result = await ctx.bus.emit(input.event as any, input.params);
-    return JSON.stringify(result ?? { ok: true });
+    if (result === undefined) return `Error: unknown event "${input.event}". Read the API docs: app_read("api/<domain>.md")`;
+    return JSON.stringify(result);
   },
 });

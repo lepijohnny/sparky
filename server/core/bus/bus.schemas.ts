@@ -166,21 +166,21 @@ export const BUS_EVENTS: Record<string, BusEventDef> = {
       return null;
     },
   }),
-  "svc.delete": def(SvcDelete, destructive("Delete service")),
+  "svc.delete": def(SvcDelete),
   "svc.guide": def(SvcGuide),
 
   "chat.create": def(ChatCreate),
-  "chat.rename": def(ChatRename, destructive("Rename chat")),
+  "chat.rename": def(ChatRename),
   "chat.flag": def(ChatFlag),
-  "chat.archive": def(ChatArchive, destructive("Archive chat")),
+  "chat.archive": def(ChatArchive),
   "chat.label": def(ChatLabel),
 
   "settings.labels.create": def(LabelsCreate),
   "settings.labels.update": def(LabelsUpdate),
-  "settings.labels.delete": def(LabelsDelete, destructive("Delete label")),
+  "settings.labels.delete": def(LabelsDelete),
 
   "settings.sandbox.allowlist.add": def(SandboxAllowlistAdd),
-  "settings.sandbox.allowlist.remove": def(SandboxAllowlistRemove, destructive("Remove from allowlist")),
+  "settings.sandbox.allowlist.remove": def(SandboxAllowlistRemove),
 
   "kt.sources.add.file": def(KtSourcesAddFile),
   "kt.sources.add.folder": def(KtSourcesAddFolder),

@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import { globSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineTool } from "./tool.registry";
-import { home } from "./tool.path";
+import { home, requireDir } from "./tool.path";
 
 const MAX_ENTRIES = 500;
 
@@ -21,8 +21,8 @@ export const glob = defineTool({
     const cwd = input.cwd ? home(input.cwd) : process.cwd();
     ctx.log.info("app_glob", { pattern: input.pattern, cwd });
 
-    const stat = statSync(cwd, { throwIfNoEntry: false });
-    if (!stat?.isDirectory()) return `Error: directory not found "${input.cwd ?? cwd}"`;
+    const err = requireDir(cwd, input.cwd ?? cwd);
+    if (err) return err;
 
     const entries = globSync(input.pattern, { cwd });
     entries.sort((a, b) => a.localeCompare(b));

@@ -82,15 +82,15 @@ export class ChatCrud {
     return { chat };
   }
 
-  createSystem(kind?: "general" | "connection"): Chat {
+  createSystem(kind?: "general" | "connection" | "permissions"): Chat {
     const llmDefault = this.config.get("llmDefault");
     const llms = this.config.get("llms") ?? [];
     const defaultConn = llms.find((c) => c.id === llmDefault?.id);
-    const role = kind === "connection" ? "connection" : "sparky";
+    const role = kind === "connection" ? "connection" : kind === "permissions" ? "permissions" : "sparky";
 
     const chat: Chat = {
       id: crypto.randomUUID(),
-      name: role === "connection" ? "Connection Setup" : "System Chat",
+      name: role === "connection" ? "Connection Setup" : role === "permissions" ? "Permission Setup" : "System Chat",
       model: defaultConn?.model ?? "",
       provider: defaultConn?.provider ?? "",
       connectionId: defaultConn?.id,
@@ -192,6 +192,18 @@ export class ChatCrud {
     if (!chat) throw new Error(`Chat not found: ${data.id}`);
 
     this.log.info("Set chat knowledge", { id: data.id, knowledge: data.knowledge });
+    this.bus.emit("chat.updated", { chat });
+    return { chat };
+  }
+
+  mode(data: { id: string; mode: string | null }): { chat: Chat } {
+    if (data.mode && !["read", "write", "execute"].includes(data.mode)) {
+      throw new Error(`Invalid mode: ${data.mode}`);
+    }
+    const chat = this.db.updateChat(data.id, { mode: data.mode });
+    if (!chat) throw new Error(`Chat not found: ${data.id}`);
+
+    this.log.info("Set chat mode", { id: data.id, mode: data.mode });
     this.bus.emit("chat.updated", { chat });
     return { chat };
   }

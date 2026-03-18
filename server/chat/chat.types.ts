@@ -10,6 +10,8 @@ export interface Chat {
   thinking?: number | null;
   /** Whether knowledge sources are searched for context */
   knowledge?: boolean;
+  /** Permission mode override — null inherits from global trust mode */
+  mode?: string | null;
   flagged?: boolean;
   archived?: boolean;
   /** Prompt role — determines system prompt, tools, and context features */

@@ -137,10 +137,16 @@ function loadFormats(): { names: string[]; content: string } {
   return cachedFormats;
 }
 
-export function buildRolePrompt(role: RoleDef, preferences: string): string {
+export function buildRolePrompt(role: RoleDef, preferences: string, mode?: string): string {
   let prompt = role.prompt;
 
   prompt += `\n\n## System\n- Platform: ${process.platform}\n- Home: ${homedir()}\n- CWD: ${process.cwd()}`;
+  if (mode) {
+    const desc = mode === "read" ? "read-only (no file writes or shell commands)"
+      : mode === "write" ? "read + write (no shell commands)"
+      : "full access (read, write, shell commands)";
+    prompt += `\n- Mode: ${mode} — ${desc}`;
+  }
 
   if (preferences) {
     prompt += `\n\nHere are some details about the user: ${preferences}`;

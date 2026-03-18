@@ -208,6 +208,12 @@
   gap: 4px;
 }
 
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .sendBtn {
   appearance: none;
   background: var(--accent);

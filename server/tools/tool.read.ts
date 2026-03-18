@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { fileTypeFromFile } from "file-type";
 import { defineTool } from "./tool.registry";
 import { promptsDir } from "../prompts/prompt.role";
-import { home } from "./tool.path";
+import { home, real, requireFile } from "./tool.path";
 
 function resolvePath(path: string): string {
   const prompts = join(promptsDir(), path);
@@ -54,15 +54,17 @@ export const read = defineTool({
     offset: z.number().optional().describe("Line number to start reading from (1-indexed)"),
     limit: z.number().optional().describe("Maximum number of lines to read"),
   }),
+  trustScope: "read",
+  trustTarget: (input) => real(resolvePath(input.path)),
   category: "file",
   summarize: (input) => `Reading ${input.path}`,
   async execute(input, ctx) {
     const filePath = resolvePath(input.path);
     ctx.log.info("app_read", { path: filePath, offset: input.offset, limit: input.limit });
 
-    const stat = statSync(filePath, { throwIfNoEntry: false });
-    if (!stat) return `Error: file not found "${input.path}"`;
-    if (!stat.isFile()) return `Error: not a file "${input.path}"`;
+    const err = requireFile(filePath, input.path);
+    if (err) return err;
+    const stat = statSync(filePath);
     if (stat.size > MAX_FILE_SIZE) return `Error: file exceeds 10 MB limit (${formatSize(stat.size)})`;
 
     const detected = await fileTypeFromFile(filePath);
