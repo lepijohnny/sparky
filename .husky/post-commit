@@ -1,0 +1,7 @@
+if git diff-tree --no-commit-id --name-only HEAD | grep -q '^\.version$'; then
+  VERSION="v$(cat .version | tr -d '[:space:]')"
+  if ! git tag -l "$VERSION" | grep -q .; then
+    git tag "$VERSION"
+    echo "Tagged $VERSION"
+  fi
+fi
