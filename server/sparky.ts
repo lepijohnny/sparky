@@ -9,7 +9,8 @@ import { createRegistry } from "./core/registry";
 import { createRegistryCrud } from "./core/registry.crud";
 import { createPlatformKeychain } from "./core/keychain";
 import { createCredStore } from "./core/cred";
-import { createTrustStore, type PermissionMode, type Scope, type RuleList } from "./core/trust";
+import { createTrustStore } from "./core/trust";
+import { registerTrustBus } from "./core/trust.bus";
 import type { AuthPluginContext, AuthFlow } from "@sparky/auth-core";
 import { createAuthManager } from "./core/auth/auth";
 import { createOAuthGateway } from "./core/auth/oauth.gateway";
@@ -289,37 +290,7 @@ export function createSparky(): Sparky {
     return {};
   });
 
-  bus.on("trust.mode.get", () => {
-    return { mode: trustStore.data().mode };
-  });
-  bus.on("trust.mode.set", (data) => {
-    trustStore.setMode(data.mode as PermissionMode);
-    broadcast("trust.changed", trustStore.data());
-    return { ok: true };
-  });
-  bus.on("trust.data.get", () => {
-    return trustStore.data();
-  });
-  bus.on("trust.rule.add", (data) => {
-    trustStore.addRule(data.scope as Scope, data.list as RuleList, { label: data.label, pattern: data.pattern });
-    broadcast("trust.changed", trustStore.data());
-    return { ok: true };
-  });
-  bus.on("trust.rule.remove", (data) => {
-    trustStore.removeRule(data.scope as Scope, data.list as RuleList, data.pattern);
-    broadcast("trust.changed", trustStore.data());
-    return { ok: true };
-  });
-  bus.on("trust.reset", () => {
-    trustStore.reset();
-    broadcast("trust.changed", trustStore.data());
-    return { ok: true };
-  });
-  bus.on("trust.clear", () => {
-    trustStore.clear();
-    broadcast("trust.changed", trustStore.data());
-    return { ok: true };
-  });
+  registerTrustBus(bus, trustStore, broadcast);
 
   bus.on("core.config.get", (data) => {
     return config.get(data.key as any) ?? null;
