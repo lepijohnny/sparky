@@ -65,6 +65,59 @@ async function fetchShowInfo(
   }
 }
 
+async function fetchOllamaModels(host: string, log: Logger): Promise<ModelDefinition[] | null> {
+  try {
+    const res = await fetch(`${host}/api/tags`);
+    if (!res.ok) return null;
+    const json = (await res.json()) as { models?: OllamaModel[]; error?: string };
+    if (json.error || !Array.isArray(json.models)) return null;
+
+    return await Promise.all(
+      json.models.map(async (m) => {
+        const showInfo = await fetchShowInfo(host, m.name);
+        return {
+          id: m.name,
+          label: formatLabel(m.name),
+          contextWindow: showInfo.contextWindow,
+          supportsThinking: supportsThinking(m.name),
+          supportsTools: true,
+          ...(showInfo.supportsVision ? { supportsAttachments: ["png", "jpg", "jpeg", "gif", "webp"] as string[] } : {}),
+          webSearch: "local" as const,
+        };
+      }),
+    );
+  } catch (err) {
+    log.debug("Ollama /api/tags unavailable, trying OpenAI-compatible", { host, error: String(err) });
+    return null;
+  }
+}
+
+const DEFAULT_CONTEXT_WINDOW = 32768;
+
+async function fetchOpenAICompatModels(host: string, log: Logger): Promise<ModelDefinition[] | null> {
+  try {
+    const res = await fetch(`${host}/v1/models`);
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data?: { id: string }[] };
+
+    const models = (json.data ?? [])
+      .filter((m) => !m.id.includes("embedding") && !m.id.includes("embed"))
+      .map((m) => ({
+        id: m.id,
+        label: formatLabel(m.id),
+        contextWindow: DEFAULT_CONTEXT_WINDOW,
+        supportsThinking: supportsThinking(m.id),
+        supportsTools: true,
+        webSearch: "local" as const,
+      }));
+
+    return models;
+  } catch (err) {
+    log.warn("Failed to fetch models from OpenAI-compatible endpoint", { host, error: String(err) });
+    return null;
+  }
+}
+
 function buildOllamaModel(modelId: string, host: string, contextWindow?: number): Model<Api> {
   return {
     id: modelId,
@@ -76,7 +129,7 @@ function buildOllamaModel(modelId: string, host: string, contextWindow?: number)
     reasoning: supportsThinking(modelId),
     input: ["text"],
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-    contextWindow: contextWindow ?? 8192,
+    contextWindow: contextWindow ?? DEFAULT_CONTEXT_WINDOW,
     maxTokens: 4096,
   };
 }
@@ -99,33 +152,12 @@ export function createPiOllamaAdapter(log: Logger): ProviderAdapter {
       const cached = cache.get(host);
       if (cached && cached.expires > Date.now()) return cached.models;
 
-      try {
-        const res = await fetch(`${host}/api/tags`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = (await res.json()) as { models?: OllamaModel[] };
-
-        const models = await Promise.all(
-          (json.models ?? []).map(async (m) => {
-            const showInfo = await fetchShowInfo(host, m.name);
-            return {
-              id: m.name,
-              label: formatLabel(m.name),
-              contextWindow: showInfo.contextWindow,
-              supportsThinking: supportsThinking(m.name),
-              supportsTools: true,
-              ...(showInfo.supportsVision ? { supportsAttachments: ["png", "jpg", "jpeg", "gif", "webp"] as string[] } : {}),
-              webSearch: "local" as const,
-            };
-          }),
-        );
-
+      const models = await fetchOllamaModels(host, log) ?? await fetchOpenAICompatModels(host, log);
+      if (models) {
         cache.set(host, { models, expires: Date.now() + CACHE_TTL });
-        log.debug("Fetched Ollama models", { host, count: models.length });
-        return models;
-      } catch (err) {
-        log.warn("Failed to fetch Ollama models", { host, error: String(err) });
-        return [];
+        log.debug("Fetched models", { host, count: models.length });
       }
+      return models ?? [];
     },
 
     createAgent(conn: LlmConnection, _agentOpts?: { webSearch?: boolean }): Agent {
@@ -157,10 +189,19 @@ export function createPiOllamaAdapter(log: Logger): ProviderAdapter {
       const host = conn?.host ?? "http://localhost:11434";
       try {
         const res = await fetch(`${host}/api/tags`);
-        return res.ok;
-      } catch {
-        return false;
-      }
+        if (res.ok) {
+          const json = (await res.json()) as { error?: string };
+          if (!json.error) return true;
+        }
+      } catch {}
+      try {
+        const res = await fetch(`${host}/v1/models`);
+        if (res.ok) {
+          const json = (await res.json()) as { data?: unknown[] };
+          return Array.isArray(json.data);
+        }
+      } catch {}
+      return false;
     },
   };
 }
