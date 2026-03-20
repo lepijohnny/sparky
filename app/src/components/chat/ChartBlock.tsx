@@ -85,7 +85,7 @@ function getThemeOverrides(): Record<string, unknown> {
   };
 }
 
-const ChartBlock = memo(function ChartBlock({ code }: { code: string }) {
+const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; onError?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
 
@@ -95,14 +95,19 @@ const ChartBlock = memo(function ChartBlock({ code }: { code: string }) {
 
     let option: Record<string, unknown>;
     try {
-      option = JSON.parse(code);
+      const parsed = JSON.parse(code);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        onError?.();
+        return;
+      }
+      option = parsed;
     } catch {
-      el.textContent = "Invalid chart JSON";
+      onError?.();
       return;
     }
 
-    const chart = echarts.init(el, undefined, { renderer: "canvas" });
-    chartRef.current = chart;
+    const existing = echarts.getInstanceByDom(el);
+    if (existing) existing.dispose();
 
     const theme = getThemeOverrides();
     const merged = deepMerge(theme, option);
@@ -111,6 +116,37 @@ const ChartBlock = memo(function ChartBlock({ code }: { code: string }) {
     delete merged.dataZoom;
     if (merged.tooltip && typeof (merged.tooltip as any).formatter === "string") {
       delete (merged.tooltip as any).formatter;
+    }
+
+    if (typeof merged.title === "string") {
+      merged.title = { text: merged.title };
+    }
+    if (typeof merged.subtitle === "string") {
+      merged.title = { ...(merged.title as any ?? {}), subtext: merged.subtitle };
+      delete merged.subtitle;
+    }
+    if (typeof merged.legend === "string") {
+      merged.legend = { data: [merged.legend] };
+    }
+    if (Array.isArray(merged.legend)) {
+      merged.legend = { data: merged.legend };
+    }
+    if (typeof merged.xAxis === "string") {
+      merged.xAxis = { type: merged.xAxis };
+    }
+    if (typeof merged.yAxis === "string") {
+      merged.yAxis = { type: merged.yAxis };
+    }
+
+    for (const key of ["series", "xAxis", "yAxis", "grid", "visualMap", "dataZoom", "geo", "parallel", "radar", "tooltip", "title", "legend"] as const) {
+      const val = merged[key];
+      if (val == null) continue;
+      if (Array.isArray(val)) {
+        merged[key] = val.filter((v: any) => v && typeof v === "object" && !Array.isArray(v));
+      }
+    }
+    if (merged.series && !Array.isArray(merged.series)) {
+      merged.series = [merged.series];
     }
 
     const hasHeatmap = Array.isArray(merged.series) && (merged.series as any[]).some((s: any) => s.type === "heatmap");
@@ -122,15 +158,36 @@ const ChartBlock = memo(function ChartBlock({ code }: { code: string }) {
       delete vm.bottom;
     }
 
-    chart.setOption(merged);
+    let disposed = false;
+    const raf = requestAnimationFrame(() => {
+      if (disposed) return;
 
-    const ro = new ResizeObserver(() => chart.resize());
-    ro.observe(el);
+      const chart = echarts.init(el, undefined, { renderer: "canvas" });
+      chartRef.current = chart;
+
+      try {
+        chart.setOption(merged);
+      } catch (err) {
+        console.warn("ECharts setOption failed:", err);
+        chart.dispose();
+        chartRef.current = null;
+        onError?.();
+        return;
+      }
+
+      ro.observe(el);
+    });
+
+    const ro = new ResizeObserver(() => chartRef.current?.resize());
 
     return () => {
+      disposed = true;
+      cancelAnimationFrame(raf);
       ro.disconnect();
-      chart.dispose();
-      chartRef.current = null;
+      if (chartRef.current) {
+        chartRef.current.dispose();
+        chartRef.current = null;
+      }
     };
   }, [code]);
 
