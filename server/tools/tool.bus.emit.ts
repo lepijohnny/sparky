@@ -3,8 +3,27 @@ import { defineTool } from "./tool.registry";
 import { guide } from "../core/assistant/assistant.tools.guide";
 import { BUS_EVENTS } from "../core/bus";
 
+function svcLabel(id: string): string {
+  return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function summarize(input: { event: string; params?: Record<string, unknown> }, output: string): string {
   const event = input.event;
+
+  if (event === "svc.call" && input.params?.service) {
+    const label = svcLabel(input.params.service as string);
+    const action = input.params.action ? ` → ${input.params.action}` : "";
+    return `${label}${action}`;
+  }
+
+  if (event === "svc.register" && input.params?.label) {
+    return `Registering ${input.params.label}`;
+  }
+
+  if (event === "svc.test" && input.params?.service) {
+    return `Testing ${svcLabel(input.params.service as string)}`;
+  }
+
   try {
     const parsed = JSON.parse(output);
 
