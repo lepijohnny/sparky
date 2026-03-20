@@ -1,19 +1,20 @@
 import { Component, type ReactNode } from "react";
 
 interface Props {
-  fallback: ReactNode;
+  fallback: ReactNode | ((error: Error | null) => ReactNode);
   children: ReactNode;
 }
 
 interface State {
   hasError: boolean;
+  error: Error | null;
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  state: State = { hasError: false, error: null };
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error) {
@@ -21,7 +22,10 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.hasError) return this.props.fallback;
+    if (this.state.hasError) {
+      const { fallback } = this.props;
+      return typeof fallback === "function" ? fallback(this.state.error) : fallback;
+    }
     return this.props.children;
   }
 }
