@@ -202,8 +202,15 @@ export function createSvcCrud(
 
   bus.on("svc.test", async (data) => {
     const def = findDef(data.service);
-    if (!def) return { ok: false, error: `Service "${data.service}" not found. Use svc.call to test with proper params.` };
-    return { ok: false, error: "Deprecated. Use svc.call with proper params to test the service." };
+    if (!def) return { ok: false, error: `Service "${data.service}" not found.` };
+
+    const ep = def.endpoints[0];
+    if (!ep) return { ok: false, error: "No endpoints defined." };
+
+    const result = await bus.emit("svc.call", { service: data.service, action: ep.name, params: {} });
+    const ok = result.ok !== false;
+    await refreshEndpointStatus(def, ep.name, ok);
+    return { ok, error: ok ? undefined : (result as any).text ?? "Test failed" };
   });
 
   bus.on("svc.delete", async (data) => {

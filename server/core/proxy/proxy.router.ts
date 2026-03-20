@@ -248,6 +248,10 @@ function formatResult(ok: boolean, status: number, body: string): string {
 
 function statusHint(status: number): string | null {
   switch (status) {
+    case 301:
+    case 302:
+    case 307:
+    case 308: return "Redirect — the endpoint path is wrong. The API is redirecting to a different URL. Read the API docs with app_web_read to find the correct path, fix the endpoint, and re-register the service with svc.register.";
     case 400: return "Bad request — check param names and types match the API docs. Re-read the docs with app_web_read and fix the endpoint definition.";
     case 401: return "Unauthorized — token may be invalid or expired. Ask user to re-enter credentials.";
     case 403: return "Forbidden — token lacks required scopes/permissions. Check API docs for required scopes.";
