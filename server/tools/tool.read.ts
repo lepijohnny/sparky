@@ -45,7 +45,8 @@ function truncateHead(lines: string[], maxLines: number, maxBytes: number): { co
 export const read = defineTool({
   name: "app_read",
   description:
-    "Read the contents of a file. Supports text files and images (jpg, png, gif, webp). " +
+    "Read the contents of a local file. For URLs use app_web_read instead. " +
+    "Supports text files and images (jpg, png, gif, webp). " +
     "Images are returned as visual attachments. " +
     `For text files, output is truncated to ${MAX_LINES} lines or ${formatSize(MAX_BYTES)} (whichever is hit first). ` +
     "Use offset/limit for large files. When you need the full file, continue with offset until complete.",
@@ -59,6 +60,8 @@ export const read = defineTool({
   category: "file",
   summarize: (input) => `Reading ${input.path}`,
   async execute(input, ctx) {
+    if (/^https?:\/\//i.test(input.path)) return "Error: app_read is for local files only. Use app_web_read to fetch URLs.";
+
     const filePath = resolvePath(input.path);
     ctx.log.info("app_read", { path: filePath, offset: input.offset, limit: input.limit });
 

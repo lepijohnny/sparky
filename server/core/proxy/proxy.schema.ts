@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { defineGrammar, entry, registerRoleGrammar } from "../../prompts/zod.ebnf";
 
 export const FieldSchema: z.ZodType = z.object({
   type: z.enum(["string", "number", "boolean", "array", "enum", "object"]),
@@ -99,6 +100,10 @@ export const ServiceSchema = z.object({
 });
 
 export type ServiceDef = z.infer<typeof ServiceSchema>;
+
+registerRoleGrammar("connection", defineGrammar("ServiceDef schema", [
+  entry("service", ServiceSchema),
+]));
 
 function buildZodField(def: FieldDef): z.ZodTypeAny {
   let field: z.ZodTypeAny;

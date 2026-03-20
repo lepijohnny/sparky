@@ -32,28 +32,6 @@ Each scope has three lists: `deny`, `ask`, `allow`. The `list` parameter in bus 
 - **bash** — shell commands. Patterns match against the full command string.
 - **bus** — app operations (delete labels, rename chats, etc.). Patterns match against event names like `settings.labels.delete`, `chat.rename`, `chat.archive`.
 
-### Rule model (EBNF)
-
-```ebnf
-rule        = '{' , scope , list , label , pattern , '}' ;
-scope       = '"scope":' , ( '"read"' | '"write"' | '"bash"' | '"bus"' ) ;
-list        = '"list":' , ( '"allow"' | '"deny"' | '"ask"' ) ;
-label       = '"label":' , string ;
-pattern     = '"pattern":' , regex ;
-
-(* pattern targets by scope *)
-read_target  = absolute_path ;                  (* e.g. /Users/me/.env *)
-write_target = absolute_path ;                  (* e.g. /etc/hosts *)
-bash_target  = command_string ;                 (* e.g. git push --force *)
-bus_target   = event_name ;                     (* e.g. chat.delete *)
-
-(* pattern conventions *)
-regex        = anchored_regex ;
-             (* bash: always anchor with ^ to match command start *)
-             (* read/write: anchor with $ for extensions, ^ for directories *)
-             (* bus: anchor with ^ and $ for exact event names *)
-             (* double-escape backslashes in JSON strings *)
-```
 
 ### Bus events
 

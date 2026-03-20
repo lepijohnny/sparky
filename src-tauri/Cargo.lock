@@ -3719,7 +3719,7 @@ dependencies = [
 
 [[package]]
 name = "sparky"
-version = "0.3.7"
+version = "0.3.8"
 dependencies = [
  "dirs",
  "libc",

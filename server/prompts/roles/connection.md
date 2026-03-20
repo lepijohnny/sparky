@@ -95,61 +95,6 @@ Use `url` strategy. Reference token in endpoint paths: `"/bot${svc.telegram.TOKE
 
 ## 5. ServiceDef Schema
 
-### Grammar (EBNF)
-
-```ebnf
-service_def     = '{' , id , label , base_url , [ icon ] , auth , [ oauth ] , endpoints , '}' ;
-
-id              = '"id":' , id_string ;                       (* /^[a-z][a-z0-9_]*$/ e.g. "github", "my_api" *)
-label           = '"label":' , string ;                       (* display name, e.g. "GitHub" *)
-base_url        = '"baseUrl":' , url ;                        (* API root, no trailing slash *)
-icon            = '"icon":' , url ;                           (* service icon URL *)
-
-(* authentication *)
-auth            = '"auth":' , ( bearer_auth | header_auth | query_auth | url_auth | oauth_auth | basic_auth | bot_auth ) ;
-bearer_auth     = '{' , '"strategy": "bearer"' , secret_ref , '}' ;
-bot_auth        = '{' , '"strategy": "bot"' , secret_ref , '}' ;
-url_auth        = '{' , '"strategy": "url"' , secret_ref , '}' ;
-basic_auth      = '{' , '"strategy": "basic"' , secret_ref , '}' ;
-oauth_auth      = '{' , '"strategy": "oauth"' , secret_ref , '}' ;
-header_auth     = '{' , '"strategy": "header"' , '"header":' , string , secret_ref , '}' ;
-query_auth      = '{' , '"strategy": "query"' , '"param":' , string , secret_ref , '}' ;
-secret_ref      = '"secretRef":' , '"${svc.' , id_string , '.' , secret_field , '}"' ;
-secret_field    = '"TOKEN"' | '"CLIENT_ID"' | '"CLIENT_SECRET"' | '"REFRESH_TOKEN"' ;
-
-(* OAuth config — required at service root when strategy = "oauth" *)
-oauth           = '"oauth":' , '{' , '"tokenUrl":' , url ,
-                  '"clientIdKey":' , secret_ref ,
-                  [ '"clientSecretKey":' , secret_ref ] ,
-                  [ '"refreshKey":' , secret_ref ] , '}' ;
-
-(* endpoints *)
-endpoints       = '"endpoints":' , '[' , { endpoint , ',' } , ']' ;
-endpoint        = '{' , ep_name , ep_desc , input , output , transport , '}' ;
-ep_name         = '"name":' , ep_name_string ;                (* /^[a-z][a-z0-9_]+$/ e.g. "list_repos" *)
-ep_desc         = '"description":' , string ;                 (* min 10 chars — what this endpoint does *)
-input           = '"input":' , '{' , { param_name , ':' , field_def } , '}' ;
-output          = '"output":' , '{' , { param_name , ':' , field_def } , '}' ;
-
-(* transport — REST or MCP *)
-transport       = '"transport":' , ( rest_transport | mcp_transport ) ;
-rest_transport  = '{' , '"type": "rest"' , method , path , [ body ] , '}' ;
-method          = '"method":' , ( '"GET"' | '"POST"' | '"PUT"' | '"PATCH"' | '"DELETE"' ) ;
-path            = '"path":' , string ;                        (* must start with "/", {name} for URL params *)
-body            = '"body":' , ( '"json"' | '"form"' | '"multipart"' ) ;   (* default: "json" *)
-mcp_transport   = '{' , '"type": "mcp"' , '"url":' , url , '}' ;
-
-(* field definitions *)
-field_def       = '{' , field_type , [ field_desc ] , [ field_default ] , [ optional ] , [ format ] , [ values ] , [ items ] , [ fields ] , '}' ;
-field_type      = '"type":' , ( '"string"' | '"number"' | '"boolean"' | '"array"' | '"enum"' | '"object"' ) ;
-field_desc      = '"description":' , string ;
-field_default   = '"default":' , value ;
-optional        = '"optional":' , ( 'true' | 'false' ) ;
-format          = '"format":' , ( '"base64"' | '"email"' | '"url"' | '"uri"' | '"uuid"' | '"date"' | '"datetime"' | '"iso8601"' | '"json"' ) ;
-values          = '"values":' , '[' , { string } , ']' ;     (* required for type "enum" *)
-items           = '"items":' , ( '"string"' | '"number"' | '"boolean"' | '"object"' ) ;  (* array item type *)
-fields          = '"fields":' , '{' , { param_name , ':' , field_def } , '}' ;  (* nested object fields *)
-```
 
 ### Example
 
@@ -253,6 +198,17 @@ Guide Template:
 > **Last error:** {message}
 > **Tried:** {fixes}
 > **Possible causes:** {options}
+
+## Icon URL
+
+Always set an `icon` URL for the service. Find the official icon:
+
+1. Try common paths: `https://<domain>/favicon.ico`, `https://<domain>/favicon.png`
+2. Verify with `app_web_read(url)` — if it returns 404 or error, try another
+3. Try Google favicon service: `https://www.google.com/s2/favicons?domain=<domain>&sz=128`
+4. Search: `app_web_search("<service> logo png svg")`
+
+**Do not use a URL that returns 404.** Keep trying until you get a working one.
 
 ## Rules
 

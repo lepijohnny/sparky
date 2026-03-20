@@ -8,6 +8,7 @@ export default defineConfig({
       "settings/**/*.test.ts",
       "knowledge/**/*.test.ts",
       "tools/**/*.test.ts",
+      "prompts/**/*.test.ts",
       "test/**/*.test.ts",
     ],
   },

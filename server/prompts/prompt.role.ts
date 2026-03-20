@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
+import { renderRoleGrammars } from "./zod.ebnf";
 
 export type ChatRole = "sparky" | "connection" | string;
 
@@ -137,6 +138,8 @@ function loadFormats(): { names: string[]; content: string } {
   return cachedFormats;
 }
 
+
+
 export function buildRolePrompt(role: RoleDef, preferences: string, mode?: string): string {
   let prompt = role.prompt;
 
@@ -161,6 +164,9 @@ export function buildRolePrompt(role: RoleDef, preferences: string, mode?: strin
       prompt += `\n\nAdditional rendering formats are available: ${extraFormats.join(", ")}. Call \`app_read("formats/${extraFormats[0]}.md")\` to get the syntax before using them.`;
     }
   }
+
+  const grammar = renderRoleGrammars(role.name);
+  if (grammar) prompt += `\n\n${grammar}`;
 
   return prompt;
 }
