@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  🚧 <strong>Under active development</strong> — not yet released. Expect breaking changes.
+  🚧 <strong>Under active development</strong>. Expect breaking changes.
 </p>
 
 <p align="center">
