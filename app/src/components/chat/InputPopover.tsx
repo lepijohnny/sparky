@@ -17,6 +17,8 @@ interface InputPopoverProps {
   emptyLabel: string;
   onSelect: (item: PopoverItem) => void;
   onClose: () => void;
+  onRight?: (item: PopoverItem) => void;
+  onLeft?: () => void;
 }
 
 export default memo(function InputPopover({
@@ -26,6 +28,8 @@ export default memo(function InputPopover({
   emptyLabel,
   onSelect,
   onClose,
+  onRight,
+  onLeft,
 }: InputPopoverProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -36,7 +40,7 @@ export default memo(function InputPopover({
 
   useEffect(() => {
     setActiveIdx(0);
-  }, [filter]);
+  }, [filter, items]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -48,6 +52,18 @@ export default memo(function InputPopover({
     } else if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
+      if (filtered[activeIdx]) onSelect(filtered[activeIdx]);
+    } else if (e.key === "ArrowRight" && onRight) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (filtered[activeIdx]) onRight(filtered[activeIdx]);
+    } else if (e.key === "ArrowLeft" && onLeft) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      onLeft();
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      e.stopImmediatePropagation();
       if (filtered[activeIdx]) onSelect(filtered[activeIdx]);
     } else if (e.key === "Escape") {
       e.preventDefault();

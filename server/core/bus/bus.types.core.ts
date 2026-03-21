@@ -39,4 +39,6 @@ export interface CoreEvents {
   "trust.reset":                { req: void; res: { ok: boolean } };
   "trust.clear":                { req: void; res: { ok: boolean } };
   "trust.changed":              { req: any; res: void };
+
+  "fs.complete":                { req: { partial: string }; res: { entries: { name: string; isDir: boolean }[]; base: string } };
 }

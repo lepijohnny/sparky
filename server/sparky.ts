@@ -11,6 +11,7 @@ import { createPlatformKeychain } from "./core/keychain";
 import { createCredStore } from "./core/cred";
 import { createTrustStore } from "./core/trust";
 import { registerTrustBus } from "./core/trust.bus";
+import { registerFsComplete } from "./core/fs.complete";
 import type { AuthPluginContext, AuthFlow } from "@sparky/auth-core";
 import { createAuthManager } from "./core/auth/auth";
 import { createOAuthGateway } from "./core/auth/oauth.gateway";
@@ -304,6 +305,8 @@ export function createSparky(): Sparky {
     const lines = logger.readTodayLinesSync();
     return { lines };
   });
+
+  registerFsComplete(bus);
 
 
 

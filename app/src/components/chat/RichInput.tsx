@@ -14,6 +14,7 @@ export interface RichInputHandle {
   insertLabelChip: (name: string, color: string) => void;
   dismissTrigger: () => void;
   clearTriggerText: () => void;
+  replacePathToken: (replacement: string) => void;
 }
 
 export interface TriggerInfo {
@@ -22,15 +23,21 @@ export interface TriggerInfo {
   position: { x: number; y: number };
 }
 
+export interface PathCompleteRequest {
+  partial: string;
+  position: { x: number; y: number };
+}
+
 interface RichInputProps {
   placeholder?: string;
   onSend: () => void;
   onChange: () => void;
   onTrigger: (info: TriggerInfo | null) => void;
+  onPathComplete?: (req: PathCompleteRequest) => void;
 }
 
 export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInput(
-  { placeholder = "Type a message...", onSend, onChange, onTrigger },
+  { placeholder = "Type a message...", onSend, onChange, onTrigger, onPathComplete },
   ref,
 ) {
   const divRef = useRef<HTMLDivElement>(null);
@@ -118,6 +125,33 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     onTrigger(null);
   }, [onTrigger]);
 
+  const getPathToken = useCallback((): string | null => {
+    const { segments: segs, cursor: cur } = model.current;
+    const s = segs[cur.seg];
+    if (!isText(s)) return null;
+    const text = s.value;
+    const pos = cur.offset;
+    let start = pos;
+    while (start > 0 && text[start - 1] !== " " && text[start - 1] !== "\n") start--;
+    const token = text.slice(start, pos);
+    if (token.startsWith("~/") || token.startsWith("./") || token.startsWith("/")) return token;
+    return null;
+  }, []);
+
+  const replacePathToken = useCallback((replacement: string) => {
+    const { segments: segs, cursor: cur } = model.current;
+    const s = segs[cur.seg];
+    if (!isText(s)) return;
+    const text = s.value;
+    const pos = cur.offset;
+    let start = pos;
+    while (start > 0 && text[start - 1] !== " " && text[start - 1] !== "\n") start--;
+    s.value = text.slice(0, start) + replacement + text.slice(pos);
+    model.current.cursor = { seg: cur.seg, offset: start + replacement.length };
+    render();
+    onChange();
+  }, [render, onChange]);
+
   const detectTrigger = useCallback(() => {
     const { segments: segs, cursor: cur } = model.current;
     const s = segs[cur.seg];
@@ -193,6 +227,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     insertSvcChip(name: string) { insertChip({ type: "svc", value: name }); },
     insertLabelChip(name: string, color: string) { insertChip({ type: "label", value: name, color }); },
     dismissTrigger() { closeTrigger(); },
+    replacePathToken(replacement: string) { replacePathToken(replacement); },
     clearTriggerText() {
       const { segments: segs, cursor: cur } = model.current;
       const s = segs[cur.seg];
@@ -435,6 +470,21 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (triggerActive.current) {
       if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key)) return;
+    }
+
+    if (e.key === "Tab" && !e.shiftKey && onPathComplete) {
+      const token = getPathToken();
+      if (token) {
+        e.preventDefault();
+        const sel = window.getSelection();
+        let x = 0, y = 0;
+        if (sel?.rangeCount) {
+          const rect = sel.getRangeAt(0).getBoundingClientRect();
+          x = rect.left; y = rect.top;
+        }
+        onPathComplete({ partial: token, position: { x, y } });
+        return;
+      }
     }
 
     if (e.key === "a" && e.metaKey) {
