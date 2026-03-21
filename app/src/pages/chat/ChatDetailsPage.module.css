@@ -6,6 +6,8 @@
   position: relative;
 }
 
+
+
 .loadingMore {
   text-align: center;
   font-size: 12px;
@@ -19,22 +21,9 @@
   overflow-y: auto;
   overflow-x: hidden;
   overflow-anchor: none;
+  min-height: 0;
   min-width: 0;
   animation: fadeIn 150ms ease;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    black 48px,
-    black calc(100% - 48px),
-    transparent
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    black 48px,
-    black calc(100% - 48px),
-    transparent
-  );
 }
 
 @keyframes fadeIn {
@@ -43,13 +32,11 @@
 }
 
 
-
-
 .inner {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 16px 20px 0;
 }
 
 .empty {
