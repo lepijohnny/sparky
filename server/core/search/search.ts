@@ -5,7 +5,8 @@ import type { Logger } from "../../logger.types";
 import { createWebSearch, type WebSearch } from "./search.ddg";
 import { createWebReader, type WebReader } from "./search.read";
 
-const version = readFileSync(resolve(import.meta.dirname, "../../../.version"), "utf-8").trim();
+let version = "0.0.0";
+try { version = readFileSync(resolve(import.meta.dirname, "../../../.version"), "utf-8").trim(); } catch { /* bundled app — .version not available */ }
 const headers: HeadersInit = { "User-Agent": `Sparky/${version} (Desktop App)` };
 
 export interface SearchService {
