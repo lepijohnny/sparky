@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { defineTool } from "./tool.registry";
 import { home, requirePath } from "./tool.path";
 
@@ -9,6 +9,29 @@ const MAX_LINE_LENGTH = 500;
 function truncateLine(line: string): string {
   if (line.length <= MAX_LINE_LENGTH) return line;
   return `${line.slice(0, MAX_LINE_LENGTH)}... [truncated]`;
+}
+
+function runGrep(args: string[], signal?: AbortSignal): Promise<{ raw: string; noMatch: boolean; error?: string }> {
+  return new Promise((resolve) => {
+    const child = execFile("grep", args, {
+      encoding: "utf-8",
+      timeout: 15_000,
+      maxBuffer: 10 * 1024 * 1024,
+    }, (err, stdout) => {
+      if (signal) signal.removeEventListener("abort", onAbort);
+      if (err) {
+        if ((err as any).status === 1 || !stdout?.trim()) return resolve({ raw: "", noMatch: true });
+        return resolve({ raw: "", noMatch: false, error: `Error: grep failed — ${err.message}` });
+      }
+      resolve({ raw: typeof stdout === "string" ? stdout : "", noMatch: false });
+    });
+
+    const onAbort = () => child.kill("SIGTERM");
+    if (signal) {
+      if (signal.aborted) { child.kill("SIGTERM"); return; }
+      signal.addEventListener("abort", onAbort);
+    }
+  });
 }
 
 export const grep = defineTool({
@@ -34,17 +57,14 @@ export const grep = defineTool({
     if (input.ignoreCase) args.push("-i");
     args.push("-m", String(MAX_MATCHES), "--", input.pattern, searchPath);
 
-    let raw: string;
-    try {
-      raw = execFileSync("grep", args, { encoding: "utf-8", timeout: 15_000, maxBuffer: 10 * 1024 * 1024 });
-    } catch (err: any) {
-      if (err.status === 1 || !err.stdout?.trim()) return "No matches found.";
-      return `Error: grep failed — ${err.message}`;
-    }
+    const result = await runGrep(args, ctx.signal);
+    if (ctx.signal.aborted) return "Error: cancelled";
+    if (result.noMatch) return "No matches found.";
+    if (result.error) return result.error;
 
-    if (!raw.trim()) return "No matches found.";
+    if (!result.raw.trim()) return "No matches found.";
 
-    const lines = raw.trimEnd().split("\n");
+    const lines = result.raw.trimEnd().split("\n");
 
     const cwd = process.cwd();
     const output = lines
