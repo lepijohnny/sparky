@@ -255,7 +255,7 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
   }, [messages]);
 
   const innerRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+
   const streamActiveRef = useRef(stream.active);
   streamActiveRef.current = stream.active;
 
@@ -568,7 +568,7 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
                 />
               </div>
             )}
-            <div ref={bottomRef} />
+
           </div>
         )}
       </div>
