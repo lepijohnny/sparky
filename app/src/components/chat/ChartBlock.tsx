@@ -177,31 +177,23 @@ const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; o
       delete merged.grid;
     }
 
-    let disposed = false;
-    const raf = requestAnimationFrame(() => {
-      if (disposed) return;
+    const chart = echarts.init(el, undefined, { renderer: "canvas" });
+    chartRef.current = chart;
 
-      const chart = echarts.init(el, undefined, { renderer: "canvas" });
-      chartRef.current = chart;
-
-      try {
-        chart.setOption(merged);
-      } catch (err) {
-        console.warn("ECharts setOption failed:", err);
-        chart.dispose();
-        chartRef.current = null;
-        onError?.();
-        return;
-      }
-
-      ro.observe(el);
-    });
+    try {
+      chart.setOption(merged);
+    } catch (err) {
+      console.warn("ECharts setOption failed:", err);
+      chart.dispose();
+      chartRef.current = null;
+      onError?.();
+      return;
+    }
 
     const ro = new ResizeObserver(() => chartRef.current?.resize());
+    ro.observe(el);
 
     return () => {
-      disposed = true;
-      cancelAnimationFrame(raf);
       ro.disconnect();
       if (chartRef.current) {
         chartRef.current.dispose();

@@ -37,6 +37,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 16px 20px 0;
+  overflow: hidden;
 }
 
 .empty {
