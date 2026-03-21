@@ -28,6 +28,8 @@ async function main() {
   if (existsSync(outDir)) rmSync(outDir, { recursive: true });
   mkdirSync(outDir, { recursive: true });
 
+  const version = (await import("node:fs")).readFileSync(join(__dirname, "..", ".version"), "utf-8").trim();
+
   const commonOptions = {
     bundle: true,
     platform: "node" as const,
@@ -36,6 +38,7 @@ async function main() {
     external: NATIVE_EXTERNALS,
     sourcemap: false,
     minify: false,
+    define: { "SPARKY_VERSION": JSON.stringify(version) },
     banner: {
       js: `
 import { createRequire } from "node:module";

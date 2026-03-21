@@ -5,8 +5,11 @@ import type { Logger } from "../../logger.types";
 import { createWebSearch, type WebSearch } from "./search.ddg";
 import { createWebReader, type WebReader } from "./search.read";
 
-let version = "0.0.0";
-try { version = readFileSync(resolve(import.meta.dirname, "../../../.version"), "utf-8").trim(); } catch { /* bundled app — .version not available */ }
+declare const SPARKY_VERSION: string | undefined;
+
+const version = typeof SPARKY_VERSION !== "undefined" ? SPARKY_VERSION : (() => {
+  try { return readFileSync(resolve(import.meta.dirname, "../../../.version"), "utf-8").trim(); } catch { return "0.0.0"; }
+})();
 const headers: HeadersInit = { "User-Agent": `Sparky/${version} (Desktop App)` };
 
 export interface SearchService {
