@@ -178,7 +178,7 @@ export function buildRolePrompt(role: RoleDef, preferences: string, mode?: strin
   }
 
   if (role.meta.formats) {
-    prompt += `\n\nRich formats: \`\`\`chart (ECharts JSON), \`\`\`mermaid, and LaTeX (\$...\$ inline, \$\$...\$\$ display). Read \`sparky/references/formats/<name>.md\` before first use.`;
+    prompt += `\n\nRich formats: \`\`\`echart (ECharts JSON), \`\`\`mermaid, and LaTeX (\$...\$ inline, \$\$...\$\$ display). Read \`sparky/references/formats/<name>.md\` before first use.`;
   }
 
   return prompt;

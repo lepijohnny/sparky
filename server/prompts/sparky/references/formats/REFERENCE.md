@@ -4,7 +4,7 @@ The assistant can produce rich content by using fenced code blocks with special 
 
 | Fence | Renders as | Use when |
 |-------|-----------|----------|
-| ` ```chart ` | ECharts visualization | User asks for charts, graphs, plots, data visualization |
+| ` ```echart ` | ECharts visualization | User asks for charts, graphs, plots, data visualization |
 | ` ```mermaid ` | Mermaid diagram | User asks for diagrams, flowcharts, sequence diagrams, ER diagrams |
 | `$...$` / `$$...$$` | LaTeX math | User writes or asks about mathematical expressions, equations, formulas |
 

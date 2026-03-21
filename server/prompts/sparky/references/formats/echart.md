@@ -2,7 +2,7 @@
 
 ## Intro
 
-Render data visualizations using a ` ```chart ` fenced code block containing a JSON ECharts option object. The JSON is passed directly to ECharts `setOption()`. The app renders the chart automatically.
+Render data visualizations using a ` ```echart ` fenced code block containing a JSON ECharts option object. The JSON is passed directly to ECharts `setOption()`. The app renders the chart automatically.
 
 ## When to Use
 
@@ -19,7 +19,7 @@ Render data visualizations using a ` ```chart ` fenced code block containing a J
 ## Examples
 
 ### Bar Chart
-```chart
+```echart
 {
   "title": { "text": "Monthly Sales" },
   "xAxis": { "type": "category", "data": ["Jan", "Feb", "Mar", "Apr", "May"] },
@@ -29,7 +29,7 @@ Render data visualizations using a ` ```chart ` fenced code block containing a J
 ```
 
 ### Line Chart
-```chart
+```echart
 {
   "title": { "text": "Temperature Trend" },
   "xAxis": { "type": "category", "data": ["Mon", "Tue", "Wed", "Thu", "Fri"] },
@@ -43,7 +43,7 @@ Render data visualizations using a ` ```chart ` fenced code block containing a J
 ```
 
 ### Pie Chart
-```chart
+```echart
 {
   "title": { "text": "Browser Share" },
   "series": [{
@@ -60,7 +60,7 @@ Render data visualizations using a ` ```chart ` fenced code block containing a J
 ```
 
 ### Scatter Plot
-```chart
+```echart
 {
   "title": { "text": "Height vs Weight" },
   "xAxis": { "type": "value", "name": "Height (cm)" },
@@ -76,7 +76,7 @@ Render data visualizations using a ` ```chart ` fenced code block containing a J
 
 | Mistake | Fix |
 |---------|-----|
-| Using ` ```echart ` or ` ```echarts ` | Use ` ```chart ` — the fence language must be `chart` |
+| Using ` ```echarts ` (with trailing s) | Use ` ```echart ` — no trailing "s" |
 | Trailing commas in JSON | Remove them — JSON does not allow trailing commas |
 | Single quotes in JSON | Use double quotes only |
 | `"title": "Monthly Sales"` (string) | Use object: `"title": { "text": "Monthly Sales" }` |
