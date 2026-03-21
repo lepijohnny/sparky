@@ -11,5 +11,9 @@ if git diff --cached --name-only | grep -q '^\.version$'; then
     sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" app/package.json
   fi
 
-  git add src-tauri/Cargo.toml src-tauri/tauri.conf.json app/package.json
+  if command -v cargo &>/dev/null; then
+    (cd src-tauri && cargo update --workspace 2>/dev/null || true)
+  fi
+
+  git add src-tauri/Cargo.toml src-tauri/Cargo.lock src-tauri/tauri.conf.json app/package.json
 fi
