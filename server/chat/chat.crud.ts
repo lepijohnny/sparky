@@ -5,6 +5,14 @@ import type { ChatDatabase } from "./chat.db";
 import type { Chat, ChatEntry } from "./chat.types";
 import { loadRole } from "../prompts/prompt.role";
 
+function getAgentRole(kind?: string): { role: string; name: string } {
+  const map: Record<string, { role: string; name: string }> = {
+    connection: { role: "connect", name: "Connection Setup" },
+    permissions: { role: "trust", name: "Permission Setup" },
+  };
+  return map[kind ?? ""] ?? { role: "sparky", name: "System Chat" };
+}
+
 export class ChatCrud {
   workspacePath = "";
 
@@ -86,11 +94,11 @@ export class ChatCrud {
     const llmDefault = this.config.get("llmDefault");
     const llms = this.config.get("llms") ?? [];
     const defaultConn = llms.find((c) => c.id === llmDefault?.id);
-    const role = kind === "connection" ? "connection" : kind === "permissions" ? "permissions" : "sparky";
+    const { role, name } = getAgentRole(kind);
 
     const chat: Chat = {
       id: crypto.randomUUID(),
-      name: role === "connection" ? "Connection Setup" : role === "permissions" ? "Permission Setup" : "System Chat",
+      name,
       model: defaultConn?.model ?? "",
       provider: defaultConn?.provider ?? "",
       connectionId: defaultConn?.id,

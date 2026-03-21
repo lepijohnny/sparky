@@ -109,7 +109,7 @@ export class ChatConversation {
       await this.emit(data.chatId, userEntry);
 
       const role = loadRole(chat.role ?? "sparky");
-      const isSystemRole = role.name === "connection";
+      const isSystemRole = role.name === "connect" || role.name === "trust";
 
       // Bump updated_at as soon as the user message is stored so the
       // chat rises to the top of the list immediately. Skip system role
@@ -149,7 +149,7 @@ export class ChatConversation {
       const toolCtx = { bus: this.bus, log: this.log, role: roleName, signal, approvalCtx: createApprovalContext(this.approval, roleName, chat.id, turnId), trust: chatTrust };
       const tools = createRoleToolSet(role, toolCtx, { webSearch: resolved.webSearch });
 
-      const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences(), chatMode);
+      const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences(), chatMode, data.chatId);
 
       const shouldSearch = role.meta.knowledge && chat.knowledge !== false;
       const knowledgeResults = shouldSearch
