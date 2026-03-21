@@ -131,14 +131,14 @@ describe("app_read", () => {
   });
 
   test("given api/ path, when reading, then resolves from prompts dir", async () => {
-    const result = await read.execute({ path: "api/guidelines.md" }, ctx);
+    const result = await read.execute({ path: "sparky/references/api/guidelines.md" }, ctx);
     expect(typeof result).toBe("string");
     expect(result as string).not.toContain("Error:");
     expect((result as string).length).toBeGreaterThan(0);
   });
 
   test("given formats/ path, when reading, then resolves from prompts dir", async () => {
-    const result = await read.execute({ path: "formats/mermaid.md" }, ctx);
+    const result = await read.execute({ path: "sparky/references/formats/mermaid.md" }, ctx);
     expect(typeof result).toBe("string");
     expect(result as string).not.toContain("Error:");
   });
