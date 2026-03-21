@@ -77,17 +77,14 @@ function getThemeOverrides(): Record<string, unknown> {
       top: "15%",
       containLabel: true,
     },
-    visualMap: {
-      textStyle: { color: muted, fontSize: 10 },
-      inRange: { color: [bg, accent] },
-      top: "middle",
-    },
+
   };
 }
 
 const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; onError?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
+
 
   useEffect(() => {
     const el = containerRef.current;
@@ -114,6 +111,17 @@ const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; o
     merged.backgroundColor = "transparent";
     delete merged.toolbox;
     delete merged.dataZoom;
+    const hasHeatmap = Array.isArray(merged.series) && (merged.series as any[]).some((s: any) => s.type === "heatmap");
+    if (!hasHeatmap) {
+      delete merged.visualMap;
+    } else if (merged.visualMap && typeof merged.visualMap === "object" && !Array.isArray(merged.visualMap)) {
+      const vm = merged.visualMap as Record<string, any>;
+      vm.orient = "vertical";
+      vm.left = 0;
+      vm.top = "middle";
+      delete vm.right;
+      delete vm.bottom;
+    }
     if (merged.tooltip && typeof (merged.tooltip as any).formatter === "string") {
       delete (merged.tooltip as any).formatter;
     }
@@ -149,13 +157,24 @@ const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; o
       merged.series = [merged.series];
     }
 
-    const hasHeatmap = Array.isArray(merged.series) && (merged.series as any[]).some((s: any) => s.type === "heatmap");
-    if (hasHeatmap && merged.visualMap) {
-      const vm = merged.visualMap as Record<string, any>;
-      vm.orient = "vertical";
-      vm.left = 0;
-      vm.top = "middle";
-      delete vm.bottom;
+
+
+    const hasPie = Array.isArray(merged.series) && (merged.series as any[]).some((s: any) => s.type === "pie");
+    if (merged.legend && typeof merged.legend === "object" && !Array.isArray(merged.legend)) {
+      const legend = merged.legend as Record<string, any>;
+      if (!legend.top && !legend.bottom && !legend.left && !legend.right) {
+        if (hasPie) {
+          legend.orient = legend.orient ?? "vertical";
+          legend.right = legend.right ?? 0;
+          legend.top = legend.top ?? "middle";
+        } else {
+          legend.bottom = legend.bottom ?? 0;
+        }
+      }
+    }
+
+    if (hasPie && merged.grid == null) {
+      delete merged.grid;
     }
 
     let disposed = false;
