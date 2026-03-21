@@ -27,8 +27,8 @@ export function useListSelection<T extends Identifiable>(
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "a" && items.length > 0) {
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        const el = e.target as HTMLElement;
+        if (el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.isContentEditable) return;
         e.preventDefault();
         actions.onSelectAll(items);
       }

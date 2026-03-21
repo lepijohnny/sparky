@@ -1,16 +1,8 @@
 import { memo, useCallback, useImperativeHandle, useRef, forwardRef, useState, useEffect } from "react";
 import styles from "./RichInput.module.css";
+import { type Segment, type Model, type Cursor, pasteStore, nextPasteId, mkModel, normalize, serialize, empty, isText } from "./RichInput.segments";
 
-const pasteStore = new Map<string, string>();
-let pasteIdCounter = 0;
-
-export type Segment =
-  | { type: "text"; value: string }
-  | { type: "svc"; value: string }
-  | { type: "label"; value: string; color: string }
-  | { type: "paste"; id: string; lines: number };
-
-interface Cursor { seg: number; offset: number }
+export type { Segment };
 
 export interface RichInputHandle {
   focus: () => void;
@@ -37,45 +29,6 @@ interface RichInputProps {
   onTrigger: (info: TriggerInfo | null) => void;
 }
 
-interface Model {
-  segments: Segment[];
-  cursor: Cursor;
-}
-
-function mkModel(text = ""): Model {
-  return { segments: [{ type: "text", value: text }], cursor: { seg: 0, offset: text.length } };
-}
-
-function normalize(segs: Segment[]): Segment[] {
-  const out: Segment[] = [];
-  for (const s of segs) {
-    if (s.type === "text") {
-      const last = out[out.length - 1];
-      if (last?.type === "text") last.value += s.value;
-      else out.push({ ...s });
-    } else {
-      if (!out.length || out[out.length - 1].type !== "text") out.push({ type: "text", value: "" });
-      out.push(s);
-    }
-  }
-  if (!out.length || out[out.length - 1].type !== "text") out.push({ type: "text", value: "" });
-  return out;
-}
-
-function serialize(segs: Segment[]): string {
-  let t = "";
-  for (const s of segs) {
-    if (s.type === "text") t += s.value;
-    else if (s.type === "svc") t += `@${s.value}`;
-    else if (s.type === "paste") t += pasteStore.get(s.id) ?? "";
-  }
-  return t.trim();
-}
-
-function empty(segs: Segment[]): boolean {
-  return segs.every((s) => s.type === "text" && s.value.trim() === "");
-}
-
 export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInput(
   { placeholder = "Type a message...", onSend, onChange, onTrigger },
   ref,
@@ -85,9 +38,6 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
   const triggerActive = useRef(false);
   const [ver, bump] = useState(0);
   const [preview, setPreview] = useState<{ text: string; x: number; y: number } | null>(null);
-
-  const curSeg = () => model.current.segments[model.current.cursor.seg];
-  const isText = (s: Segment): s is { type: "text"; value: string } => s.type === "text";
 
   const render = useCallback(() => {
     bump((n) => n + 1);
@@ -281,6 +231,96 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     render();
   }, [render]);
 
+  const resolveOffset = useCallback((node: Node, off: number): Cursor | null => {
+    const el = divRef.current;
+    if (!el) return null;
+
+    let resolvedNode = node;
+    let resolvedOff = off;
+    if (node === el) {
+      const children = el.childNodes;
+      if (off >= children.length) {
+        const segs = model.current.segments;
+        const last = segs[segs.length - 1];
+        return { seg: segs.length - 1, offset: isText(last) ? last.value.length : 0 };
+      }
+      resolvedNode = children[off];
+      resolvedOff = 0;
+    }
+
+    const children = Array.from(el.childNodes);
+    const { segments: segs } = model.current;
+    let domIdx = 0;
+    for (let segIdx = 0; segIdx < segs.length; segIdx++) {
+      const s = segs[segIdx];
+      if (s.type === "text") {
+        const parts = s.value.split("\n");
+        for (let p = 0; p < parts.length; p++) {
+          if (p > 0) domIdx++;
+          const child = children[domIdx];
+          if (child === resolvedNode || child?.contains(resolvedNode)) {
+            let charOff = 0;
+            for (let k = 0; k < p; k++) charOff += parts[k].length + 1;
+            charOff += resolvedOff;
+            if (s.value === "" && resolvedNode.textContent === "\u200B") charOff = 0;
+            return { seg: segIdx, offset: Math.min(charOff, s.value.length) };
+          }
+          domIdx++;
+        }
+      } else {
+        domIdx++;
+      }
+    }
+    return null;
+  }, []);
+
+  const deleteSelection = useCallback((): boolean => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return false;
+
+    const el = divRef.current;
+    if (!el) return false;
+
+    const selText = sel.toString();
+    const fullText = serialize(model.current.segments);
+    if (selText.replace(/\u200B/g, "") === fullText || (sel.anchorNode === el || sel.focusNode === el)) {
+      for (const s of model.current.segments) if (s.type === "paste") pasteStore.delete(s.id);
+      model.current = mkModel();
+      render();
+      onChange();
+      return true;
+    }
+
+    if (!sel.anchorNode || !sel.focusNode) return false;
+    const a = resolveOffset(sel.anchorNode, sel.anchorOffset);
+    const f = resolveOffset(sel.focusNode, sel.focusOffset);
+    if (!a || !f) return false;
+
+    const { segments: segs } = model.current;
+    const sa = segs[a.seg], sf = segs[f.seg];
+    if (!isText(sa) || !isText(sf)) return false;
+
+    let start = a, end = f;
+    if (a.seg > f.seg || (a.seg === f.seg && a.offset > f.offset)) { start = f; end = a; }
+
+    if (start.seg === end.seg) {
+      const s = segs[start.seg] as { type: "text"; value: string };
+      s.value = s.value.slice(0, start.offset) + s.value.slice(end.offset);
+      model.current.cursor = { seg: start.seg, offset: start.offset };
+    } else {
+      const ss = segs[start.seg] as { type: "text"; value: string };
+      const se = segs[end.seg] as { type: "text"; value: string };
+      ss.value = ss.value.slice(0, start.offset) + se.value.slice(end.offset);
+      segs.splice(start.seg + 1, end.seg - start.seg);
+      model.current.segments = normalize(segs);
+      model.current.cursor = { seg: start.seg, offset: start.offset };
+    }
+
+    render();
+    onChange();
+    return true;
+  }, [resolveOffset, render, onChange]);
+
   const deleteBack = useCallback(() => {
     const { segments: segs, cursor: cur } = model.current;
     const s = segs[cur.seg];
@@ -342,6 +382,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
       e.preventDefault();
       switch (e.inputType) {
         case "insertText":
+          deleteSelection();
           if (e.data) insertText(e.data);
           break;
         case "insertParagraph":
@@ -349,10 +390,10 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
           insertText("\n");
           break;
         case "deleteContentBackward":
-          deleteBack();
+          if (!deleteSelection()) deleteBack();
           break;
         case "deleteContentForward":
-          deleteFwd();
+          if (!deleteSelection()) deleteFwd();
           break;
         case "deleteWordBackward": {
           const { segments: segs, cursor: cur } = model.current;
@@ -394,6 +435,18 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (triggerActive.current) {
       if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key)) return;
+    }
+
+    if (e.key === "a" && e.metaKey) {
+      e.preventDefault();
+      const el = divRef.current;
+      if (el) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+      }
+      return;
     }
 
     if (e.key === "Enter" && !e.shiftKey) {
@@ -440,7 +493,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
       return;
     }
 
-    const id = `paste-${++pasteIdCounter}`;
+    const id = nextPasteId();
     pasteStore.set(id, text);
     const chip: Segment = { type: "paste", id, lines: lines.length };
 
