@@ -273,7 +273,7 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
     container.addEventListener("scroll", onScroll, { passive: true });
 
     const observer = new ResizeObserver(() => {
-      if (wasNearBottom && streamActiveRef.current) {
+      if (wasNearBottom) {
         container.scrollTop = container.scrollHeight;
       }
     });
