@@ -227,17 +227,17 @@ export class ChatCrud {
     const chat = this.db.getChat(data.id);
     if (!chat) return null;
 
-    const { entries, hasMore } = this.db.getEntries(data.id, 25);
+    const entries = this.db.getAllEntries(data.id);
     this.db.enrichWithAttachments(entries, this.workspacePath);
 
     this.log.debug("Loaded chat", { id: data.id, entries: entries.length });
-    return { chat, entries, hasMore };
+    return { chat, entries, hasMore: false };
   }
 
   entries(data: { chatId: string; before?: number }): { entries: ChatEntry[]; hasMore: boolean } {
-    const { entries, hasMore } = this.db.getEntries(data.chatId, 25, data.before);
+    const entries = this.db.getAllEntries(data.chatId);
     this.db.enrichWithAttachments(entries, this.workspacePath);
-    return { entries, hasMore };
+    return { entries, hasMore: false };
   }
 
   anchorAdd(data: { chatId: string; rowid: number }): void {

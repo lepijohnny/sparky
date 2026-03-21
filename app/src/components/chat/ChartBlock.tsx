@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import * as echarts from "echarts/core";
 import { BarChart, LineChart, PieChart, ScatterChart, RadarChart, GaugeChart, FunnelChart, HeatmapChart, TreemapChart, SankeyChart, GraphChart, CandlestickChart } from "echarts/charts";
 import { TitleComponent, TooltipComponent, LegendComponent, GridComponent, VisualMapComponent } from "echarts/components";
@@ -84,9 +84,23 @@ function getThemeOverrides(): Record<string, unknown> {
 const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; onError?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
-
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        io.disconnect();
+      }
+    }, { rootMargin: "500px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -200,7 +214,7 @@ const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; o
         chartRef.current = null;
       }
     };
-  }, [code]);
+  }, [code, visible]);
 
   return <div ref={containerRef} className={styles.chart} />;
 });

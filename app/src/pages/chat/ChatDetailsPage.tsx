@@ -192,9 +192,24 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
   const streamRef = useRef(stream.activities);
   streamRef.current = stream.activities;
 
-  const messages = useMemo(() => collapseEntries(entries), [entries]);
+  const allMessages = useMemo(() => collapseEntries(entries), [entries]);
+  const [renderAll, setRenderAll] = useState(false);
+  useEffect(() => {
+    setRenderAll(false);
+    const id = requestAnimationFrame(() => setRenderAll(true));
+    return () => cancelAnimationFrame(id);
+  }, [entries]);
+  const messages = renderAll ? allMessages : allMessages.slice(-10);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pendingScrollRef = useRef<{ scrollTop: number; scrollHeight: number } | null>(null);
+  useLayoutEffect(() => {
+    const pending = pendingScrollRef.current;
+    if (!pending || !scrollRef.current) return;
+    pendingScrollRef.current = null;
+    const container = scrollRef.current;
+    container.scrollTop = pending.scrollTop + (container.scrollHeight - pending.scrollHeight);
+  }, [entries]);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const hasMoreRef = useRef(hasMore);
   const entriesRef = useRef(entries);
@@ -215,18 +230,9 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
           setHasMore(false);
           return;
         }
-        const prevScrollTop = container.scrollTop;
-        const prevScrollHeight = container.scrollHeight;
-        container.style.overflow = "hidden";
-        try {
-          flushSync(() => {
-            setEntries((prev) => [...data.entries, ...prev]);
-            setHasMore(data.hasMore);
-          });
-          container.scrollTop = prevScrollTop + (container.scrollHeight - prevScrollHeight);
-        } finally {
-          container.style.overflow = "";
-        }
+        pendingScrollRef.current = { scrollTop: container.scrollTop, scrollHeight: container.scrollHeight };
+        setEntries((prev) => [...data.entries, ...prev]);
+        setHasMore(data.hasMore);
       })
       .catch((err) => console.error("Failed to load older entries:", err))
       .finally(() => { loadingMoreRef.current = false; });

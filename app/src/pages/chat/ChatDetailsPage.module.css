@@ -24,6 +24,7 @@
   min-height: 0;
   min-width: 0;
   animation: fadeIn 150ms ease;
+  will-change: transform;
 }
 
 @keyframes fadeIn {
