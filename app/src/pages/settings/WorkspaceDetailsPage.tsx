@@ -3,6 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { Brain, HardDrive, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ModelDownloadModal from "../../components/modals/ModelDownloadModal";
+import RenameWorkspaceModal from "../../components/modals/RenameWorkspaceModal";
 import { useConnection } from "../../context/ConnectionContext";
 import { useToasts } from "../../context/ToastContext";
 import { useStore } from "../../store";
@@ -48,6 +49,7 @@ export default function WorkspaceDetailsPage() {
   const workspace = useStore((s) => s.workspace);
   const workspaceSpace = useStore((s) => s.workspaceSpace);
   const setWorkspaceSpace = useStore((s) => s.setWorkspaceSpace);
+  const [showRenameModal, setShowRenameModal] = useState(false);
   const [localKnowledgeSearch, setLocalKnowledgeSearch] = useState<"keyword" | "hybrid" | null>(null);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [missingModels, setMissingModels] = useState<{ name: string; filename: string; size_bytes: number }[]>([]);
@@ -147,6 +149,14 @@ export default function WorkspaceDetailsPage() {
     }
   }, [switchToMode, addToast]);
 
+  const handleRename = useCallback(async (name: string) => {
+    if (!conn || !workspace) return;
+    setShowRenameModal(false);
+    try {
+      await conn.request("settings.workspace.update", { id: workspace.id, name });
+    } catch {}
+  }, [conn, workspace]);
+
   const handleDownloadCancel = useCallback(() => {
     setShowDownloadModal(false);
   }, []);
@@ -161,6 +171,20 @@ export default function WorkspaceDetailsPage() {
 
   return (
     <div className={shared.contentArea}>
+      {/* Workspace Info */}
+      <div className={shared.card}>
+        <div className={shared.cardHeader}>Workspace</div>
+        <div className={shared.cardBody}>
+          <div className={styles.infoRow}>
+            <div className={shared.fieldText}>
+              <label className={shared.fieldLabel}>Name</label>
+              <p className={styles.nameValue}>{workspace.name}</p>
+            </div>
+            <button className={shared.btn} onClick={() => setShowRenameModal(true)}>Rename</button>
+          </div>
+        </div>
+      </div>
+
       {/* Knowledge Search */}
       <div className={shared.card}>
         <div className={shared.cardHeader}>Knowledge</div>
@@ -274,13 +298,19 @@ export default function WorkspaceDetailsPage() {
         </div>
       )}
 
-      {/* Sandbox — hidden for now */}
-
       {showDownloadModal && (
         <ModelDownloadModal
           models={missingModels}
           onComplete={startDownload}
           onCancel={handleDownloadCancel}
+        />
+      )}
+
+      {showRenameModal && (
+        <RenameWorkspaceModal
+          currentName={workspace.name}
+          onClose={() => setShowRenameModal(false)}
+          onRename={handleRename}
         />
       )}
     </div>

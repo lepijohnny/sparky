@@ -1,3 +1,19 @@
+.infoRow {
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nameValue {
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin: 0;
+  line-height: 1;
+}
+
+
 .cardHeaderRow {
   padding: 6px 16px;
   height: 60px;

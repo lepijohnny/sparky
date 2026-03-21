@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import {
   type ReactNode,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -89,6 +90,11 @@ export default function MenuPanel({
   const { data: activeData } = useWsRequest<{ activeWorkspace: string | null }>(
     conn, "settings.workspace.active.get", undefined, [refreshKey],
   );
+
+  useEffect(() => {
+    if (!conn) return;
+    return conn.subscribe("settings.workspace.changed", () => setRefreshKey((k) => k + 1));
+  }, [conn]);
 
   const workspaces = wsData?.workspaces ?? [];
   const activeWorkspaceId = activeData?.activeWorkspace ?? null;
