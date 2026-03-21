@@ -28,7 +28,7 @@ const ALL_TOOLS: Record<string, ToolDef> = {
   app_web_read: webRead,
 };
 
-const WEB_SEARCH_TOOLS = new Set(["app_web_search", "app_web_read"]);
+const WEB_SEARCH_TOOLS = new Set(["app_web_search"]);
 
 const MODE_TOOLS: Record<PermissionMode, Set<string>> = {
   read: new Set(["app_read", "app_glob", "app_grep", "app_bus_emit", "app_web_search", "app_web_read"]),
