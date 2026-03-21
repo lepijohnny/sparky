@@ -233,13 +233,14 @@ export function createTrustStore(log: Logger, basePath: string, keychain: Keycha
     },
 
     resolve(scope, input) {
-      const allowMatch = matchesAny(trust[scope].allow, input);
       const denyMatch = matchesAny(trust[scope].deny, input);
+      if (denyMatch) return { decision: "deny", rule: denyMatch };
+
+      const allowMatch = matchesAny(trust[scope].allow, input);
       const askMatch = matchesAny(trust[scope].ask, input);
 
       const candidates: { decision: Resolution; rule: TrustRule }[] = [];
       if (allowMatch) candidates.push({ decision: "allow", rule: allowMatch });
-      if (denyMatch) candidates.push({ decision: "deny", rule: denyMatch });
       if (askMatch) candidates.push({ decision: "prompt", rule: askMatch });
 
       if (candidates.length === 0) return { decision: SCOPE_FALLBACK[scope] };

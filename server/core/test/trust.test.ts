@@ -175,9 +175,9 @@ describe("TrustStore", () => {
     expect(trust.resolve("bash", "npm install express")).toMatchObject({ decision: "prompt" });
   });
 
-  test("given resolve, when user adds ask rule after default deny, then ask wins", () => {
+  test("given resolve, when user adds ask rule after default deny, then deny still wins", () => {
     trust.addRule("bash", "ask", { label: "sudo", pattern: "^sudo" });
-    expect(trust.resolve("bash", "sudo test")).toMatchObject({ decision: "prompt" });
+    expect(trust.resolve("bash", "sudo test")).toMatchObject({ decision: "deny" });
   });
 
   test("given resolve, when later rule conflicts with earlier rule, then later rule wins", () => {
@@ -186,10 +186,10 @@ describe("TrustStore", () => {
     expect(trust.resolve("bash", "npm install foo")).toMatchObject({ decision: "prompt" });
   });
 
-  test("given resolve, when allow is added after deny, then allow wins", () => {
+  test("given resolve, when allow is added after deny, then deny still wins", () => {
     trust.addRule("write", "deny", { label: "deny py", pattern: "\\.py$", addedAt: 100 });
     trust.addRule("write", "allow", { label: "allow workspace py", pattern: "workspaces.*\\.py$", addedAt: 200 });
-    expect(trust.resolve("write", "/Users/me/.sparky/workspaces/test.py")).toMatchObject({ decision: "allow" });
+    expect(trust.resolve("write", "/Users/me/.sparky/workspaces/test.py")).toMatchObject({ decision: "deny" });
     expect(trust.resolve("write", "/tmp/hack.py")).toMatchObject({ decision: "deny" });
   });
 

@@ -114,6 +114,7 @@ const ROUTES: RouteEntry[] = [
   ["trust.clear", { notifiable: true }],
 
   "core.prefetch",
+  "fs.complete",
 
   "diagnostics.logs.read",
 

@@ -8,12 +8,18 @@ import ApprovalPopup from "./ApprovalPopup";
 import ModeSelector from "./ModeSelector";
 import ModelSelector from "./ModelSelector";
 import ThinkingSelector from "./ThinkingSelector";
-import RichInput, { type RichInputHandle, type TriggerInfo } from "./RichInput";
+import RichInput, { type RichInputHandle, type TriggerInfo, type PathCompleteRequest } from "./RichInput";
 import InputPopover, { type PopoverItem } from "./InputPopover";
 import { generateThumbnail } from "../../lib/thumbnail";
 import type { PendingAttachment } from "../../types/attachment";
 import { useToasts } from "../../context/ToastContext";
 import styles from "./AgentTurnInput.module.css";
+
+import { extractPathToken, pathBase, pathParent, normalizePath, pathFilter } from "./pathComplete";
+
+function getPathTokenFromHandle(handle: RichInputHandle): string | null {
+  return extractPathToken(handle.getText());
+}
 
 const MIME_MAP: Record<string, string> = {
   ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
@@ -71,6 +77,7 @@ export default memo(function ChatInput({
   const [hasContent, setHasContent] = useState(false);
   const [sending, setSending] = useState(false);
   const [trigger, setTrigger] = useState<TriggerInfo | null>(null);
+  const [pathPopover, setPathPopover] = useState<{ items: PopoverItem[]; position: { x: number; y: number }; filter: string } | null>(null);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const { addToast } = useToasts();
   const inputRef = useRef<RichInputHandle>(null);
@@ -102,11 +109,20 @@ export default memo(function ChatInput({
     }
   }, [chat.id]);
 
+  const pathNavRef = useRef(false);
+
   const handleInputChange = useCallback(() => {
     const handle = inputRef.current;
     if (!handle) return;
     saveDraft(handle.getText());
     setHasContent(!handle.isEmpty());
+    if (pathNavRef.current) return;
+    setPathPopover((prev) => {
+      if (!prev) return null;
+      const token = getPathTokenFromHandle(handle);
+      if (!token) return null;
+      return { ...prev, filter: pathFilter(token) };
+    });
   }, [saveDraft]);
 
   useEffect(() => {
@@ -157,6 +173,76 @@ export default memo(function ChatInput({
     inputRef.current?.dismissTrigger();
     setTrigger(null);
   }, []);
+
+  const pathPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const fetchPathEntries = useCallback(async (partial: string, position: { x: number; y: number }) => {
+    if (!conn) return;
+    pathPosRef.current = position;
+    try {
+      const res = await conn.request<{ entries: { name: string; isDir: boolean }[]; base: string }>("fs.complete", { partial });
+      if (res.entries.length === 0) {
+        setPathPopover(null);
+        return;
+      }
+      setPathPopover({
+        items: res.entries.map((e) => ({ id: e.name, name: e.isDir ? e.name + "/" : e.name })),
+        position,
+        filter: "",
+      });
+    } catch {
+      setPathPopover(null);
+    }
+  }, [conn]);
+
+  const handlePathComplete = useCallback(async (req: PathCompleteRequest) => {
+    fetchPathEntries(req.partial, req.position);
+  }, [fetchPathEntries]);
+
+  const navigatePath = useCallback((newPath: string) => {
+    const handle = inputRef.current;
+    if (!handle) return;
+    const clean = normalizePath(newPath);
+    pathNavRef.current = true;
+    handle.replacePathToken(clean);
+    pathNavRef.current = false;
+    fetchPathEntries(clean, pathPosRef.current);
+  }, [fetchPathEntries]);
+
+  const handlePathSelect = useCallback((item: PopoverItem) => {
+    const handle = inputRef.current;
+    if (!handle) return;
+    const token = getPathTokenFromHandle(handle);
+    const base = token ? pathBase(token) : "";
+    const newPath = base + item.name;
+    if (item.name.endsWith("/")) {
+      navigatePath(newPath);
+    } else {
+      pathNavRef.current = true;
+      handle.replacePathToken(newPath);
+      pathNavRef.current = false;
+      setPathPopover(null);
+    }
+  }, [navigatePath]);
+
+  const handlePathRight = useCallback((item: PopoverItem) => {
+    if (!item.name.endsWith("/")) return;
+    const handle = inputRef.current;
+    if (!handle) return;
+    const token = getPathTokenFromHandle(handle);
+    const base = token ? pathBase(token) : "";
+    navigatePath(base + item.name);
+  }, [navigatePath]);
+
+  const handlePathLeft = useCallback(() => {
+    const handle = inputRef.current;
+    if (!handle) return;
+    const token = getPathTokenFromHandle(handle);
+    if (!token) return;
+    const parent = pathParent(token);
+    if (!parent) return;
+    navigatePath(parent);
+  }, [navigatePath]);
 
   const popoverItems: PopoverItem[] = trigger
     ? trigger.type === "@"
@@ -329,6 +415,7 @@ export default memo(function ChatInput({
           onSend={handleSend}
           onChange={handleInputChange}
           onTrigger={handleTrigger}
+          onPathComplete={handlePathComplete}
         />
         {trigger && (
           <InputPopover
@@ -338,6 +425,18 @@ export default memo(function ChatInput({
             emptyLabel={trigger.type === "@" ? "No services" : "No labels"}
             onSelect={handlePopoverSelect}
             onClose={handlePopoverClose}
+          />
+        )}
+        {pathPopover && !trigger && (
+          <InputPopover
+            items={pathPopover.items}
+            position={pathPopover.position}
+            filter={pathPopover.filter}
+            emptyLabel="No matches"
+            onSelect={handlePathSelect}
+            onClose={() => setPathPopover(null)}
+            onRight={handlePathRight}
+            onLeft={handlePathLeft}
           />
         )}
         <div className={styles.toolbar} key={chat.id}>
