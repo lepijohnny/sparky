@@ -353,6 +353,11 @@ export class ChatDatabase {
     return Number(result.lastInsertRowid);
   }
 
+  getAllEntries(chatId: string): ChatEntry[] {
+    const rows = this.db.prepare("SELECT * FROM entries WHERE chat_id = :chat_id ORDER BY rowid ASC").all({ chat_id: chatId }) as EntryRow[];
+    return rows.map((r) => this.toEntry(r));
+  }
+
   getEntries(chatId: string, messageLimit = 10, beforeRowid?: number): { entries: ChatEntry[]; hasMore: boolean } {
     let boundarySql: string;
     let boundaryParams: Record<string, any>;
