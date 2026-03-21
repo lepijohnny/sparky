@@ -5,15 +5,11 @@ import type { Logger } from "../logger.types";
 import type { Workspace, WorkspaceSpace } from "./workspace.types";
 import { statSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { checkQemu } from "../core/sandbox/sandbox.check";
-import { listSandboxImages } from "../core/sandbox/sandbox.images";
-import { SandboxAllowlist } from "../core/sandbox/sandbox.env";
 
 const WORKSPACES_REL = "workspaces";
 
 export class WorkspaceSettings {
   private log;
-  private allowlist: SandboxAllowlist;
 
   constructor(
     private bus: EventBus,
@@ -22,7 +18,6 @@ export class WorkspaceSettings {
     logger: Logger,
   ) {
     this.log = logger;
-    this.allowlist = new SandboxAllowlist(config);
 
     bus.on("settings.workspace.list", () => this.list());
     bus.on("settings.workspace.add", (data) => this.add(data));
@@ -31,14 +26,6 @@ export class WorkspaceSettings {
     bus.on("settings.workspace.active.set", (data) => this.setActive(data));
     bus.on("settings.workspace.update", (data) => this.update(data));
     bus.on("settings.workspace.space", () => this.space());
-
-    bus.on("settings.sandbox.status", () => checkQemu());
-    bus.on("settings.sandbox.images", () => ({ images: listSandboxImages(storage) }));
-    bus.on("settings.sandbox.allowlist.list", () => ({ entries: this.allowlist.list() }));
-    bus.on("settings.sandbox.allowlist.add", async (data) => ({ entry: await this.allowlist.add(data.host) }));
-    bus.on("settings.sandbox.allowlist.remove", async (data) => ({ removed: await this.allowlist.remove(data.host) }));
-    // Default workspace is seeded by createWorkspace() in workspace.seed.ts
-    // which runs synchronously at startup before any bus handlers fire.
   }
 
   private space(): WorkspaceSpace {
@@ -103,17 +90,20 @@ export class WorkspaceSettings {
     return { removed: true };
   }
 
-  private async update(data: { id: string; sandbox?: boolean; sandboxImage?: string; knowledgeSearch?: "keyword" | "hybrid" }): Promise<{ workspace: Workspace }> {
+  private async update(data: { id: string; name?: string; knowledgeSearch?: "keyword" | "hybrid" }): Promise<{ workspace: Workspace }> {
     const workspaces = this.readWorkspaces();
     const workspace = workspaces.find((w) => w.id === data.id);
     if (!workspace) throw new Error(`Workspace not found: ${data.id}`);
 
-    if (data.sandbox !== undefined) workspace.sandbox = data.sandbox;
-    if (data.sandboxImage !== undefined) workspace.sandboxImage = data.sandboxImage;
+    if (data.name !== undefined) {
+      const trimmed = data.name.trim();
+      if (!trimmed) throw new Error("Workspace name cannot be empty");
+      workspace.name = trimmed;
+    }
     if (data.knowledgeSearch !== undefined) workspace.knowledgeSearch = data.knowledgeSearch;
 
     await this.config.set("workspaces", workspaces);
-    this.log.info("Updated workspace", { id: workspace.id, sandbox: workspace.sandbox, sandboxImage: workspace.sandboxImage, knowledgeSearch: workspace.knowledgeSearch });
+    this.log.info("Updated workspace", { id: workspace.id, name: workspace.name, knowledgeSearch: workspace.knowledgeSearch });
     this.bus.emit("settings.workspace.changed", { workspace });
     return { workspace };
   }

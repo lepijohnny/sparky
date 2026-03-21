@@ -31,7 +31,7 @@ export interface SettingsEvents {
   "settings.workspace.remove":         { req: { id: string }; res: { removed: boolean } };
   "settings.workspace.active.get":     { req: void; res: { activeWorkspace: string | null } };
   "settings.workspace.active.set":     { req: { id: string }; res: { activeWorkspace: string } };
-  "settings.workspace.update":         { req: { id: string; sandbox?: boolean; sandboxImage?: string; knowledgeSearch?: "keyword" | "hybrid" }; res: { workspace: Workspace } };
+  "settings.workspace.update":         { req: { id: string; name?: string; knowledgeSearch?: "keyword" | "hybrid" }; res: { workspace: Workspace } };
   "settings.workspace.space":          { req: void; res: WorkspaceSpace };
   "settings.workspace.changed":        { req: { workspace: Workspace }; res: void };
   "settings.workspace.added":          { req: { workspace: Workspace }; res: void };
