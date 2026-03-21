@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
-import { globSync, statSync } from "node:fs";
+import { glob as globFn } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { defineTool } from "./tool.registry";
 import { home, requireDir } from "./tool.path";
@@ -24,19 +25,26 @@ export const glob = defineTool({
     const err = requireDir(cwd, input.cwd ?? cwd);
     if (err) return err;
 
-    const entries = globSync(input.pattern, { cwd });
+    const entries: string[] = [];
+    for await (const entry of globFn(input.pattern, { cwd })) {
+      if (ctx.signal.aborted) return "Error: cancelled";
+      entries.push(entry);
+    }
     entries.sort((a, b) => a.localeCompare(b));
 
     const results: string[] = [];
 
     for (const entry of entries) {
       if (results.length >= MAX_ENTRIES) break;
+      if (ctx.signal.aborted) return "Error: cancelled";
 
       const full = resolve(cwd, entry);
-      const entryStat = statSync(full, { throwIfNoEntry: false });
-      if (!entryStat) continue;
-
-      results.push(entryStat.isDirectory() ? `${entry}/` : entry);
+      try {
+        const entryStat = await stat(full);
+        results.push(entryStat.isDirectory() ? `${entry}/` : entry);
+      } catch {
+        continue;
+      }
     }
 
     if (results.length === 0) return "No matches found.";

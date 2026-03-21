@@ -112,4 +112,14 @@ describe("fs.complete", () => {
     const res = await bus.emit("fs.complete", { partial: root + "/" });
     expect(res.entries.every((e: any) => e.name !== "node_modules")).toBe(true);
   });
+
+  test("given dot prefix, when completing, then shows hidden entries", async () => {
+    const res = await bus.emit("fs.complete", { partial: root + "/." });
+    expect(res.entries.some((e: any) => e.name === ".hidden")).toBe(true);
+  });
+
+  test("given no dot prefix, when completing, then hides hidden entries", async () => {
+    const res = await bus.emit("fs.complete", { partial: root + "/" });
+    expect(res.entries.every((e: any) => !e.name.startsWith("."))).toBe(true);
+  });
 });

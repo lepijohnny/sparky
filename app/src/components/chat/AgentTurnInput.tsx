@@ -18,7 +18,7 @@ import styles from "./AgentTurnInput.module.css";
 import { extractPathToken, pathBase, pathParent, normalizePath, pathFilter } from "./pathComplete";
 
 function getPathTokenFromHandle(handle: RichInputHandle): string | null {
-  return extractPathToken(handle.getText());
+  return handle.getPathToken();
 }
 
 const MIME_MAP: Record<string, string> = {

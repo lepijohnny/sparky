@@ -15,6 +15,7 @@ export interface RichInputHandle {
   dismissTrigger: () => void;
   clearTriggerText: () => void;
   replacePathToken: (replacement: string) => void;
+  getPathToken: () => string | null;
 }
 
 export interface TriggerInfo {
@@ -228,6 +229,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     insertLabelChip(name: string, color: string) { insertChip({ type: "label", value: name, color }); },
     dismissTrigger() { closeTrigger(); },
     replacePathToken(replacement: string) { replacePathToken(replacement); },
+    getPathToken() { return getPathToken(); },
     clearTriggerText() {
       const { segments: segs, cursor: cur } = model.current;
       const s = segs[cur.seg];
