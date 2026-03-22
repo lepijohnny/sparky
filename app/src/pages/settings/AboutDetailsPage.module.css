@@ -74,6 +74,12 @@
   gap: 12px;
 }
 
+.updateAvailableNotes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .updateDownloading {
   display: flex;
   align-items: center;
