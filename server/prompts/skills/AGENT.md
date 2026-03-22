@@ -100,7 +100,7 @@ When a user asks you to create a skill:
 3. **Write SKILL.md** — frontmatter + a focused system prompt
 4. **Create it** — `app_bus_emit("skills.create", { id: "<slug>", name: "<name>", content: "<full SKILL.md content>" })`
 5. **Add references if needed** — `app_write("~/.sparky/skills/<slug>/references/<file>", content)`
-6. **Generate requirements.json** — `app_write("~/.sparky/skills/<slug>/requirements.json", content)`
+6. **Generate requirements.json** — `app_write("~/.sparky/skills/<slug>/requirements.json", content)` — content must be raw JSON, not a string-escaped JSON blob
 
 **IMPORTANT**: The `content` field in `skills.create` is required. It must contain the full SKILL.md content including frontmatter and prompt body. The call will fail if content is missing or empty.
 
@@ -167,7 +167,7 @@ When reviewing an imported skill, you must produce a `requirements.json` and ass
 3. **Read all references**: `app_glob("~/.sparky/skills/<slug>/references/*")` then `app_read` each
 4. **Analyze for safety** (see checklist below)
 5. **Extract dependencies** — bins, env vars, tools
-6. **Write requirements.json**: `app_write("~/.sparky/skills/<slug>/requirements.json", ...)`
+6. **Write requirements.json**: `app_write("~/.sparky/skills/<slug>/requirements.json", ...)` — pass raw JSON with real newlines, never string-escaped
 7. **Set state**: `app_bus_emit("skills.state.set", { id: "<slug>", state: "verified" })` or `"rejected"`
 
 ### Safety Checklist
