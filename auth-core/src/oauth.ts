@@ -10,7 +10,6 @@ export interface OAuthExchangeParams {
   clientId: string;
   clientSecret?: string;
   codeVerifier?: string;
-  state?: string;
   /** Body encoding. Defaults to "json". Use "form" for GitHub and most other providers. */
   bodyEncoding?: "json" | "form";
 }

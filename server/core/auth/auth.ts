@@ -36,8 +36,9 @@ export function createAuthManager(log: Logger, cred: Credentials, gateway: OAuth
 
       if (isOAuth) {
         const sessionKey = `${domain}.${provider}.${grant}`;
-        const { port, callbackPromise } = await gateway.listen();
-        const redirectUri = `http://localhost:${port}/callback`;
+        const { port, callbackPromise } = await gateway.listen(flow.redirectPort);
+        const path = flow.redirectPath ?? "/callback";
+        const redirectUri = `http://localhost:${port}${path}`;
         pending.set(sessionKey, callbackPromise);
         return flow.request(redirectUri, params);
       }

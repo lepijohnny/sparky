@@ -7,7 +7,7 @@ const PORT_END = 49162;
 const TIMEOUT_MS = 600_000;
 
 export interface OAuthGateway {
-  listen(): Promise<{ port: number; callbackPromise: Promise<{ code: string; socket: Socket }> }>;
+  listen(preferredPort?: number): Promise<{ port: number; callbackPromise: Promise<{ code: string; socket: Socket }> }>;
   respondSuccess(socket: Socket): void;
   respondError(socket: Socket): void;
 }
@@ -20,7 +20,7 @@ function extractCode(raw: string): string | null {
 export function createOAuthGateway(log: Logger): OAuthGateway {
   log.info("OAuth gateway created");
   return {
-    async listen() {
+    async listen(preferredPort?: number) {
       return new Promise((resolveSetup, rejectSetup) => {
         let resolved = false;
         let server: Server | null = null;
@@ -33,7 +33,8 @@ export function createOAuthGateway(log: Logger): OAuthGateway {
 
         const callbackPromise = new Promise<{ code: string; socket: Socket }>((resolveCallback, rejectCallback) => {
           const tryPort = (port: number) => {
-            if (port > PORT_END) {
+            const isFixed = preferredPort != null && port === preferredPort;
+            if (!isFixed && port > PORT_END) {
               rejectSetup(new Error(`All OAuth ports (${PORT_START}–${PORT_END}) are in use`));
               return;
             }
@@ -52,7 +53,13 @@ export function createOAuthGateway(log: Logger): OAuthGateway {
               });
             });
 
-            srv.once("error", () => tryPort(port + 1));
+            srv.once("error", () => {
+              if (isFixed) {
+                rejectSetup(new Error(`OAuth port ${port} is already in use`));
+              } else {
+                tryPort(port + 1);
+              }
+            });
             srv.listen(port, "localhost", () => {
               server = srv;
               timer = setTimeout(() => {
@@ -70,7 +77,7 @@ export function createOAuthGateway(log: Logger): OAuthGateway {
             });
           };
 
-          tryPort(PORT_START);
+          tryPort(preferredPort ?? PORT_START);
         });
       });
     },
