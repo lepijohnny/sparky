@@ -1,5 +1,8 @@
-import { execFile } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
+import { mkdtempSync, readdirSync, existsSync, readFileSync, cpSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { z } from "zod";
 import type { EventBus } from "../core/bus";
 import type { Logger } from "../logger.types";
@@ -228,6 +231,66 @@ const SkillStateSet = z.object({
   state: z.enum(["active", "verified", "rejected", "pending"]).describe("Target state"),
 });
 
+const SkillImport = z.object({
+  path: z.string().min(1).describe("Absolute path to a .zip file"),
+});
+
+function extractAndValidateSkillZip(zipPath: string): { tmpDir: string; skillDir: string; slug: string } {
+  const tmpDir = mkdtempSync(join(tmpdir(), "sparky-skill-import-"));
+
+  try {
+    try {
+      execFileSync("unzip", ["-o", zipPath, "-d", tmpDir]);
+    } catch (err: any) {
+      throw new Error(`Failed to extract zip: ${err.stderr?.toString() ?? String(err)}`);
+    }
+
+    const topEntries = readdirSync(tmpDir, { withFileTypes: true })
+      .filter((e) => !e.name.startsWith(".") && !e.name.startsWith("__"));
+
+    let skillDir: string;
+    if (topEntries.length === 1 && topEntries[0].isDirectory()) {
+      skillDir = join(tmpDir, topEntries[0].name);
+    } else {
+      skillDir = tmpDir;
+    }
+
+    const hasSkillMd = existsSync(join(skillDir, "SKILL.md"));
+    if (!hasSkillMd) {
+      throw new Error("Invalid skill package: missing SKILL.md in the root of the archive");
+    }
+
+    const mdPath = join(skillDir, "SKILL.md");
+    const content = readFileSync(mdPath, "utf-8");
+    const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!fmMatch) {
+      throw new Error("Invalid skill: SKILL.md must start with YAML frontmatter (---\\n...\\n---)");
+    }
+
+    const nameLine = fmMatch[1].match(/^name:\s*(.+)$/m);
+    if (!nameLine) {
+      throw new Error("Invalid skill: frontmatter must include a 'name' field");
+    }
+
+    const dirName = topEntries.length === 1 && topEntries[0].isDirectory()
+      ? topEntries[0].name
+      : null;
+
+    const slug = dirName?.match(/^[a-z0-9][a-z0-9-]*$/)
+      ? dirName
+      : nameLine[1].trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    if (!slug || !slug.match(/^[a-z0-9][a-z0-9-]*$/)) {
+      throw new Error("Could not derive a valid skill slug from the package");
+    }
+
+    return { tmpDir, skillDir, slug };
+  } catch (err) {
+    rmSync(tmpDir, { recursive: true, force: true });
+    throw err;
+  }
+}
+
 export function registerSkillsBus(bus: EventBus, log: Logger, storage: StorageProvider, getEnvVars: (skillId?: string) => Record<string, string>, broadcast: (route: string, data: unknown) => void): void {
   bus.on("skills.list", async () => {
     const skills = await listSkills(storage, getEnvVars);
@@ -309,6 +372,70 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     invalidateSkillCache();
     broadcast("skills.changed", {});
     return { skill };
+  });
+
+  bus.on("skills.export", async (data) => {
+    const { id, dest } = z.object({
+      id: z.string().min(1),
+      dest: z.string().min(1).describe("Absolute path for the output .zip file"),
+    }).parse(data);
+
+    const dir = skillPath(id);
+    if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
+
+    const rootDir = storage.root(dir);
+    const excludes = ["_state.json", "_meta.json", "requirements.json"];
+    const args = ["-r", dest, ".", ...excludes.flatMap((f) => ["-x", f])];
+
+    try {
+      execFileSync("zip", args, { cwd: rootDir });
+    } catch (err: any) {
+      throw new Error(`Failed to create zip: ${err.stderr?.toString() ?? String(err)}`);
+    }
+
+    log.info("Skill exported", { id, dest });
+    return { ok: true, path: dest };
+  });
+
+  bus.on("skills.import", async (data) => {
+    const { path } = SkillImport.parse(data);
+    const { tmpDir, skillDir, slug } = extractAndValidateSkillZip(path);
+
+    try {
+      if (storage.exists(skillPath(slug))) {
+        throw new Error(`Skill "${slug}" already exists. Delete it first or rename the import.`);
+      }
+
+      storage.mkdir(skillPath(slug));
+      cpSync(skillDir, storage.root(skillPath(slug)), { recursive: true });
+
+      storage.write(skillPath(slug, "_meta.json"), {
+        slug,
+        source: "imported",
+        importedAt: new Date().toISOString(),
+        originalFile: path,
+      });
+
+      const skill = await loadSkill(storage, slug, getEnvVars(slug));
+      log.info("Skill imported", { id: slug, path });
+      invalidateSkillCache();
+      broadcast("skills.changed", {});
+
+      let chatId: string | undefined;
+      try {
+        const res = await bus.emit("chat.system.ask", {
+          content: `Review and verify the imported skill "${slug}". Check its SKILL.md, scripts, and any referenced files for safety and correctness.`,
+          kind: "skills",
+        });
+        chatId = res.chatId;
+      } catch (err) {
+        log.warn("Auto-review failed", { id: slug, error: String(err) });
+      }
+
+      return { skill, chatId };
+    } finally {
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   log.info("Skills bus registered");

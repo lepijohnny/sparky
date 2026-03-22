@@ -2,11 +2,11 @@ import { resolve } from "node:path";
 import { realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 
-export function home(path: string): string {
+export function home(path: string, cwd?: string): string {
   if (path === "~" || path.startsWith("~/") || path.startsWith("~\\")) {
     return resolve(homedir(), path.slice(2));
   }
-  return resolve(path);
+  return cwd ? resolve(cwd, path) : resolve(path);
 }
 
 /** Resolve symlinks so trust rules match the real path. Returns the original path if it doesn't exist yet (e.g. new files). */

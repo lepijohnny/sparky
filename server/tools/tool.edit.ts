@@ -20,7 +20,7 @@ export const edit = defineTool({
   category: "file",
   summarize: (input) => input.path,
   async execute(input, ctx) {
-    const filePath = home(input.path);
+    const filePath = home(input.path, ctx.cwd);
     ctx.log.info("app_edit", { path: filePath });
 
     const err = requireFile(filePath, input.path);

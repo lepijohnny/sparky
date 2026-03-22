@@ -20,7 +20,7 @@ export const write = defineTool({
   category: "file",
   summarize: (input) => input.path,
   async execute(input, ctx) {
-    const filePath = home(input.path);
+    const filePath = home(input.path, ctx.cwd);
     ctx.log.info("app_write", { path: filePath });
 
     const err = rejectDir(filePath, input.path);

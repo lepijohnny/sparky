@@ -6,10 +6,10 @@ import { defineTool } from "./tool.registry";
 import { promptsDir } from "../prompts/prompt.role";
 import { home, real, requireFile } from "./tool.path";
 
-function resolvePath(path: string): string {
+function resolvePath(path: string, cwd?: string): string {
   const prompts = join(promptsDir(), path);
   if (statSync(prompts, { throwIfNoEntry: false })?.isFile()) return prompts;
-  return home(path);
+  return home(path, cwd);
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -64,7 +64,7 @@ export const read = defineTool({
     if (/^https?:\/\//i.test(input.path)) {
       return "Error: app_read is for local files only. Use app_web_read to fetch URLs.";
     }
-    const filePath = resolvePath(input.path);
+    const filePath = resolvePath(input.path, ctx.cwd);
     ctx.log.info("app_read", { path: filePath, offset: input.offset, limit: input.limit });
 
     const err = requireFile(filePath, input.path);
