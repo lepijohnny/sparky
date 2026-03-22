@@ -12,6 +12,7 @@
   justify-content: center;
   flex-shrink: 0;
   user-select: none;
+  -webkit-user-select: none;
   /* inset so the title doesn't overlap macOS traffic lights */
   padding-left: 78px;
   padding-right: 78px;
@@ -25,6 +26,8 @@
   font-weight: 600;
   color: var(--fg);
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .content {
