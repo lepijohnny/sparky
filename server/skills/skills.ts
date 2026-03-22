@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { existsSync, readdirSync } from "node:fs";
 
 const DEFAULT_SKILLS_DIR = join(homedir(), ".sparky", "skills");
 
@@ -98,9 +97,18 @@ function ensureSkillCache(): void {
         const descLine = fmMatch[1].match(/^description:\s*(.+)$/m);
         const toolsLine = fmMatch[1].match(/^allowed-tools:\s*(.+)$/m);
 
+        let displayName: string | undefined;
+        const metaPath = join(dir, d.name, "_meta.json");
+        if (existsSync(metaPath)) {
+          try {
+            const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+            if (meta.displayName) displayName = meta.displayName;
+          } catch {}
+        }
+
         skillMetaCache.set(d.name, {
           id: d.name,
-          name: nameLine?.[1]?.trim() ?? d.name,
+          name: displayName ?? nameLine?.[1]?.trim() ?? d.name,
           description: descLine?.[1]?.trim() ?? "",
           allowedTools: toolsLine ? toolsLine[1].split(/\s+/).filter(Boolean) : [],
           mdPath,
