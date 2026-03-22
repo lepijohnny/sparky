@@ -96,8 +96,11 @@
   right: 0;
   height: 52px;
   z-index: 50;
-  -webkit-app-region: drag;
   animation: fadeIn 250ms ease;
+}
+
+:not(:global(.platform-mac)) .focusDrag {
+  -webkit-app-region: drag;
 }
 
 @keyframes fadeIn {

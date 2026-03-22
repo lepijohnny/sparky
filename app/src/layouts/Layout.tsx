@@ -7,6 +7,7 @@ import {
 } from "react";
 import styles from "./Layout.module.css";
 import { useStore } from "../store";
+import { useDragRegion } from "../hooks/useDragRegion";
 import WindowControls from "../components/platform-win/WindowControls";
 
 const LEFT_DEFAULT = 180;
@@ -73,6 +74,8 @@ export default function Layout({ menu, context, details }: LayoutProps) {
 
 
 
+  const dragRegion = useDragRegion();
+
   return (
     <div
       className={styles.app}
@@ -84,7 +87,7 @@ export default function Layout({ menu, context, details }: LayoutProps) {
     >
       {/* Left */}
       <aside className={`${styles.left} ${focusMode ? styles.leftHidden : ""}`}>
-        <div className={styles.leftHeader} data-tauri-drag-region />
+        <div className={styles.leftHeader} {...dragRegion} />
         {menu}
       </aside>
 
@@ -109,7 +112,7 @@ export default function Layout({ menu, context, details }: LayoutProps) {
       {details}
 
       {focusMode && (
-        <div className={styles.focusDrag} data-tauri-drag-region />
+        <div className={styles.focusDrag} {...dragRegion} />
       )}
       <WindowControls />
     </div>

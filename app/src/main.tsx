@@ -17,6 +17,28 @@ if (navigator.userAgent.includes("Windows")) {
   document.documentElement.classList.add("platform-win");
 }
 
+if (navigator.userAgent.includes("Macintosh")) {
+  document.documentElement.classList.add("platform-mac");
+}
+
+if (window.__TAURI_INTERNALS__) {
+  const syncWindowBg = () => {
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    const match = bg.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    if (!match) return;
+    import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+      getCurrentWindow().setBackgroundColor({
+        red: parseInt(match[1], 16),
+        green: parseInt(match[2], 16),
+        blue: parseInt(match[3], 16),
+        alpha: 255,
+      });
+    });
+  };
+  syncWindowBg();
+  new MutationObserver(syncWindowBg).observe(document.documentElement, { attributes: true, attributeFilter: ["style"] });
+}
+
 document.addEventListener("click", (e) => {
   const anchor = (e.target as HTMLElement).closest("a");
   if (!anchor) return;
