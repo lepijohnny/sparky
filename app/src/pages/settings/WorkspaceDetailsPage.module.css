@@ -356,7 +356,8 @@
 
 .spaceSegConv,
 .spaceSegKnow,
-.spaceSegAtt {
+.spaceSegAtt,
+.spaceSegCwd {
   border-radius: 6px;
   border: 1px solid var(--accent, hsl(233, 65%, 58%));
   min-width: 8px;
@@ -408,10 +409,10 @@
   background: color-mix(in srgb, var(--accent, hsl(233, 65%, 58%)) 15%, transparent);
 }
 
-.spaceSegTmp {
+.spaceSegCwd {
   background: color-mix(in srgb, var(--text-secondary, #888) 30%, transparent);
 }
 
-.spaceDotTmp {
+.spaceDotCwd {
   background: color-mix(in srgb, var(--text-secondary, #888) 30%, transparent);
 }

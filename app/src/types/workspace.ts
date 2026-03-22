@@ -1,6 +1,7 @@
 export interface WorkspaceSpace {
   attachments: number;
   conversations: number;
+  cwd: number;
   knowledge: number;
   total: number;
 }
