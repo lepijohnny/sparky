@@ -66,10 +66,10 @@ Add documents (PDF, Markdown, text, URLs) as sources. Sparky chunks, embeds, and
 Install custom extractors to support new source types:
 
 ```bash
-npm install sparky-url-extractor --prefix ~/.sparky/plugins/ext
+bash <(curl -fsSL https://raw.githubusercontent.com/lepijohnny/sparky-extractors/main/install.sh) sparky-url-extractor
 ```
 
-Plugins are automatically discovered on startup. See [`sparky-url-extractor`](https://github.com/nicolaradin/sparky-url-extractor) for an example.
+Plugins are automatically discovered on startup. See [`sparky-extractors`](https://github.com/lepijohnny/sparky-extractors) for available plugins.
 
 ## Architecture
 
