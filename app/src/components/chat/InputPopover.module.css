@@ -56,6 +56,14 @@
   flex-shrink: 0;
 }
 
+.sectionTitle {
+  padding: 4px 8px 2px;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--fg-muted);
+  opacity: 0.6;
+}
+
 .empty {
   padding: 8px;
   font-size: 12px;

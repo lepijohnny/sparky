@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { resolveServiceMentions } from "../serviceResolver";
+import { resolveServiceMentions, resolveSkillMentions } from "../serviceResolver";
 import type { ServiceInfo } from "../../types/service";
+import type { Skill } from "../../types/skill";
 
 function svc(id: string, label: string): ServiceInfo {
   return { id, label, baseUrl: "", auth: { strategy: "bearer" }, endpoints: [] };
@@ -52,5 +53,45 @@ describe("resolveServiceMentions", () => {
 
   it("given empty message, when resolving, then returns empty", () => {
     expect(resolveServiceMentions("", services)).toEqual([]);
+  });
+});
+
+function skill(id: string, name: string): Skill {
+  return { id, name, description: "", version: "", license: "", author: "", icon: "puzzle", state: "active", source: "created", files: [], requirements: null, binsMissing: false, secretsMissing: false };
+}
+
+const skills = [
+  skill("code-reviewer", "Code Reviewer"),
+  skill("video-transcript-generator", "Video Transcript Generator"),
+];
+
+describe("resolveSkillMentions", () => {
+  it("given no skills, when resolving, then returns empty", () => {
+    expect(resolveSkillMentions("hello @Code Reviewer", [])).toEqual([]);
+  });
+
+  it("given inactive skill, when resolving, then returns empty", () => {
+    const inactive = [{ ...skill("code-reviewer", "Code Reviewer"), state: "pending" as const }];
+    expect(resolveSkillMentions("@Code Reviewer check this", inactive)).toEqual([]);
+  });
+
+  it("given @name mention, when resolving, then matches by name", () => {
+    expect(resolveSkillMentions("@Code Reviewer check this", skills)).toEqual(["code-reviewer"]);
+  });
+
+  it("given @id mention, when resolving, then matches by id", () => {
+    expect(resolveSkillMentions("@code-reviewer check this", skills)).toEqual(["code-reviewer"]);
+  });
+
+  it("given case-insensitive mention, when resolving, then matches", () => {
+    expect(resolveSkillMentions("@code reviewer check", skills)).toEqual(["code-reviewer"]);
+  });
+
+  it("given no mention, when resolving, then returns empty", () => {
+    expect(resolveSkillMentions("just a normal message", skills)).toEqual([]);
+  });
+
+  it("given longest name matched first, when resolving, then no partial overlap", () => {
+    expect(resolveSkillMentions("@Video Transcript Generator please", skills)).toEqual(["video-transcript-generator"]);
   });
 });

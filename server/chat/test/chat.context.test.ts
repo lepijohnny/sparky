@@ -20,6 +20,8 @@ function toolResult(messageId: string, toolId: string, output: string): ChatEntr
   return { kind: "activity", messageId, source: "agent", type: "agent.tool.result", timestamp: "2026-01-01T00:00:02Z", data: { id: toolId, output }, rowid: rowidCounter++ };
 }
 
+const emptyFetcher: EntryFetcher = () => ({ entries: [], hasMore: false });
+
 function arrayFetcher(entries: ChatEntry[]): EntryFetcher {
   return (pageSize: number, beforeRowid?: number) => {
     const messages = entries.filter((e) => e.kind === "message");
@@ -420,5 +422,33 @@ describe("contextBuilder — attachments", () => {
     expect(userContent).not.toContain("base64");
     expect(userContent).not.toContain("filePath");
     expect(userContent.length).toBeLessThan(200);
+  });
+
+  test("given skills summaries, when building context, then injects active-skills block", () => {
+    const ctx = contextBuilder()
+      .system("You are helpful.")
+      .skills([
+        { id: "code-reviewer", name: "Code Reviewer", description: "Reviews code" },
+        { id: "translator", name: "Translator", description: "Translates text" },
+      ])
+      .conversation(emptyFetcher)
+      .build();
+
+    expect(ctx.system).toContain("<active-skills>");
+    expect(ctx.system).toContain("Code Reviewer");
+    expect(ctx.system).toContain("Translator");
+    expect(ctx.system).toContain("app_read");
+    expect(ctx.budget.skillsTokens).toBeGreaterThan(0);
+  });
+
+  test("given empty skills, when building context, then no skills block", () => {
+    const ctx = contextBuilder()
+      .system("You are helpful.")
+      .skills([])
+      .conversation(emptyFetcher)
+      .build();
+
+    expect(ctx.system).not.toContain("<active-skills>");
+    expect(ctx.budget.skillsTokens).toBe(0);
   });
 });

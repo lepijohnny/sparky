@@ -11,5 +11,6 @@ export interface WorkspaceSpace {
   conversations: number;
   knowledge: number;
   attachments: number;
+  tmp: number;
   total: number;
 }

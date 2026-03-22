@@ -14,6 +14,8 @@ function mockCred(store: Record<string, string> = {}): Credentials {
     keys: vi.fn(() => Object.keys(store)),
     svcKey: vi.fn((svc: string, field: string) => `svc.${svc}.${field}`),
     deleteSvc: vi.fn(),
+    getEnvVars: vi.fn(() => ({})),
+    getEnvVarsForSkill: vi.fn(() => ({})),
   };
 }
 

@@ -95,6 +95,12 @@ export function syncStore(conn: WsConnection): Unsubscribe {
     useStore.getState().setTrust(data);
   });
 
+  sub("skills.changed", () => {
+    conn.request<{ skills: any[] }>("skills.list").then((res) => {
+      useStore.getState().setSkills(res.skills);
+    }).catch(() => {});
+  });
+
   sub("settings.workspace.changed", () => {
     fetchInitialData(conn);
     useStore.setState({ selectedSourceId: null });
@@ -117,11 +123,12 @@ export function syncPopup(conn: WsConnection): void {
 
 async function fetchInitialData(conn: WsConnection) {
   try {
-    const [chats, sources, connections, labels] = await Promise.all([
+    const [chats, sources, connections, labels, skills] = await Promise.all([
       conn.request<{ chats: Chat[] }>("chat.list.all"),
       conn.request<{ sources: Source[] }>("kt.sources.list"),
       conn.request<{ services: ServiceInfo[] }>("svc.list"),
       conn.request<{ labels: Label[] }>("settings.labels.list"),
+      conn.request<{ skills: any[] }>("skills.list"),
     ]);
 
     const store = useStore.getState();
@@ -129,6 +136,7 @@ async function fetchInitialData(conn: WsConnection) {
     store.setSources(sources.sources);
     store.setConnections(connections.services);
     store.setLabels(labels.labels);
+    store.setSkills(skills.skills);
 
     refetchWorkspace(conn);
     refetchTrust(conn);

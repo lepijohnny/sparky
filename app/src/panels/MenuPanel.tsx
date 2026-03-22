@@ -17,6 +17,7 @@ import {
   Tag,
   FileText,
   Unplug,
+  Puzzle,
 } from "lucide-react";
 import {
   type ReactNode,
@@ -50,6 +51,7 @@ const NAV_BEFORE_LABELS: { id: Section; label: string; icon: ReactNode }[] = [
 const NAV_AFTER_LABELS: { id: Section; label: string; icon: ReactNode }[] = [
   { id: "sources",      label: "Knowledge",    icon: <BookOpen size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "connections",  label: "Connections",  icon: <Blocks size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
+  { id: "skills",       label: "Skills",       icon: <Puzzle size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
 ];
 
 const SECRET_CLICKS = 7;

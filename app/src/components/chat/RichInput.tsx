@@ -428,9 +428,11 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
           break;
         case "deleteContentBackward":
           if (!deleteSelection()) deleteBack();
+          detectTrigger();
           break;
         case "deleteContentForward":
           if (!deleteSelection()) deleteFwd();
+          detectTrigger();
           break;
         case "deleteWordBackward": {
           const { segments: segs, cursor: cur } = model.current;
@@ -443,8 +445,10 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
             model.current.cursor = { seg: cur.seg, offset: i };
             render();
             onChange();
+            detectTrigger();
           } else {
             deleteBack();
+            detectTrigger();
           }
           break;
         }

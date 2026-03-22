@@ -12,6 +12,9 @@ export interface ToolContext {
   signal: AbortSignal;
   approvalCtx: ApprovalContext;
   trust: TrustStore;
+  envVars?: Record<string, string>;
+  cwd?: string;
+  skillApproved?: boolean;
   /** Injected by createToolSet — forwards a call to another tool in the set. */
   forward?: (tool: string, args: Record<string, unknown>) => Promise<string | ToolAttachment>;
 }
@@ -87,8 +90,8 @@ export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
           });
           return `Blocked by trust rules: ${rule?.label ?? target}`;
         }
-        if (decision === "prompt") {
-          const ok = await ctx.approvalCtx.requestApproval(name, rule?.label ?? target, { type: "confirm:yesno" });
+        if (decision === "prompt" && !(ctx.skillApproved && !rule)) {
+          const ok = await ctx.approvalCtx.requestApproval(name, target, { type: "confirm:yesno" });
           if (!ok) return "Denied by the user.";
         }
       }

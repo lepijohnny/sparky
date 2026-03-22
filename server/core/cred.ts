@@ -17,6 +17,8 @@ export interface Credentials {
   delete(key: string): Promise<void>;
   deletePrefix(prefix: string): Promise<void>;
   keys(): string[];
+  getEnvVars(): Record<string, string>;
+  getEnvVarsForSkill(skillId: string): Record<string, string>;
   svcKey(service: string, field: string): string;
   deleteSvc(service: string): Promise<void>;
 }
@@ -140,6 +142,41 @@ export function createCredStore(log: Logger, basePath: string, keychain: Keychai
 
     keys() {
       return [...map.keys()];
+    },
+
+    getEnvVars() {
+      const vars: Record<string, string> = {};
+      for (const [key, value] of map) {
+        if (key.startsWith("env.") && !key.startsWith("env.meta.")) vars[key.slice(4)] = value;
+      }
+      return vars;
+    },
+
+    /** Returns env vars for a skill. If ANY vars are tagged to this skill,
+     *  returns ONLY those — untagged globals are excluded. Otherwise returns
+     *  all untagged globals. This prevents unwanted key mixing between skills. */
+    getEnvVarsForSkill(skillId: string) {
+      const all: Record<string, string> = {};
+      const meta: Record<string, string> = {};
+
+      for (const [key, value] of map) {
+        if (key.startsWith("env.meta.")) {
+          meta[key.slice(9)] = value;
+        } else if (key.startsWith("env.")) {
+          all[key.slice(4)] = value;
+        }
+      }
+
+      const tagged: Record<string, string> = {};
+      const untagged: Record<string, string> = {};
+      for (const [name, value] of Object.entries(all)) {
+        const tag = meta[name];
+        if (tag === skillId) tagged[name] = value;
+        else if (!tag) untagged[name] = value;
+      }
+
+      if (Object.keys(tagged).length > 0) return tagged;
+      return untagged;
     },
   };
 }

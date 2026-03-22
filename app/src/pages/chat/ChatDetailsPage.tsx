@@ -23,7 +23,7 @@ import { collapseEntries, type Message } from "../../lib/chatUtils";
 import type { Chat, ChatActivity, ChatEntry } from "../../types/chat";
 import { highlightText } from "../../lib/highlight";
 import { useStore } from "../../store";
-import { resolveServiceMentions } from "../../lib/serviceResolver";
+import { resolveServiceMentions, resolveSkillMentions } from "../../lib/serviceResolver";
 import styles from "./ChatDetailsPage.module.css";
 
 
@@ -483,12 +483,15 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
         attachmentIds.push(res.attachment.id);
       }
 
-      const services = resolveServiceMentions(text, useStore.getState().connections);
+      const store = useStore.getState();
+      const services = resolveServiceMentions(text, store.connections);
+      const skills = resolveSkillMentions(text, store.skills);
       await conn.request("chat.ask", {
         chatId: chat.id,
         content: text,
         attachmentIds: attachmentIds.length > 0 ? attachmentIds : undefined,
         services: services.length > 0 ? services : undefined,
+        skills: skills.length > 0 ? skills : undefined,
       });
     } catch (err) {
       console.error("Failed to send message:", err);

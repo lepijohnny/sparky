@@ -125,7 +125,7 @@ describe("TrustStore", () => {
     trust.reset();
     expect(trust.data().mode).toBe("read");
     expect(trust.data().bash.allow).toHaveLength(0);
-    expect(trust.data().bash.ask).toHaveLength(0);
+    expect(trust.data().bash.ask).toHaveLength(1);
     expect(trust.data().bash.deny.length).toBeGreaterThan(0);
     expect(trust.data().write.deny.length).toBeGreaterThan(0);
     expect(trust.data().read.deny.length).toBeGreaterThan(0);
@@ -208,5 +208,42 @@ describe("TrustStore", () => {
   test("given trust.enc exists, then file is created on flush", () => {
     trust.setMode("write");
     expect(existsSync(join(basePath, "trust.enc"))).toBe(true);
+  });
+
+  test("given rm command, then default ask rule triggers prompt", () => {
+    const res = trust.resolve("bash", "rm ~/.sparky/skills/test/FILE.md");
+    expect(res).toMatchObject({ decision: "prompt" });
+    expect(res.rule?.label).toBe("rm");
+  });
+
+  test("given rm -rf /, then deny rule wins over ask rule", () => {
+    expect(trust.resolve("bash", "rm -rf /")).toMatchObject({ decision: "deny" });
+  });
+
+  test("given skillApproved with no matching rule, then prompt decision has no rule", () => {
+    const res = trust.resolve("bash", "ls -la");
+    expect(res.decision).toBe("prompt");
+    expect(res.rule).toBeUndefined();
+  });
+
+  test("given skillApproved with rm command, then prompt decision has rule", () => {
+    const res = trust.resolve("bash", "rm file.txt");
+    expect(res.decision).toBe("prompt");
+    expect(res.rule).toBeDefined();
+  });
+
+  test("given custom bash deny rules added, then default ask rules still present", () => {
+    trust.addRule("bash", "deny", { label: "custom deny", pattern: "^dangerous" });
+    const data = trust.data();
+    const rmAsk = data.bash.ask.find((r) => r.label === "rm");
+    expect(rmAsk).toBeDefined();
+    expect(rmAsk?.pattern).toBe("\\brm\\b");
+  });
+
+  test("given defaults merged with saved rules, then no duplicate default rules", async () => {
+    trust.addRule("bash", "ask", { label: "rm", pattern: "\\brm\\b" });
+    const data = trust.data();
+    const rmRules = data.bash.ask.filter((r) => r.label === "rm");
+    expect(rmRules).toHaveLength(1);
   });
 });

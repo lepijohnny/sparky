@@ -34,6 +34,7 @@ export function createChatWorkspace(
   agentFactory: AgentFactory = () => Promise.resolve(null),
   defaultAgentFactory: AgentFactory = () => Promise.resolve(null),
   knowledge: KnowledgeSearch | null = null,
+  getEnvVars: () => Record<string, string> = () => ({}),
 ): ChatWorkspace {
   let db = new ChatDatabase(dbPath, log);
   let buffer = new StreamBufferManager(db, log);
@@ -52,7 +53,7 @@ export function createChatWorkspace(
     return parts.join(" ");
   };
 
-  const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences);
+  const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences, getEnvVars);
   conversation.wsDir = workspacePath;
 
   bus.on("tool.approval.pending", (data) => approval.getPending(data.chatId));
