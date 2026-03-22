@@ -12,6 +12,7 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 pub static NODE_BIN: OnceLock<PathBuf> = OnceLock::new();
 
 fn hidden_command(program: &PathBuf) -> Command {
+    #[allow(unused_mut)]
     let mut cmd = Command::new(program);
     #[cfg(windows)]
     cmd.creation_flags(CREATE_NO_WINDOW);
