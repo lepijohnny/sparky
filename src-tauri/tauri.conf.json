@@ -10,6 +10,7 @@
     "beforeBuildCommand": ""
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Sparky",
@@ -21,10 +22,11 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
+        "transparent": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "visible": false,
-        "backgroundColor": [26, 26, 46, 255]
+        "backgroundColor": [242, 242, 242, 0]
       }
     ],
     "security": {

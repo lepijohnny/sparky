@@ -248,7 +248,6 @@ pub fn run() {
 
             // Show window when frontend signals ready
             let window = app.handle().get_webview_window("main").unwrap();
-
             app.listen("show-window", move |_| {
                 let _ = window.show();
             });
