@@ -44,7 +44,7 @@ export interface CoreEvents {
 
   "skills.list":                { req: void; res: { skills: any[] } };
   "skills.get":                 { req: { id: string }; res: { skill: any; files: { name: string; content: string }[] } };
-  "skills.create":              { req: { id: string; name: string }; res: { skill: any } };
+  "skills.create":              { req: { id: string; name: string; content?: string }; res: { skill: any } };
   "skills.delete":              { req: { id: string }; res: { ok: boolean } };
   "skills.activate":            { req: { id: string }; res: { skill: any } };
   "skills.deactivate":          { req: { id: string }; res: { skill: any } };

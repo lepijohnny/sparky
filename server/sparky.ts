@@ -296,7 +296,7 @@ export function createSparky(): Sparky {
   });
 
   registerTrustBus(bus, trustStore, broadcast);
-  registerSkillsBus(bus, logger.createLogger("skills"), (skillId?: string) => skillId ? cred.getEnvVarsForSkill(skillId) : cred.getEnvVars(), broadcast);
+  registerSkillsBus(bus, logger.createLogger("skills"), storage, (skillId?: string) => skillId ? cred.getEnvVarsForSkill(skillId) : cred.getEnvVars(), broadcast);
 
   bus.on("core.config.get", (data) => {
     return config.get(data.key as any) ?? null;
