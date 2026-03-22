@@ -121,8 +121,11 @@ export default function AboutDetailsPage() {
             </div>
           )}
           {update.status === "available" && (
-            <div className={styles.updateAvailable}>
-              <p className={styles.updateStatus}>Version {update.version} is available</p>
+            <div className={update.notes && update.notes.length > 0 ? styles.updateAvailableNotes : styles.updateAvailable}>
+              <div className={styles.updateAvailable}>
+                <p className={styles.updateStatus}>Version {update.version} is available</p>
+                <button className={styles.updateBtn} onClick={downloadAndInstall}>Download and install</button>
+              </div>
               {update.notes && update.notes.length > 0 && (
                 <ul className={styles.changelog}>
                   {update.notes.map((item, i) => (
@@ -130,7 +133,6 @@ export default function AboutDetailsPage() {
                   ))}
                 </ul>
               )}
-              <button className={styles.updateBtn} onClick={downloadAndInstall}>Download and install</button>
             </div>
           )}
           {update.status === "downloading" && (
