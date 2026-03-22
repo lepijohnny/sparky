@@ -49,7 +49,7 @@ export const grep = defineTool({
   category: "file",
   summarize: (input) => input.pattern,
   async execute(input, ctx) {
-    const searchPath = input.path ? home(input.path) : process.cwd();
+    const searchPath = input.path ? home(input.path, ctx.cwd) : (ctx.cwd ?? process.cwd());
     ctx.log.info("app_grep", { pattern: input.pattern, path: searchPath });
 
     const err = requirePath(searchPath, input.path ?? searchPath);
@@ -68,9 +68,9 @@ export const grep = defineTool({
 
     const lines = result.raw.trimEnd().split("\n");
 
-    const cwd = process.cwd();
+    const stripCwd = ctx.cwd ?? process.cwd();
     const output = lines
-      .map((line) => truncateLine(line.startsWith(cwd) ? line.slice(cwd.length + 1) : line))
+      .map((line) => truncateLine(line.startsWith(stripCwd) ? line.slice(stripCwd.length + 1) : line))
       .join("\n");
 
     return output;

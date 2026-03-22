@@ -120,6 +120,8 @@ const ROUTES: RouteEntry[] = [
   ["skills.activate", { notifiable: true }],
   ["skills.deactivate", { notifiable: true }],
   ["skills.state.set", { notifiable: true }],
+  ["skills.import", { notifiable: true }],
+  ["skills.export", { notifiable: true }],
 
   "core.prefetch",
   "fs.complete",

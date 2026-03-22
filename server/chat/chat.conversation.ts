@@ -152,6 +152,9 @@ export class ChatConversation {
 
       const skills = await this.getSkillsMetadata(data.skills, data.chatId);
 
+      const chatCwd = join(this.wsDir, "chats", data.chatId, "cwd");
+      await mkdir(chatCwd, { recursive: true });
+
       const toolCtx = { 
         bus: this.bus, 
         log: this.log, 
@@ -160,11 +163,11 @@ export class ChatConversation {
         approvalCtx: createApprovalContext(this.approval, roleName, chat.id, turnId), 
         trust: chatTrust, 
         envVars: this.getEnvVars(),
-        cwd: skills.cwd,
+        cwd: chatCwd,
         skillApproved: skills.summaries.length > 0,
       };
       const tools = createRoleToolSet(role, toolCtx, { webSearch: resolved.webSearch });
-      const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences(), chatMode, data.chatId);
+      const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences(), chatMode, data.chatId, chatCwd);
 
       const shouldSearch = role.meta.knowledge && chat.knowledge !== false;
       const knowledgeResults = shouldSearch
@@ -340,7 +343,6 @@ export class ChatConversation {
 
   private async getSkillsMetadata(skillIds: string[] | undefined, chatId: string): Promise<{
     summaries: { id: string; name: string; description: string }[];
-    cwd: string | undefined;
   }> {
     const ids = new Set(skillIds ?? []);
 
@@ -358,10 +360,7 @@ export class ChatConversation {
       }
     }
 
-    if (ids.size === 0) return { summaries: [], cwd: undefined };
-
-    const cwd = join(this.wsDir, "chats", chatId, "tmp");
-    await mkdir(cwd, { recursive: true });
+    if (ids.size === 0) return { summaries: [] };
 
     const summaries: { id: string; name: string; description: string }[] = [];
     for (const id of ids) {
@@ -373,7 +372,7 @@ export class ChatConversation {
       }
     }
 
-    return { summaries, cwd };
+    return { summaries };
   }
 
   private async searchKnowledge(

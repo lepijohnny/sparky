@@ -1,4 +1,4 @@
-import { Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { Download, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./App.module.css";
 import shared from "./styles/shared.module.css";
@@ -262,6 +262,28 @@ export default function App() {
     }
   }, [conn, selectChat, section, router.handleSectionChange]);
 
+  const handleImportSkill = useCallback(async () => {
+    if (!conn) return;
+    try {
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: "Skill archive", extensions: ["zip"] }],
+      });
+      if (!selected) return;
+      const res = await conn.request<{ skill: any; chatId?: string }>("skills.import", { path: selected });
+      addToast({ id: `skill-import-${Date.now()}`, kind: "success", title: "Skill imported — review started" });
+      if (res.chatId) {
+        if (section !== "chats") router.handleSectionChange("chats");
+        conn.request<{ chat: Chat }>("chat.get.id", { id: res.chatId }).then((r) => {
+          if (r?.chat) selectChat(r.chat);
+        }).catch(() => {});
+      }
+    } catch (err: any) {
+      addToast({ id: `skill-import-err-${Date.now()}`, kind: "error", title: err?.message ?? String(err) });
+    }
+  }, [conn, addToast, section, router, selectChat]);
+
   const handleRename = useCallback((c: Chat) => setRenameChat(c), [setRenameChat]);
   const handleDelete = useCallback(() => selectChat(null), [selectChat]);
   const handleSearchClose = useCallback(() => setSearching(false), [setSearching]);
@@ -453,18 +475,27 @@ export default function App() {
                 <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
               </button>
             ) : section === "skills" ? (
-              <button
-                ref={skillsPlusRef}
-                className={styles.searchBtn}
-                onClick={() => {
-                  const rect = skillsPlusRef.current?.getBoundingClientRect();
-                  if (rect) setSkillsAskPos({ x: rect.left - 320, y: rect.bottom + 8 });
-                  setShowSkillsAsk(true);
-                }}
-                title="Create or manage skills"
-              >
-                <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
-              </button>
+              <>
+                <button
+                  className={styles.searchBtn}
+                  onClick={handleImportSkill}
+                  title="Import skill from zip"
+                >
+                  <Download size={14} strokeWidth={1.5} />
+                </button>
+                <button
+                  ref={skillsPlusRef}
+                  className={styles.searchBtn}
+                  onClick={() => {
+                    const rect = skillsPlusRef.current?.getBoundingClientRect();
+                    if (rect) setSkillsAskPos({ x: rect.left - 320, y: rect.bottom + 8 });
+                    setShowSkillsAsk(true);
+                  }}
+                  title="Create or manage skills"
+                >
+                  <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
+                </button>
+              </>
             ) : section !== "settings" ? (
               <button
                 className={`${styles.searchBtn} ${searching ? styles.searchBtnActive : ""}`}

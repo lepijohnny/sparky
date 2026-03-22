@@ -159,10 +159,10 @@ export function listRoles(): string[] {
   }
 }
 
-export function buildRolePrompt(role: RoleDef, preferences: string, mode?: string, chatId?: string): string {
+export function buildRolePrompt(role: RoleDef, preferences: string, mode?: string, chatId?: string, cwd?: string): string {
   let prompt = role.prompt;
 
-  prompt += `\n\n## System\n- Platform: ${process.platform}\n- Home: ${homedir()}\n- CWD: ${process.cwd()}`;
+  prompt += `\n\n## System\n- Platform: ${process.platform}\n- Home: ${homedir()}\n- CWD: ${cwd ?? process.cwd()}`;
   if (chatId) prompt += `\n- ChatId: ${chatId}`;
   if (mode) {
     const desc = mode === "read" ? "read-only (no file writes or shell commands)"

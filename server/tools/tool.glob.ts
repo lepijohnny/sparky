@@ -21,7 +21,7 @@ export const glob = defineTool({
   category: "file",
   summarize: (input) => input.pattern,
   async execute(input, ctx) {
-    const cwd = input.cwd ? home(input.cwd) : process.cwd();
+    const cwd = input.cwd ? home(input.cwd, ctx.cwd) : (ctx.cwd ?? process.cwd());
     ctx.log.info("app_glob", { pattern: input.pattern, cwd });
 
     const err = requireDir(cwd, input.cwd ?? cwd);
