@@ -2,6 +2,20 @@ import { useCallback, useRef } from "react";
 
 const isMac = navigator.userAgent.includes("Macintosh");
 
+if (isMac && window.__TAURI_INTERNALS__) {
+  import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+    const win = getCurrentWindow();
+    win.onResized(() => {
+      if (animating) return;
+      win.isMaximized().then((maximized) => {
+        if (maximized && !pseudoMaximized) {
+          win.unmaximize().then(() => togglePseudoMaximize());
+        }
+      });
+    });
+  });
+}
+
 let prevRect: { x: number; y: number; w: number; h: number } | null = null;
 let pseudoMaximized = false;
 let animating = false;
@@ -40,7 +54,10 @@ async function togglePseudoMaximize() {
   }
 
   animating = true;
-  const duration = 300;
+  const duration = 500;
+
+  await new Promise<void>((r) => requestAnimationFrame(() => r()));
+
   const start = performance.now();
 
   await new Promise<void>((resolve) => {
