@@ -23,7 +23,8 @@
         "decorations": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "visible": false
+        "visible": false,
+        "backgroundColor": [26, 26, 46, 255]
       }
     ],
     "security": {

@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDragRegion } from "../../hooks/useDragRegion";
 import RenameModal from "../../components/modals/RenameModal";
 import ContextMenu from "../../components/shared/ContextMenu";
 import { Ctx as ConnectionCtx, useConnection } from "../../context/ConnectionContext";
@@ -144,7 +145,7 @@ function ChatWindowInner({ chatId, printMode }: { chatId: string; printMode?: bo
 
   return (
     <div className={styles.window}>
-      <div className={styles.header} data-tauri-drag-region>
+      <div className={styles.header} {...useDragRegion()}>
         <ContextMenu actions={actions} align="left">
           <span className={styles.title}>
             {chat.name}
