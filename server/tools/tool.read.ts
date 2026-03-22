@@ -54,10 +54,12 @@ export const read = defineTool({
     offset: z.number().optional().describe("Line number to start reading from (1-indexed)"),
     limit: z.number().optional().describe("Maximum number of lines to read"),
   }),
+  label: "Reading",
+  icon: "file-text",
   trustScope: "read",
   trustTarget: (input) => real(resolvePath(input.path)),
   category: "file",
-  summarize: (input) => `Reading ${input.path}`,
+  summarize: (input) => input.path,
   async execute(input, ctx) {
     if (/^https?:\/\//i.test(input.path)) {
       return "Error: app_read is for local files only. Use app_web_read to fetch URLs.";

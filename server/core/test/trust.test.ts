@@ -125,7 +125,7 @@ describe("TrustStore", () => {
     trust.reset();
     expect(trust.data().mode).toBe("read");
     expect(trust.data().bash.allow).toHaveLength(0);
-    expect(trust.data().bash.ask).toHaveLength(1);
+    expect(trust.data().bash.ask).toHaveLength(3);
     expect(trust.data().bash.deny.length).toBeGreaterThan(0);
     expect(trust.data().write.deny.length).toBeGreaterThan(0);
     expect(trust.data().read.deny.length).toBeGreaterThan(0);

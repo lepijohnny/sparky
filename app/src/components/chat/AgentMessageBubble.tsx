@@ -5,15 +5,21 @@ import {
   Brain,
   ChevronRight,
   FileText,
+  FilePlus,
   FolderOpen,
+  Globe,
   MessageSquare,
   Palette,
+  Pencil,
   Plug,
+  Search,
+  Settings,
   ShieldCheck,
   ShieldQuestion,
   ShieldX,
   Square,
   Tag,
+  Terminal,
   Wrench,
 } from "lucide-react";
 import { memo, type ReactElement, useCallback, useMemo, useRef, useState } from "react";
@@ -68,6 +74,16 @@ export interface AgentMessageBubbleProps {
 const ICON_SIZE = 12;
 const ICON_STROKE = 1.5;
 
+const TOOL_ICONS: Record<string, typeof Wrench> = {
+  "file-text": FileText,
+  "file-plus": FilePlus,
+  "pencil": Pencil,
+  "terminal": Terminal,
+  "search": Search,
+  "globe": Globe,
+  "settings": Settings,
+};
+
 const CATEGORY_ICONS: Record<string, typeof Wrench> = {
   chat: MessageSquare,
   label: Tag,
@@ -76,10 +92,11 @@ const CATEGORY_ICONS: Record<string, typeof Wrench> = {
   theme: Palette,
   file: FileText,
   docs: FileText,
+  execute: Terminal,
 };
 
-function getCategoryIcon(category?: string): ReactElement {
-  const Icon = (category && CATEGORY_ICONS[category]) || Wrench;
+function getToolIcon(icon?: string, category?: string): ReactElement {
+  const Icon = (icon && TOOL_ICONS[icon]) || (category && CATEGORY_ICONS[category]) || Wrench;
   return <Icon size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
 }
 
@@ -91,7 +108,7 @@ function getActivityIcon(activity: ChatActivity): ReactElement {
   if (type === "agent.trust.denied") return <ShieldX size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.knowledge") return <BookOpen size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type.includes("thinking")) return <Brain size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
-  if (type === "agent.tool.start" || type === "agent.tool.result") return getCategoryIcon(data?.category);
+  if (type === "agent.tool.start" || type === "agent.tool.result") return getToolIcon(data?.icon, data?.category);
   if (type === "agent.error") return <AlertCircle size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.stopped") return <Square size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   return <ChevronRight size={ICON_SIZE} strokeWidth={ICON_STROKE} />;

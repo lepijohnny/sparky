@@ -13,10 +13,12 @@ export const edit = defineTool({
     oldText: z.string().describe("Exact text to find and replace (must match exactly)"),
     newText: z.string().describe("New text to replace the old text with"),
   }),
+  label: "Editing",
+  icon: "pencil",
   trustScope: "write",
   trustTarget: (input) => real(home(input.path)),
   category: "file",
-  summarize: (input) => `Editing ${input.path}`,
+  summarize: (input) => input.path,
   async execute(input, ctx) {
     const filePath = home(input.path);
     ctx.log.info("app_edit", { path: filePath });

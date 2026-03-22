@@ -73,12 +73,13 @@ export const bash = defineTool({
     command: z.string().describe("Bash command to execute"),
     timeout: z.number().optional().describe("Timeout in seconds (default: 30)"),
   }),
+  label: "Running",
+  icon: "terminal",
   trustScope: "bash",
   trustTarget: (input) => input.command,
   category: "execute",
   summarize: (input) => {
-    const cmd = input.command.length > 60 ? `${input.command.slice(0, 57)}...` : input.command;
-    return `$ ${cmd}`;
+    return input.command.length > 60 ? `${input.command.slice(0, 57)}...` : input.command;
   },
   async execute(input, ctx) {
     const MAX_TIMEOUT = 5 * 60 * 1000;

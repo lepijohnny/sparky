@@ -3,12 +3,14 @@ import { defineTool } from "./tool.registry";
 
 export const webSearch = defineTool({
   name: "app_web_search",
+  label: "Web Searching",
+  icon: "globe",
   description: "Search the web using DuckDuckGo. Returns titles, URLs, and snippets. Use this to find documentation, APIs, or any information not available in app_read.",
   schema: z.object({
     query: z.string().describe("Search query, e.g. 'todoist REST API v1 documentation'"),
     maxResults: z.number().optional().default(10).describe("Max results to return (default 10)"),
   }),
-  summarize: (input) => `Searching: ${input.query}`,
+  summarize: (input) => input.query,
   async execute(input, ctx) {
     ctx.log.info("app_web_search", { query: input.query });
     const { results } = await ctx.bus.emit("web.search", { query: input.query, maxResults: input.maxResults });

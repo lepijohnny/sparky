@@ -44,8 +44,10 @@ export const grep = defineTool({
     path: z.string().optional().describe("File or directory to search (default: current working directory)"),
     ignoreCase: z.boolean().optional().describe("Case-insensitive search (default: false)"),
   }),
+  label: "Matching",
+  icon: "search",
   category: "file",
-  summarize: (input) => `Grep ${input.pattern}`,
+  summarize: (input) => input.pattern,
   async execute(input, ctx) {
     const searchPath = input.path ? home(input.path) : process.cwd();
     ctx.log.info("app_grep", { pattern: input.pattern, path: searchPath });

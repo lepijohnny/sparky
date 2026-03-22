@@ -1,9 +1,11 @@
-import { ExternalLink, KeyRound, ShieldAlert } from "lucide-react";
+import { ExternalLink, FileText, Globe, KeyRound, Pencil, ShieldAlert, Terminal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
 import { useConnection } from "../../context/ConnectionContext";
 import { useWsSubscriber } from "../../hooks/useWsSubscriber";
 import styles from "./ApprovalPopup.module.css";
+
+import { humanizeToolTarget } from "../../lib/activityUtils";
 
 interface ApprovalField {
   name: string;
@@ -22,6 +24,8 @@ interface ApprovalRequest {
   requestId: string;
   type: "confirm:yesno" | "input:credentials" | "input:oauth";
   service?: string;
+  tool?: string;
+  target?: string;
   message: string;
   canPersist: boolean;
   timeoutMs: number;
@@ -290,7 +294,18 @@ function ApprovalItem({
         {isConnection ? request.message : "Approval Required"}
       </div>
       {request.description && <div className={styles.detail}>{request.description}</div>}
-      {!isConnection && !request.description && <div className={styles.detail}>{request.message}</div>}
+      {!isConnection && !request.description && request.tool === "app_bash" && (
+        <div className={styles.targetBlock}>
+          <div className={styles.targetHeader}>
+            <Terminal size={12} strokeWidth={1.5} />
+            <span className={styles.targetLabel}>Shell Command</span>
+          </div>
+          <pre className={styles.targetCode}>{(request.target ?? request.message).replace(/^\n+|\n+$/g, "")}</pre>
+        </div>
+      )}
+      {!isConnection && !request.description && request.tool !== "app_bash" && (
+        <div className={styles.detail}>{humanizeToolTarget(request.tool, request.target) || request.message}</div>
+      )}
       {request.link && (
         <a
           className={styles.link}
