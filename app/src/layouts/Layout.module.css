@@ -78,15 +78,10 @@
   height: 52px;
   display: flex;
   align-items: center;
-  padding: 0 20px 0 78px;
+  padding: 0 20px;
   user-select: none;
   -webkit-user-select: none;
   flex-shrink: 0;
-}
-
-/* Windows: no traffic lights, reduce left padding */
-:global(.platform-win) .leftHeader {
-  padding-left: 20px;
 }
 
 .focusDrag {

@@ -13,9 +13,8 @@
   flex-shrink: 0;
   user-select: none;
   -webkit-user-select: none;
-  /* inset so the title doesn't overlap macOS traffic lights */
-  padding-left: 78px;
-  padding-right: 78px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .title {
