@@ -1,3 +1,5 @@
+import { rmSync } from "node:fs";
+import { join } from "node:path";
 import type { EventBus } from "../core/bus";
 import type { ConfigManager } from "../core/config";
 import type { Logger } from "../logger.types";
@@ -121,6 +123,14 @@ export class ChatCrud {
     if (deleted) {
       this.log.info("Deleted chat", { id: data.id });
       this.bus.emit("chat.deleted", { id: data.id });
+      if (this.workspacePath) {
+        const chatDir = join(this.workspacePath, "chats", data.id);
+        try {
+          rmSync(chatDir, { recursive: true, force: true });
+        } catch (err) {
+          this.log.warn("Failed to remove chat directory", { id: data.id, error: String(err) });
+        }
+      }
     }
     return { deleted };
   }

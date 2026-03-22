@@ -32,7 +32,7 @@ export class WorkspaceSettings {
     const activeId = this.config.get("activeWorkspace");
     const workspaces = this.readWorkspaces();
     const ws = workspaces.find((w) => w.id === activeId);
-    if (!ws) return { conversations: 0, knowledge: 0, attachments: 0, total: 0 };
+    if (!ws) return { conversations: 0, knowledge: 0, attachments: 0, cwd: 0, total: 0 };
 
     const dbPath = this.storage.root(`${ws.path}/workspace.db`);
     const ktDbPath = dbPath.replace(/\.db$/, ".kt.db");
@@ -41,9 +41,9 @@ export class WorkspaceSettings {
     const conversations = fileSize(dbPath);
     const knowledge = fileSize(ktDbPath);
     const attachments = chatSubdirSize(chatsRoot, "attachments");
-    const tmp = chatSubdirSize(chatsRoot, "tmp");
+    const cwd = chatSubdirSize(chatsRoot, "cwd");
 
-    return { conversations, knowledge, attachments, tmp, total: conversations + knowledge + attachments + tmp };
+    return { conversations, knowledge, attachments, cwd, total: conversations + knowledge + attachments + cwd };
   }
 
   private readWorkspaces(): Workspace[] {

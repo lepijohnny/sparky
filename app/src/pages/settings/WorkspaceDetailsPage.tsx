@@ -277,11 +277,11 @@ export default function WorkspaceDetailsPage() {
                   title={`Attachments: ${formatSize(workspaceSpace.attachments)}`}
                 />
               )}
-              {workspaceSpace.tmp > 0 && (
+              {workspaceSpace.cwd > 0 && (
                 <div
-                  className={styles.spaceSegTmp}
-                  style={{ flex: workspaceSpace.tmp }}
-                  title={`Temp files: ${formatSize(workspaceSpace.tmp)}`}
+                  className={styles.spaceSegCwd}
+                  style={{ flex: workspaceSpace.cwd }}
+                  title={`Working files: ${formatSize(workspaceSpace.cwd)}`}
                 />
               )}
             </div>
@@ -300,10 +300,10 @@ export default function WorkspaceDetailsPage() {
                   Attachments {formatSize(workspaceSpace.attachments)}
                 </span>
               )}
-              {workspaceSpace.tmp > 0 && (
+              {workspaceSpace.cwd > 0 && (
                 <span className={styles.spaceLegendItem}>
-                  <span className={`${styles.spaceDot} ${styles.spaceDotTmp}`} />
-                  Temp {formatSize(workspaceSpace.tmp)}
+                  <span className={`${styles.spaceDot} ${styles.spaceDotCwd}`} />
+                  Working files {formatSize(workspaceSpace.cwd)}
                 </span>
               )}
             </div>
