@@ -69,6 +69,8 @@ function summarize(input: { event: string; params?: Record<string, unknown> }, o
 
 export const busEmit = defineTool({
   name: "app_bus_emit",
+  label: "App",
+  icon: "wrench",
   description:
     "Call an application bus event. The 'event' field is the event name and 'params' is a separate object with the event arguments. Never combine them into one string.",
   schema: z.object({

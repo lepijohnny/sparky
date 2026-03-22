@@ -16,8 +16,10 @@ export const glob = defineTool({
     pattern: z.string().describe("Glob pattern, e.g. '**/*.ts', 'src/**/*.test.ts'"),
     cwd: z.string().optional().describe("Directory to search from (default: current working directory)"),
   }),
+  label: "Searching",
+  icon: "search",
   category: "file",
-  summarize: (input) => `Glob ${input.pattern}`,
+  summarize: (input) => input.pattern,
   async execute(input, ctx) {
     const cwd = input.cwd ? home(input.cwd) : process.cwd();
     ctx.log.info("app_glob", { pattern: input.pattern, cwd });

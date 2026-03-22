@@ -34,15 +34,27 @@ describe("truncate", () => {
 });
 
 describe("toolLabel", () => {
-  test("given bus_emit with event, when labeled, then returns event name", () => {
-    expect(toolLabel("app_bus_emit", { event: "chat.list" })).toBe("chat.list");
+  test("given bus_emit with chat event, when labeled, then returns Chat", () => {
+    expect(toolLabel("app_bus_emit", { event: "chat.list" })).toBe("Chat");
   });
 
-  test("given bus_emit without event, when labeled, then returns Bus event", () => {
-    expect(toolLabel("app_bus_emit", {})).toBe("Bus event");
+  test("given bus_emit with settings event, when labeled, then returns Settings", () => {
+    expect(toolLabel("app_bus_emit", { event: "settings.labels.create" })).toBe("Settings");
   });
 
-  test("given non-bus_emit tool, when labeled, then returns tool name", () => {
+  test("given bus_emit with skills event, when labeled, then returns Skills", () => {
+    expect(toolLabel("app_bus_emit", { event: "skills.create" })).toBe("Skills");
+  });
+
+  test("given bus_emit without event, when labeled, then returns App", () => {
+    expect(toolLabel("app_bus_emit", {})).toBe("App");
+  });
+
+  test("given tool with label, when labeled, then returns label", () => {
+    expect(toolLabel("app_read", { path: "foo.ts" }, "Reading")).toBe("Reading");
+  });
+
+  test("given tool without label, when labeled, then returns tool name", () => {
     expect(toolLabel("report_intent", {})).toBe("report_intent");
   });
 });
@@ -56,14 +68,14 @@ describe("getActivityLabel", () => {
     expect(getActivityLabel(activity("agent.thinking.start"))).toBe("Thinking");
   });
 
-  test("given tool.start bus_emit, when labeled, then returns event name", () => {
+  test("given tool.start bus_emit, when labeled, then returns domain label", () => {
     const a = activity("agent.tool.start", { name: "app_bus_emit", input: { event: "settings.labels.list" } });
-    expect(getActivityLabel(a)).toBe("settings.labels.list");
+    expect(getActivityLabel(a)).toBe("Settings");
   });
 
   test("given tool.start with summary, when labeled, then returns summary", () => {
-    const a = activity("agent.tool.start", { name: "app_read", input: { path: "src/index.ts" }, summary: "Reading src/index.ts" });
-    expect(getActivityLabel(a)).toBe("Reading src/index.ts");
+    const a = activity("agent.tool.start", { name: "app_read", input: { path: "src/index.ts" }, summary: "src/index.ts" });
+    expect(getActivityLabel(a)).toBe("src/index.ts");
   });
 
   test("given tool.result with summary, when labeled, then returns summary", () => {
@@ -129,11 +141,11 @@ describe("filterActivities", () => {
 
 describe("mergeToolActivities", () => {
   test("given start and result with same id, when merged, then produces single row", () => {
-    const start = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" } });
+    const start = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" }, label: "Managing" });
     const result = activity("agent.tool.result", { id: "c1", output: "{}", summary: "Listed chats, 5 found", category: "chat" });
     const merged = mergeToolActivities([start, result]);
     expect(merged).toHaveLength(1);
-    expect(merged[0].data.mergedLabel).toBe("chat.list → Listed chats, 5 found");
+    expect(merged[0].data.mergedLabel).toBe("Chat → Listed chats, 5 found");
   });
 
   test("given start without matching result, when merged, then kept as-is", () => {
@@ -150,6 +162,15 @@ describe("mergeToolActivities", () => {
     expect(merged[0].type).toBe("agent.tool.result");
   });
 
+  test("given tool with label and icon, when merged, then icon propagates from start", () => {
+    const start = activity("agent.tool.start", { id: "c1", name: "app_read", input: { path: "foo.ts" }, label: "Reading", icon: "file-text" });
+    const result = activity("agent.tool.result", { id: "c1", output: "content", summary: "Read foo.ts" });
+    const merged = mergeToolActivities([start, result]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].data.mergedLabel).toBe("Reading → Read foo.ts");  // result summary unchanged
+    expect(merged[0].data.icon).toBe("file-text");
+  });
+
   test("given non-tool activities, when merged, then passed through", () => {
     const thinking = activity("agent.thinking.start");
     const error = activity("agent.error", { message: "fail" });
@@ -158,14 +179,14 @@ describe("mergeToolActivities", () => {
   });
 
   test("given multiple tool pairs, when merged, then each pair produces one row", () => {
-    const s1 = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" } });
+    const s1 = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" }, label: "Managing" });
     const r1 = activity("agent.tool.result", { id: "c1", output: "{}", summary: "5 chats" });
-    const s2 = activity("agent.tool.start", { id: "c2", name: "app_bus_emit", input: { event: "chat.create" } });
+    const s2 = activity("agent.tool.start", { id: "c2", name: "app_bus_emit", input: { event: "chat.create" }, label: "Managing" });
     const r2 = activity("agent.tool.result", { id: "c2", output: "{}", summary: '"New Chat"' });
     const merged = mergeToolActivities([s1, r1, s2, r2]);
     expect(merged).toHaveLength(2);
-    expect(merged[0].data.mergedLabel).toBe("chat.list → 5 chats");
-    expect(merged[1].data.mergedLabel).toBe('chat.create → "New Chat"');
+    expect(merged[0].data.mergedLabel).toBe("Chat → 5 chats");
+    expect(merged[1].data.mergedLabel).toBe('Chat → "New Chat"');
   });
 });
 

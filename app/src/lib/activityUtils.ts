@@ -11,15 +11,27 @@ function inputField(input: unknown, key: string): unknown {
   return undefined;
 }
 
-export function toolLabel(name: string, input: unknown): string {
+const BUS_LABELS: Record<string, string> = {
+  chat: "Chat",
+  settings: "Settings",
+  trust: "Permissions",
+  skills: "Skills",
+  svc: "Service",
+  web: "Web",
+  core: "App",
+};
+
+function busLabel(event: string): string {
+  const domain = event.split(".")[0];
+  return BUS_LABELS[domain] ?? domain.charAt(0).toUpperCase() + domain.slice(1);
+}
+
+export function toolLabel(name: string, input: unknown, label?: string): string {
   if (name === "app_bus_emit") {
     const event = String(inputField(input, "event") ?? "");
-    return event || "Bus event";
+    return event ? busLabel(event) : label || "App";
   }
-  if (name === "web_search" || name === "app_web_search") {
-    const query = String(inputField(input, "query") ?? "");
-    return query ? `web search: ${query}` : "web search";
-  }
+  if (label) return label;
   return name;
 }
 
@@ -33,7 +45,7 @@ export function getActivityLabel(activity: ChatActivity): string | null {
       return "Thinking";
 
     case "agent.tool.start":
-      return activity.data.summary || toolLabel(activity.data.name, activity.data.input);
+      return activity.data.summary || toolLabel(activity.data.name, activity.data.input, activity.data.label);
 
     case "agent.tool.result":
       return activity.data.summary ?? truncate(String(activity.data.output));
@@ -81,11 +93,11 @@ export function mergeToolActivities(activities: ChatActivity[]): ChatActivity[] 
   for (const a of activities) {
     if (a.type === "agent.tool.start" && a.data?.id && resultById.has(a.data.id)) {
       const result = resultById.get(a.data.id)!;
-      const label = toolLabel(a.data.name, a.data.input);
+      const displayLabel = toolLabel(a.data.name, a.data.input, a.data.label);
       const summary = result.data?.summary ?? truncate(String(result.data?.output));
       merged.push({
         ...result,
-        data: { ...result.data, mergedLabel: `${label} → ${summary}` },
+        data: { ...result.data, icon: a.data.icon, mergedLabel: `${displayLabel} → ${summary}` },
       });
       continue;
     }
