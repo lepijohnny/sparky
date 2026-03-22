@@ -1,0 +1,174 @@
+---
+sidebar_position: 5
+sidebar_label: Skills
+---
+
+<span className="section-label">Look and Feel</span>
+
+# Skills
+
+<p className="header-description">Give the agent specialized capabilities on demand.</p>
+
+Skills are self-contained capability packages that teach the agent how to perform specific tasks — like reviewing code, transcribing videos, or translating documents. Instead of cramming everything into one prompt, you install skills and tag them when needed.
+
+## How Skills Work
+
+Skills live in `~/.sparky/skills/`. Each skill is a folder with a `SKILL.md` file containing a YAML frontmatter header and a system prompt:
+
+```
+~/.sparky/skills/
+  code-reviewer/
+    SKILL.md
+    requirements.json
+  video-transcript-generator/
+    SKILL.md
+    requirements.json
+    references/
+```
+
+### SKILL.md Format
+
+```markdown
+---
+name: Code Reviewer
+description: Reviews code for bugs, security issues, and best practices.
+author: sparky
+version: 1.0.0
+license: MIT
+icon: code
+allowed-tools: app_read app_glob app_grep app_bash
+---
+
+You are a code reviewer. Your job is to review code changes...
+```
+
+The frontmatter defines metadata. The body is the system prompt — instructions the agent follows when the skill is active.
+
+### Tagging Skills
+
+To use a skill, type `@` in the chat input. A popover appears showing your connections and active skills. Select a skill to tag it.
+
+When you send the message, Sparky injects the skill's name and description into the system prompt. The agent then reads the full `SKILL.md` on demand using `app_read` — this is called **progressive disclosure**. Only the summary goes into the prompt; the full instructions are loaded when needed.
+
+Tagged skills persist for the conversation. If you tag `@Video Transcript Generator` in your first message, follow-up messages in the same chat automatically pick it up — no need to tag again.
+
+## Creating Skills
+
+Go to **Skills** in the sidebar and use the skills agent to create new skills. Describe what you want and the agent writes the `SKILL.md` for you.
+
+You can also create skills manually by adding a folder to `~/.sparky/skills/` with a `SKILL.md` file.
+
+## Review & Activation
+
+Every skill goes through a pipeline before it can be used:
+
+```
+Pending → Audited → Bins ✓ → Secrets ✓ → Active
+```
+
+1. **Pending** — skill is installed but not yet reviewed
+2. **Audited** — the skills agent has reviewed the skill for safety and generated a `requirements.json`
+3. **Bins** — all required command-line tools are installed (e.g., `yt-dlp`, `ffmpeg`)
+4. **Secrets** — all required API keys or tokens are configured in **Settings → Environment**
+
+You can only activate a skill when all prerequisites are met. The skills detail page shows the current status of each step.
+
+### Safety Review
+
+The skills agent checks for:
+
+- Prompt injection attempts ("ignore previous instructions")
+- Data exfiltration (sending user data to external servers)
+- Credential access (reading secrets, tokens, keys)
+- Scope creep (requesting tools the skill doesn't need)
+- Destructive commands without safeguards
+- Hardcoded output paths (should use relative paths)
+
+### Requirements Manifest
+
+After review, the skills agent generates `requirements.json`:
+
+```json
+{
+  "bins": [
+    {
+      "name": "yt-dlp",
+      "install": {
+        "macos": "brew install yt-dlp",
+        "linux": "pip install yt-dlp"
+      },
+      "required": true
+    }
+  ],
+  "env": [
+    { "name": "OPENAI_API_KEY", "required": false, "group": "llm" }
+  ],
+  "groups": {
+    "llm": { "min": 1, "hint": "At least one LLM key required" }
+  },
+  "safe": true,
+  "notes": "Requires yt-dlp for video downloads."
+}
+```
+
+## Permissions & Skills
+
+Skills interact with the [permission system](/docs/look-and-feel/permissions) in two ways:
+
+### Auto-Approval
+
+When a skill is tagged, tool calls that would normally prompt for approval (the "Ask" decision) are **auto-approved** — with one important exception: if an explicit **ask rule** matches, the prompt still appears.
+
+For example:
+- `yt-dlp --write-subs "https://..."` → auto-approved (no matching ask rule)
+- `rm some-file.txt` → still prompts (default `rm` ask rule matches)
+
+This means skills can run their workflows without constant interruptions, while dangerous operations like file deletion still require your confirmation.
+
+### Deny Rules Always Win
+
+Deny rules are never bypassed, regardless of skill status. If a deny rule blocks `sudo`, no skill can run `sudo` commands.
+
+```
+Tool call with skill tagged
+  → Deny rule matches? → Blocked (always)
+  → Ask rule matches?  → Prompts user (always, even with skill)
+  → No rule matches?   → Auto-approved (skill trusted)
+```
+
+### Working Directory
+
+When a skill is tagged, `app_bash` commands run in a per-chat temporary folder (`~/.sparky/workspaces/<ws>/chats/<chatId>/tmp/`) instead of the sidecar directory. This keeps downloaded files organized and prevents clutter.
+
+## Skill-Scoped Environment Variables
+
+Some skills need API keys or tokens. Configure these in **Settings → Environment**. Each env var can optionally be tagged to a specific skill.
+
+**Tagged-takes-over rule:** If ANY env vars are tagged to a skill, only those tagged vars are passed to it. If none are tagged, all untagged global vars are available. This prevents skills from seeing keys they don't need.
+
+For example:
+- `OPENAI_API_KEY` tagged to `video-transcript-generator` → only this skill sees it
+- `GITHUB_TOKEN` with no tag → available to all skills that don't have any tagged vars
+
+## Icons
+
+Skills can specify a lucide icon in the frontmatter `icon` field. Available icons:
+
+`bot` · `brain` · `bug` · `code` · `database` · `file-search` · `flask` · `globe` · `image` · `languages` · `layout` · `chart` · `lock` · `mail` · `message` · `microscope` · `music` · `pencil` · `puzzle` · `rocket` · `search` · `shield` · `sparkles` · `terminal` · `test` · `video` · `wand` · `wrench` · `zap`
+
+Default is `puzzle` if not specified.
+
+## Storage
+
+Skills are stored on disk in `~/.sparky/skills/`, shared across all workspaces. Internal files use `_` prefix:
+
+| File | Purpose |
+|------|---------|
+| `SKILL.md` | Frontmatter + system prompt (required) |
+| `requirements.json` | Dependencies generated by skills agent |
+| `_state.json` | Activation state (`{"state":"active"}`) |
+| `_meta.json` | ClawHub metadata (slug, version) |
+| `references/` | Optional supporting documents |
+| `scripts/` | Optional helper scripts |
+
+Temporary files from skill execution are stored in per-chat `tmp/` folders within the workspace. You can see the total size of these in **Settings → Workspace** under the storage breakdown.

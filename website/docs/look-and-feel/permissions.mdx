@@ -151,6 +151,16 @@ You can also add rules manually with the **+** button if you prefer to write the
 
 Trust rules are stored in `~/.sparky/trust.enc`, encrypted with AES-256-GCM. The encryption key is stored in your OS native keychain (macOS Keychain or Windows DPAPI) — never in plain text on disk.
 
+## Skills & Permissions
+
+When a [skill](/docs/look-and-feel/skills) is tagged in a chat, tool calls that would normally trigger an "Ask" prompt are auto-approved — unless an explicit ask rule matches. This lets skills run their workflows without constant interruptions while keeping dangerous operations gated.
+
+- **No matching rule** → auto-approved when skill is tagged
+- **Ask rule matches** (e.g., `rm`) → still prompts, even with skill
+- **Deny rule matches** → always blocked, regardless of skill
+
+The default `rm` ask rule ensures file deletion always requires approval, even when a skill is active. See [Skills → Permissions & Skills](/docs/look-and-feel/skills#permissions--skills) for details.
+
 ## How it all fits together
 
 ```
@@ -161,7 +171,8 @@ User sends message
     → Yes → Trust check: resolve(write, "/path/to/file.ts")
       → Allow → tool executes
       → Deny  → blocked, agent sees the denial
-      → Ask   → user prompted for approval
+      → Ask   → skill tagged & no explicit ask rule? → auto-approved
+              → otherwise → user prompted for approval
 ```
 
 The mode acts as a coarse filter (which tools exist), and trust rules act as a fine filter (which specific targets are allowed). Together, they give you layered control without getting in the way of everyday use.

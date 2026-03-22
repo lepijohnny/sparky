@@ -1,0 +1,30 @@
+---
+sidebar_position: 6
+sidebar_label: Skills
+---
+
+<span className="section-label">Use Cases</span>
+
+# Skills
+
+<p className="header-description">Give the agent specialized capabilities on demand.</p>
+
+<video src={require('../assets/uc/skills.mp4').default} autoPlay muted loop playsInline style={{maxWidth: '700px', width: '100%'}} />
+
+Skills are self-contained capability packages that extend what the agent can do. Tag a skill with `@` in the chat input and the agent gains new expertise — code review, video transcription, translation, and more.
+
+## What you see
+
+1. Type `@` to open the skill popover
+2. Select a skill (e.g., **Code Reviewer**)
+3. The agent reads the skill's full instructions on demand
+4. Tool calls are auto-approved for the skill's workflow — except dangerous operations like `rm` which still prompt
+
+## Key features
+
+- **Progressive disclosure** — only a summary goes into the system prompt; full instructions are loaded when needed
+- **Sticky per-chat** — tag once and follow-up messages in the same chat keep the skill active
+- **Auto-approval with safety guards** — skills run without constant interruptions, but deny rules and `rm` ask rules are always enforced
+- **Per-chat working directory** — `app_bash` runs in an isolated `tmp/` folder, keeping downloads organized
+
+For full details, see [Skills documentation](/docs/look-and-feel/skills).
