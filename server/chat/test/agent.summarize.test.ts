@@ -57,6 +57,8 @@ function makeCtx(overrides: Partial<ContextResult> = {}): ContextResult {
       toolTokens: 0,
       anchorTokens: 0,
       summaryTokens: 0,
+      servicesTokens: 0,
+      skillsTokens: 0,
       knowledgeTokens: 0,
       conversationTokens: 8000,
       remaining: 2000,

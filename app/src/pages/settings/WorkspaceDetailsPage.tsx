@@ -277,6 +277,13 @@ export default function WorkspaceDetailsPage() {
                   title={`Attachments: ${formatSize(workspaceSpace.attachments)}`}
                 />
               )}
+              {workspaceSpace.tmp > 0 && (
+                <div
+                  className={styles.spaceSegTmp}
+                  style={{ flex: workspaceSpace.tmp }}
+                  title={`Temp files: ${formatSize(workspaceSpace.tmp)}`}
+                />
+              )}
             </div>
             <div className={styles.spaceLegend}>
               <span className={styles.spaceLegendItem}>
@@ -291,6 +298,12 @@ export default function WorkspaceDetailsPage() {
                 <span className={styles.spaceLegendItem}>
                   <span className={`${styles.spaceDot} ${styles.spaceDotAtt}`} />
                   Attachments {formatSize(workspaceSpace.attachments)}
+                </span>
+              )}
+              {workspaceSpace.tmp > 0 && (
+                <span className={styles.spaceLegendItem}>
+                  <span className={`${styles.spaceDot} ${styles.spaceDotTmp}`} />
+                  Temp {formatSize(workspaceSpace.tmp)}
                 </span>
               )}
             </div>

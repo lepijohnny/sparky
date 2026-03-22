@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
+import { getSkillIcon } from "../../pages/skills/skillIcons";
 import styles from "./InputPopover.module.css";
 
 export interface PopoverItem {
@@ -8,6 +9,7 @@ export interface PopoverItem {
   icon?: string;
   color?: string;
   checked?: boolean;
+  kind?: "service" | "skill" | "label";
 }
 
 interface InputPopoverProps {
@@ -19,6 +21,11 @@ interface InputPopoverProps {
   onClose: () => void;
   onRight?: (item: PopoverItem) => void;
   onLeft?: () => void;
+}
+
+function SkillIcon({ name }: { name: string }) {
+  const Icon = getSkillIcon(name);
+  return <Icon size={14} strokeWidth={1.5} className={styles.itemIcon} />;
 }
 
 export default memo(function InputPopover({
@@ -90,26 +97,35 @@ export default memo(function InputPopover({
       {filtered.length === 0 ? (
         <div className={styles.empty}>{emptyLabel}</div>
       ) : (
-        filtered.map((item, i) => (
-          <div
-            key={item.id}
-            className={`${styles.item} ${i === activeIdx ? styles.itemActive : ""}`}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              onSelect(item);
-            }}
-            onMouseEnter={() => setActiveIdx(i)}
-          >
-            {item.icon && (
-              <img src={item.icon} alt="" className={styles.itemIcon} />
-            )}
-            {item.color && !item.icon && (
-              <span className={styles.itemDot} style={{ background: item.color }} />
-            )}
-            <span className={styles.itemName}>{item.name}</span>
-            {item.checked && <Check size={10} strokeWidth={2} className={styles.itemCheck} />}
-          </div>
-        ))
+        filtered.map((item, i) => {
+          const prev = i > 0 ? filtered[i - 1] : null;
+          const showTitle = !prev || prev.kind !== item.kind;
+          const sectionLabel = item.kind === "skill" ? "Skills" : item.kind === "label" ? "Labels" : "Connections";
+          return (
+            <div key={item.id}>
+              {showTitle && <div className={styles.sectionTitle}>{sectionLabel}</div>}
+              <div
+                className={`${styles.item} ${i === activeIdx ? styles.itemActive : ""}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onSelect(item);
+                }}
+                onMouseEnter={() => setActiveIdx(i)}
+              >
+                {item.icon && (
+                  item.kind === "skill"
+                    ? <SkillIcon name={item.icon} />
+                    : <img src={item.icon} alt="" className={styles.itemIcon} />
+                )}
+                {item.color && !item.icon && (
+                  <span className={styles.itemDot} style={{ background: item.color }} />
+                )}
+                <span className={styles.itemName}>{item.name}</span>
+                {item.checked && <Check size={10} strokeWidth={2} className={styles.itemCheck} />}
+              </div>
+            </div>
+          );
+        })
       )}
     </div>
   );

@@ -73,6 +73,7 @@ export default memo(function ChatInput({
   const connections = useStore((s) => s.llmConnections);
   const providers = useStore((s) => s.providers);
   const services = useStore((s) => s.connections);
+  const skills = useStore((s) => s.skills);
   const labels = useStore((s) => s.labels);
   const [hasContent, setHasContent] = useState(false);
   const [sending, setSending] = useState(false);
@@ -244,14 +245,19 @@ export default memo(function ChatInput({
     navigatePath(parent);
   }, [navigatePath]);
 
+  const activeSkills = skills.filter((s) => s.state === "active");
   const popoverItems: PopoverItem[] = trigger
     ? trigger.type === "@"
-      ? services.map((s) => ({ id: s.id, name: s.label, icon: s.icon }))
+      ? [
+          ...services.map((s) => ({ id: s.id, name: s.label, icon: s.icon, kind: "service" as const })),
+          ...activeSkills.map((s) => ({ id: s.id, name: s.name, icon: s.icon, kind: "skill" as const })),
+        ]
       : labels.map((l) => ({
           id: l.id,
           name: l.name,
           color: l.color,
           checked: (chat.labels ?? []).includes(l.id),
+          kind: "label" as const,
         }))
     : [];
 

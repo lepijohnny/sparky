@@ -4,14 +4,23 @@ import {
   useState,
 } from "react";
 import { useConnection } from "../../context/ConnectionContext";
+import { useStore } from "../../store";
 import shared from "../../styles/shared.module.css";
 import local from "./EnvironmentDetailsPage.module.css";
 
+interface EnvEntry {
+  key: string;
+  name: string;
+  skill: string;
+}
+
 export default function EnvironmentDetailsPage() {
   const { conn } = useConnection();
-  const [envKeys, setEnvKeys] = useState<string[]>([]);
+  const skills = useStore((s) => s.skills);
+  const [entries, setEntries] = useState<EnvEntry[]>([]);
   const [varName, setVarName] = useState("");
   const [varValue, setVarValue] = useState("");
+  const [varSkill, setVarSkill] = useState("");
   const [saving, setSaving] = useState(false);
   const [allowlist, setAllowlist] = useState<string[]>([]);
   const [hostInput, setHostInput] = useState("");
@@ -20,7 +29,19 @@ export default function EnvironmentDetailsPage() {
     if (!conn) return;
     try {
       const { keys } = await conn.request<{ keys: string[] }>("cred.list");
-      setEnvKeys(keys.filter((k) => k.startsWith("env.")));
+      const envKeys = keys.filter((k) => k.startsWith("env.") && !k.startsWith("env.meta."));
+      const metaKeys = keys.filter((k) => k.startsWith("env.meta."));
+
+      const metaMap: Record<string, string> = {};
+      for (const mk of metaKeys) {
+        const res = await conn.request<{ value: string | null }>("cred.get", { key: mk });
+        if (res.value) metaMap[mk.slice(9)] = res.value;
+      }
+
+      setEntries(envKeys.map((k) => {
+        const name = k.slice(4);
+        return { key: k, name, skill: metaMap[name] ?? "" };
+      }));
     } catch (err) {
       console.error("Failed to list credentials:", err);
     }
@@ -70,12 +91,17 @@ export default function EnvironmentDetailsPage() {
   const handleAddVariable = async () => {
     const name = varName.trim();
     const value = varValue.trim();
+    const skill = varSkill.trim();
     if (!name || !value || !conn) return;
     setSaving(true);
     try {
       await conn.request("cred.set", { key: `env.${name}`, value });
+      if (skill) {
+        await conn.request("cred.set", { key: `env.meta.${name}`, value: skill });
+      }
       setVarName("");
       setVarValue("");
+      setVarSkill("");
       await load();
     } catch (err) {
       console.error("Failed to store variable:", err);
@@ -84,11 +110,14 @@ export default function EnvironmentDetailsPage() {
     }
   };
 
-  const handleDeleteVariable = async (key: string) => {
+  const handleDeleteVariable = async (entry: EnvEntry) => {
     if (!conn) return;
     setSaving(true);
     try {
-      await conn.request("cred.delete", { key });
+      await conn.request("cred.delete", { key: entry.key });
+      if (entry.skill) {
+        await conn.request("cred.delete", { key: `env.meta.${entry.name}` });
+      }
       await load();
     } catch (err) {
       console.error("Failed to delete variable:", err);
@@ -102,15 +131,16 @@ export default function EnvironmentDetailsPage() {
       <div className={shared.card}>
         <div className={shared.cardHeader}>Variables</div>
         <div className={shared.cardBody}>
-          {envKeys.length > 0 ? (
+          {entries.length > 0 ? (
             <div className={local.varList}>
-              {envKeys.map((key) => (
-                <div key={key} className={local.varRow}>
-                  <span className={local.varKey}>{key.replace(/^env\./, "")}</span>
+              {entries.map((entry) => (
+                <div key={entry.key} className={local.varRow}>
+                  <span className={local.varKey}>{entry.name}</span>
+                  {entry.skill && <span className={local.varSkill}>{entry.skill}</span>}
                   <span className={local.varValue}>••••••••</span>
                   <button
                     className={shared.btnDanger}
-                    onClick={() => handleDeleteVariable(key)}
+                    onClick={() => handleDeleteVariable(entry)}
                     disabled={saving}
                   >
                     Remove
@@ -120,7 +150,7 @@ export default function EnvironmentDetailsPage() {
             </div>
           ) : (
             <div className={shared.emptyState}>
-              No variables configured. Add environment variables for use in sandboxes.
+              No variables configured. Add environment variables for tools and skills.
             </div>
           )}
           <div className={local.addForm}>
@@ -137,8 +167,20 @@ export default function EnvironmentDetailsPage() {
               placeholder="Value"
               value={varValue}
               onChange={(e) => setVarValue(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAddVariable()}
             />
+            <input
+              className={local.inputSkill}
+              type="text"
+              list="skill-suggestions"
+              placeholder="Skill (optional)"
+              value={varSkill}
+              onChange={(e) => setVarSkill(e.target.value)}
+            />
+            <datalist id="skill-suggestions">
+              {skills.map((s) => (
+                <option key={s.id} value={s.id} />
+              ))}
+            </datalist>
             <button
               className={shared.btn}
               onClick={handleAddVariable}

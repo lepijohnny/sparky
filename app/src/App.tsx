@@ -44,6 +44,8 @@ import SourceListPage from "./pages/knowledge/SourceListPage";
 import SourceDetailsPage from "./pages/knowledge/SourceDetailsPage";
 import ConnectionsListPage from "./pages/connections/ConnectionsListPage";
 import ConnectionsDetailsPage from "./pages/connections/ConnectionsDetailsPage";
+import SkillsListPage from "./pages/skills/SkillsListPage";
+import SkillsDetailsPage from "./pages/skills/SkillsDetailsPage";
 import ContextPanel from "./panels/ContextPanel";
 import DetailsPanel from "./panels/DetailsPanel";
 import MenuPanel, { type Section } from "./panels/MenuPanel";
@@ -87,6 +89,7 @@ const SECTION_LABELS: Record<Section, string> = {
   archived: "Archived",
   sources: "Sources",
   connections: "Connections",
+  skills: "Skills",
   settings: "Settings",
 };
 
@@ -127,6 +130,7 @@ export default function App() {
     rangeSelectSource, selectAllSources, clearSourceSelection,
     isSourceMulti, sourceSelectedIds, selectedSources,
     selectedConnectionId, selectConnection,
+    selectedSkillId, selectSkill,
   } = useStore((s) => s);
 
   const llmConnections = useStore((s) => s.llmConnections);
@@ -143,6 +147,7 @@ export default function App() {
   const [debugUnlocked, setDebugUnlocked] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [showConnectionAsk, setShowConnectionAsk] = useState(false);
+  const [showSkillsAsk, setShowSkillsAsk] = useState(false);
   const [connTimeout, setConnTimeout] = useState(false);
 
   useEffect(() => {
@@ -152,6 +157,8 @@ export default function App() {
   }, [wsStatus]);
   const [connectionAskPos, setConnectionAskPos] = useState({ x: 0, y: 0 });
   const connectionPlusRef = useRef<HTMLButtonElement>(null);
+  const [skillsAskPos, setSkillsAskPos] = useState({ x: 0, y: 0 });
+  const skillsPlusRef = useRef<HTMLButtonElement>(null);
 
   const { addToast } = useToasts();
 
@@ -242,6 +249,19 @@ export default function App() {
     }
   }, [conn, selectChat, section, router.handleSectionChange]);
 
+  const handleSkillsAsk = useCallback(async (content: string) => {
+    if (!conn) return;
+    try {
+      const res = await conn.request<{ chatId: string }>("chat.system.ask", { content, kind: "skills" });
+      if (section !== "chats") router.handleSectionChange("chats");
+      conn.request<{ chat: Chat }>("chat.get.id", { id: res.chatId }).then((r) => {
+        if (r?.chat) selectChat(r.chat);
+      }).catch(() => {});
+    } catch (err) {
+      console.error("Skills ask failed:", err);
+    }
+  }, [conn, selectChat, section, router.handleSectionChange]);
+
   const handleRename = useCallback((c: Chat) => setRenameChat(c), [setRenameChat]);
   const handleDelete = useCallback(() => selectChat(null), [selectChat]);
   const handleSearchClose = useCallback(() => setSearching(false), [setSearching]);
@@ -314,6 +334,13 @@ export default function App() {
         onSelectConnection={selectConnection}
       />
     );
+  } else if (section === "skills") {
+    contextContent = (
+      <SkillsListPage
+        selectedSkillId={selectedSkillId}
+        onSelectSkill={selectSkill}
+      />
+    );
   } else {
     contextContent = <Empty message="Nothing here yet." />;
   }
@@ -339,6 +366,19 @@ export default function App() {
   } else if (section === "connections" && selectedConnectionId) {
     detailsTitle = selectedConnectionId.charAt(0).toUpperCase() + selectedConnectionId.slice(1);
     detailsContent = <ConnectionsDetailsPage connectionId={selectedConnectionId} />;
+  } else if (section === "skills" && selectedSkillId) {
+    const skill = useStore.getState().skills.find((s) => s.id === selectedSkillId);
+    detailsTitle = skill?.name ?? selectedSkillId;
+    detailsContent = <SkillsDetailsPage key={selectedSkillId} skillId={selectedSkillId} />;
+  } else if (section === "skills") {
+    detailsTitle = "";
+    detailsContent = (
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
+        <span style={{ color: "var(--fg-muted)", fontSize: 13, fontStyle: "italic", lineHeight: 1.6, maxWidth: 320 }}>
+          Skills give the assistant specialized capabilities. Import from ClawHub or create your own.
+        </span>
+      </div>
+    );
   } else if (section === "connections") {
     detailsTitle = "";
     detailsContent = (
@@ -412,6 +452,19 @@ export default function App() {
               >
                 <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
               </button>
+            ) : section === "skills" ? (
+              <button
+                ref={skillsPlusRef}
+                className={styles.searchBtn}
+                onClick={() => {
+                  const rect = skillsPlusRef.current?.getBoundingClientRect();
+                  if (rect) setSkillsAskPos({ x: rect.left - 320, y: rect.bottom + 8 });
+                  setShowSkillsAsk(true);
+                }}
+                title="Create or manage skills"
+              >
+                <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
+              </button>
             ) : section !== "settings" ? (
               <button
                 className={`${styles.searchBtn} ${searching ? styles.searchBtnActive : ""}`}
@@ -428,7 +481,7 @@ export default function App() {
         details={
           <DetailsPanel
             title={detailsTitle}
-            contentKey={section === "settings" ? settingsSub : section === "sources" ? (selectedSource?.id ?? "none") : section === "connections" ? "connections" : "chat"}
+            contentKey={section === "settings" ? settingsSub : section === "sources" ? (selectedSource?.id ?? "none") : section === "connections" ? "connections" : section === "skills" ? (selectedSkillId ?? "skills") : "chat"}
           >
             {detailsContent}
           </DetailsPanel>
@@ -451,6 +504,15 @@ export default function App() {
           hint="The assistant can help you connect to external services like GitHub, Gmail, Linear, and more."
           placeholder="Connect to Gmail..."
           initialPos={connectionAskPos}
+        />
+      )}
+      {showSkillsAsk && (
+        <AssistantAsk
+          onSubmit={handleSkillsAsk}
+          onClose={() => setShowSkillsAsk(false)}
+          hint="The assistant can create, review, and manage skills. Ask it to create a new skill or review an imported one."
+          placeholder="Create a code review skill..."
+          initialPos={skillsAskPos}
         />
       )}
     </>

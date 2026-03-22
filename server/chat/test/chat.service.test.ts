@@ -15,6 +15,8 @@ const mockCred: Credentials = {
   keys: () => [],
   svcKey: (s, f) => `svc.${s}.${f}`,
   deleteSvc: async () => {},
+  getEnvVars: () => ({}),
+  getEnvVarsForSkill: () => ({}),
 };
 
 const noopLogger: Logger = {

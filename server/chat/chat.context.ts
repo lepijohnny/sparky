@@ -36,6 +36,7 @@ export interface ContextResult {
     anchorTokens: number;
     summaryTokens: number;
     servicesTokens: number;
+    skillsTokens: number;
     knowledgeTokens: number;
     conversationTokens: number;
     remaining: number;
@@ -102,6 +103,8 @@ export class ContextBuilder {
   private summaryTokens = 0;
   private servicesBlock = "";
   private servicesTokens = 0;
+  private skillsBlock = "";
+  private skillsTokens = 0;
   private entryFetcher: EntryFetcher | null = null;
 
   constructor(contextWindow?: number) {
@@ -190,6 +193,15 @@ export class ContextBuilder {
     return this;
   }
 
+  skills(summaries: { id: string; name: string; description: string }[]): this {
+    if (summaries.length === 0 || this.remaining === 0) return this;
+    const lines = summaries.map((s) => `- **${s.name}**: ${s.description} — read full instructions with \`app_read("~/.sparky/skills/${s.id}/SKILL.md")\``);
+    this.skillsBlock = lines.join("\n");
+    this.skillsTokens = estimateTokens(this.skillsBlock) + MESSAGE_OVERHEAD;
+    this.remaining = Math.max(0, this.remaining - this.skillsTokens);
+    return this;
+  }
+
   conversation(fetcher: EntryFetcher): this {
     this.entryFetcher = fetcher;
     return this;
@@ -199,6 +211,9 @@ export class ContextBuilder {
     let fullSystem = this.systemPrompt;
     if (this.servicesBlock) {
       fullSystem += `\n\n<connected-services>\n${this.servicesBlock}\n</connected-services>`;
+    }
+    if (this.skillsBlock) {
+      fullSystem += `\n\n<active-skills>\nThe user tagged these skills. Read the SKILL.md before proceeding.\n${this.skillsBlock}\n</active-skills>`;
     }
     if (this.anchorBlocks.length > 0) {
       fullSystem += `\n\n<anchored-messages>\n${this.anchorBlocks.join("\n")}\n</anchored-messages>`;
@@ -238,6 +253,7 @@ export class ContextBuilder {
         anchorTokens: this.anchorTokens,
         summaryTokens: this.summaryTokens,
         servicesTokens: this.servicesTokens,
+        skillsTokens: this.skillsTokens,
         knowledgeTokens: this.knowledgeTokens,
         conversationTokens,
         remaining: Math.max(0, this.remaining - conversationTokens),

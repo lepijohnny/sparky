@@ -14,7 +14,7 @@ function setup() {
   const bus = createEventBus(noopLogger);
   const storage = createStorage(noopLogger, TEST_ROOT).seed();
   const config = createConfiguration(storage);
-  const mockCred = { init: async () => {}, get: async () => null, set: async () => {}, delete: async () => {}, deletePrefix: async () => {}, keys: () => [], svcKey: () => "", deleteSvc: async () => {} };
+  const mockCred = { init: async () => {}, get: async () => null, set: async () => {}, delete: async () => {}, deletePrefix: async () => {}, keys: () => [] as string[], svcKey: () => "", deleteSvc: async () => {}, getEnvVars: () => ({}), getEnvVarsForSkill: () => ({}) };
   new LlmSettings(bus, config, mockCred, noopLogger);
   return { bus, config };
 }

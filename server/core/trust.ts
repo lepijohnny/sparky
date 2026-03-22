@@ -18,7 +18,7 @@ export type Resolution = "deny" | "allow" | "prompt";
 export interface TrustRule {
   label: string;
   pattern: string;
-  addedAt: number;
+  addedAt?: number;
 }
 
 export interface ScopeRules {
@@ -87,6 +87,10 @@ const DEFAULT_BASH_DENY: TrustRule[] = [
   { label: "eval", pattern: "^eval\\b", addedAt: 0 },
 ];
 
+const DEFAULT_BASH_ASK: TrustRule[] = [
+  { label: "rm", pattern: "\\brm\\b", addedAt: 0 },
+];
+
 const DEFAULT_BUS_DENY: TrustRule[] = [
   { label: "Delete workspace", pattern: "^settings\\.workspace\\.remove$", addedAt: 0 },
 ];
@@ -110,7 +114,7 @@ function defaults(): TrustData {
     mode: "read",
     read: { allow: [], deny: [...DEFAULT_READ_DENY], ask: [] },
     write: { allow: [], deny: [...DEFAULT_WRITE_DENY], ask: [] },
-    bash: { allow: [], deny: [...DEFAULT_BASH_DENY], ask: [] },
+    bash: { allow: [], deny: [...DEFAULT_BASH_DENY], ask: [...DEFAULT_BASH_ASK] },
     bus: { allow: [], deny: [...DEFAULT_BUS_DENY], ask: [...DEFAULT_BUS_ASK] },
   };
 }
@@ -171,13 +175,19 @@ export function createTrustStore(log: Logger, basePath: string, keychain: Keycha
   }
 
   function loadScope(stored: Partial<ScopeRules> | undefined, fallback?: ScopeRules): ScopeRules {
+    const base = fallback ?? emptyScope();
     if (!stored || (!stored.allow?.length && !stored.deny?.length && !stored.ask?.length)) {
-      return fallback ?? emptyScope();
+      return base;
     }
+    const mergeUnique = (defaults: TrustRule[], saved: TrustRule[]): TrustRule[] => {
+      const patterns = new Set(saved.map((r) => r.pattern));
+      const missing = defaults.filter((r) => !patterns.has(r.pattern));
+      return [...missing, ...saved];
+    };
     return {
-      allow: stored.allow ?? [],
-      deny: stored.deny ?? [],
-      ask: stored.ask ?? [],
+      allow: mergeUnique(base.allow, stored.allow ?? []),
+      deny: mergeUnique(base.deny, stored.deny ?? []),
+      ask: mergeUnique(base.ask, stored.ask ?? []),
     };
   }
 
@@ -246,7 +256,7 @@ export function createTrustStore(log: Logger, basePath: string, keychain: Keycha
       if (candidates.length === 0) return { decision: SCOPE_FALLBACK[scope] };
       if (candidates.length === 1) return { decision: candidates[0].decision, rule: candidates[0].rule };
 
-      candidates.sort((a, b) => b.rule.addedAt - a.rule.addedAt);
+      candidates.sort((a, b) => (b.rule.addedAt ?? 0) - (a.rule.addedAt ?? 0));
       return { decision: candidates[0].decision, rule: candidates[0].rule };
     },
 

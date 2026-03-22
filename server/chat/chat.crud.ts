@@ -9,6 +9,7 @@ function getAgentRole(kind?: string): { role: string; name: string } {
   const map: Record<string, { role: string; name: string }> = {
     connection: { role: "connect", name: "Connection Setup" },
     permissions: { role: "trust", name: "Permission Setup" },
+    skills: { role: "skills", name: "Skills Assistant" },
   };
   return map[kind ?? ""] ?? { role: "sparky", name: "System Chat" };
 }
@@ -90,7 +91,7 @@ export class ChatCrud {
     return { chat };
   }
 
-  createSystem(kind?: "general" | "connection" | "permissions"): Chat {
+  createSystem(kind?: "general" | "connection" | "permissions" | "skills"): Chat {
     const llmDefault = this.config.get("llmDefault");
     const llms = this.config.get("llms") ?? [];
     const defaultConn = llms.find((c) => c.id === llmDefault?.id);

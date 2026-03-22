@@ -28,7 +28,7 @@ export interface ChatEvents {
   "chat.attachment.add":      { req: { chatId: string; filePath: string; mimeType?: string; thumbnail?: string }; res: { attachment: { id: string; filename: string; mimeType: string; size: number } } };
   "chat.attachment.remove":   { req: { chatId: string; attachmentId: string }; res: { removed: boolean } };
   "chat.attachment.list":     { req: { chatId: string }; res: { attachments: { id: string; filename: string; mimeType: string; size: number }[] } };
-  "chat.ask":                 { req: { chatId: string; content: string; attachmentIds?: string[]; services?: string[] }; res: { ok: boolean } };
+  "chat.ask":                 { req: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[] }; res: { ok: boolean } };
   "chat.stop":                { req: { chatId: string }; res: { ok: boolean } };
   "chat.search":              { req: { query: string; flagged?: boolean; archived?: boolean; labelId?: string }; res: { results: { chat: Chat; matchCount: number }[] } };
   "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" | "permissions" }; res: { chatId: string } };

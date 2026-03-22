@@ -113,6 +113,14 @@ const ROUTES: RouteEntry[] = [
   ["trust.reset", { notifiable: true }],
   ["trust.clear", { notifiable: true }],
 
+  "skills.list",
+  "skills.get",
+  ["skills.create", { notifiable: true }],
+  ["skills.delete", { notifiable: true }],
+  ["skills.activate", { notifiable: true }],
+  ["skills.deactivate", { notifiable: true }],
+  ["skills.state.set", { notifiable: true }],
+
   "core.prefetch",
   "fs.complete",
 

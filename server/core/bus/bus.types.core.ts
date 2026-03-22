@@ -41,4 +41,13 @@ export interface CoreEvents {
   "trust.changed":              { req: any; res: void };
 
   "fs.complete":                { req: { partial: string }; res: { entries: { name: string; isDir: boolean }[]; base: string } };
+
+  "skills.list":                { req: void; res: { skills: any[] } };
+  "skills.get":                 { req: { id: string }; res: { skill: any; files: { name: string; content: string }[] } };
+  "skills.create":              { req: { id: string; name: string }; res: { skill: any } };
+  "skills.delete":              { req: { id: string }; res: { ok: boolean } };
+  "skills.activate":            { req: { id: string }; res: { skill: any } };
+  "skills.deactivate":          { req: { id: string }; res: { skill: any } };
+  "skills.state.set":           { req: { id: string; state: string }; res: { skill: any } };
+  "skills.changed":             { req: void; res: void };
 }

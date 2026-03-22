@@ -37,11 +37,13 @@ export class WorkspaceSettings {
     const dbPath = this.storage.root(`${ws.path}/workspace.db`);
     const ktDbPath = dbPath.replace(/\.db$/, ".kt.db");
 
+    const chatsRoot = this.storage.root(`${ws.path}/chats`);
     const conversations = fileSize(dbPath);
     const knowledge = fileSize(ktDbPath);
-    const attachments = attachmentsSize(this.storage.root(`${ws.path}/chats`));
+    const attachments = chatSubdirSize(chatsRoot, "attachments");
+    const tmp = chatSubdirSize(chatsRoot, "tmp");
 
-    return { conversations, knowledge, attachments, total: conversations + knowledge + attachments };
+    return { conversations, knowledge, attachments, tmp, total: conversations + knowledge + attachments + tmp };
   }
 
   private readWorkspaces(): Workspace[] {
@@ -144,14 +146,13 @@ function dirSize(dirPath: string): number {
   return total;
 }
 
-/** Sum size of chats/{id}/attachments/ only */
-function attachmentsSize(chatsDir: string): number {
+/** Sum size of chats/{id}/<subdir>/ across all chats */
+function chatSubdirSize(chatsDir: string, subdir: string): number {
   let total = 0;
   try {
     for (const entry of readdirSync(chatsDir, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
-      const attDir = join(chatsDir, entry.name, "attachments");
-      total += dirSize(attDir);
+      total += dirSize(join(chatsDir, entry.name, subdir));
     }
   } catch {}
   return total;

@@ -407,3 +407,11 @@
 .spaceDotAtt {
   background: color-mix(in srgb, var(--accent, hsl(233, 65%, 58%)) 15%, transparent);
 }
+
+.spaceSegTmp {
+  background: color-mix(in srgb, var(--text-secondary, #888) 30%, transparent);
+}
+
+.spaceDotTmp {
+  background: color-mix(in srgb, var(--text-secondary, #888) 30%, transparent);
+}

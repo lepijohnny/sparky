@@ -11,6 +11,7 @@ import { createPlatformKeychain } from "./core/keychain";
 import { createCredStore } from "./core/cred";
 import { createTrustStore } from "./core/trust";
 import { registerTrustBus } from "./core/trust.bus";
+import { registerSkillsBus } from "./skills/skills.crud";
 import { registerFsComplete } from "./core/fs.complete";
 import type { AuthPluginContext, AuthFlow } from "@sparky/auth-core";
 import { createAuthManager } from "./core/auth/auth";
@@ -62,6 +63,8 @@ export function createSparky(): Sparky {
   const ktDb = createKtDatabase(workspace.dbPath.replace(/\.db$/, ".kt.db"), logger.createLogger("knowledge.db"));
   const knowledgeManager = createKtManager(bus, ktDb, config, logger.createLogger("knowledge"), storage.root(""), storage);
 
+  const getEnvVars = () => cred.getEnvVars();
+
   const chatManager = createChatWorkspace(
     bus, 
     config, 
@@ -71,7 +74,8 @@ export function createSparky(): Sparky {
     trustStore, 
     agentFn, 
     defaultAgentFn, 
-    knowledgeManager);
+    knowledgeManager,
+    getEnvVars);
 
   let hub: Connection | null = null;
 
@@ -292,6 +296,7 @@ export function createSparky(): Sparky {
   });
 
   registerTrustBus(bus, trustStore, broadcast);
+  registerSkillsBus(bus, logger.createLogger("skills"), (skillId?: string) => skillId ? cred.getEnvVarsForSkill(skillId) : cred.getEnvVars(), broadcast);
 
   bus.on("core.config.get", (data) => {
     return config.get(data.key as any) ?? null;

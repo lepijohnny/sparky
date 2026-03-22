@@ -36,13 +36,15 @@ interface RunResult {
   killed: boolean;
 }
 
-function run(command: string, timeoutMs: number, signal?: AbortSignal): Promise<RunResult> {
+function run(command: string, timeoutMs: number, signal?: AbortSignal, envVars?: Record<string, string>, cwd?: string): Promise<RunResult> {
   return new Promise((resolve) => {
     const child = exec(command, {
       encoding: "utf-8",
       timeout: timeoutMs,
       maxBuffer: 10 * 1024 * 1024,
       shell: "/bin/bash",
+      env: envVars ? { ...process.env, ...envVars } : undefined,
+      cwd,
     }, (err, stdout, stderr) => {
       if (signal) signal.removeEventListener("abort", onAbort);
       resolve({
@@ -85,7 +87,7 @@ export const bash = defineTool({
     if (requestedMs > MAX_TIMEOUT) ctx.log.warn("app_bash timeout capped", { requested: requestedMs, capped: MAX_TIMEOUT });
     ctx.log.info("app_bash", { command: input.command, timeout: timeoutMs });
 
-    const { stdout, stderr, code, killed } = await run(input.command, timeoutMs, ctx.signal);
+    const { stdout, stderr, code, killed } = await run(input.command, timeoutMs, ctx.signal, ctx.envVars, ctx.cwd);
 
     if (killed) {
       const partial = truncateOutput(stdout.trimEnd() || stderr.trimEnd());

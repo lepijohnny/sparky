@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { mkdir } from "node:fs/promises";
 import { v7 as randomUUIDv7 } from "uuid";
 import { RecordingAgent } from "../core/adapters/agent.recording";
 import type { Agent, AgentMessage, AgentTools, MessageContent, MessagePart } from "../core/agent.types";
@@ -10,6 +11,7 @@ import type { Logger } from "../logger.types";
 import { type ContextResult, contextBuilder } from "./chat.context";
 import { generateSummary, shouldSummarize } from "./agent.summarize";
 import { loadRole, buildRolePrompt } from "../prompts/prompt.role";
+import { getSkillFrontmatter, getAllSkillFrontmatter } from "../skills/skills";
 import { runAgentLoop } from "./chat.conversation.loop";
 import type { ChatDatabase } from "./chat.db";
 import type { ChatEntry } from "./chat.types";
@@ -40,6 +42,7 @@ export class ChatConversation {
     private trust: TrustStore,
     private knowledge: KnowledgeSearch | null = null,
     private getSystemPromptPreferences: SystemPromptPreferencesFn = () => DEFAULT_PREFERENCES,
+    private getEnvVars: () => Record<string, string> = () => ({}),
   ) {}
 
   switchDb(db: ChatDatabase): void {
@@ -77,7 +80,7 @@ export class ChatConversation {
    * Stores the user message and streams the full agent response.
    * Awaits the entire stream — callers decide whether to await or fire-and-forget.
    */
-  async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[] }): Promise<{ ok: boolean }> {
+  async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[] }): Promise<{ ok: boolean }> {
 
     if (this.activeChats.has(data.chatId)) {
       throw new Error("Chat is busy — wait for the current response to finish");
@@ -146,9 +149,21 @@ export class ChatConversation {
       const roleName = chat.role ?? "sparky";
       const chatMode = (chat.mode as PermissionMode | undefined) ?? this.trust.data().mode;
       const chatTrust = withModeOverride(this.trust, chatMode);
-      const toolCtx = { bus: this.bus, log: this.log, role: roleName, signal, approvalCtx: createApprovalContext(this.approval, roleName, chat.id, turnId), trust: chatTrust };
-      const tools = createRoleToolSet(role, toolCtx, { webSearch: resolved.webSearch });
 
+      const skills = await this.getSkillsMetadata(data.skills, data.chatId);
+
+      const toolCtx = { 
+        bus: this.bus, 
+        log: this.log, 
+        role: roleName, 
+        signal, 
+        approvalCtx: createApprovalContext(this.approval, roleName, chat.id, turnId), 
+        trust: chatTrust, 
+        envVars: this.getEnvVars(),
+        cwd: skills.cwd,
+        skillApproved: skills.summaries.length > 0,
+      };
+      const tools = createRoleToolSet(role, toolCtx, { webSearch: resolved.webSearch });
       const systemPrompt = buildRolePrompt(role, isSystemRole ? "" : this.getSystemPromptPreferences(), chatMode, data.chatId);
 
       const shouldSearch = role.meta.knowledge && chat.knowledge !== false;
@@ -160,6 +175,7 @@ export class ChatConversation {
       const servicesList = role.meta.services && data.services?.length
         ? data.services
         : [];
+
       const chatAttachments = role.meta.knowledge
         ? this.db.getAllChatAttachments(data.chatId).map((a) => ({ ...a, path: join(this.wsDir, "chats", data.chatId, "attachments", a.filename) }))
         : [];
@@ -169,6 +185,7 @@ export class ChatConversation {
         .attachments(chatAttachments)
         .tools(tools.defs)
         .services(servicesList)
+        .skills(skills.summaries)
         .anchors(anchoredEntries)
         .summary(existingSummary?.content ?? "")
         .knowledge(knowledgeResults)
@@ -276,7 +293,7 @@ export class ChatConversation {
   }
 
   private async renameAgentLoop(
-    chat: { id: string; name: string; system?: boolean },
+    chat: { id: string; name: string; system?: boolean; role?: string },
     data: { content: string },
   ): Promise<boolean> {
     if (chat.role && chat.role !== "sparky") return false;
@@ -319,6 +336,44 @@ export class ChatConversation {
     if (parts.length === 1) return undefined;
 
     return parts;
+  }
+
+  private async getSkillsMetadata(skillIds: string[] | undefined, chatId: string): Promise<{
+    summaries: { id: string; name: string; description: string }[];
+    cwd: string | undefined;
+  }> {
+    const ids = new Set(skillIds ?? []);
+
+    if (ids.size === 0) {
+      const allMeta = getAllSkillFrontmatter();
+      if (allMeta.length > 0) {
+        const messages = this.db.getRecentUserMessages(chatId, 20);
+        const text = messages.join(" ").toLowerCase();
+        for (const meta of allMeta) {
+          if (text.includes(`@${meta.name.toLowerCase()}`) || text.includes(`@${meta.id.toLowerCase()}`)) {
+            ids.add(meta.id);
+          }
+        }
+        this.log.debug("Skill scan from messages", { found: [...ids], messageCount: messages.length });
+      }
+    }
+
+    if (ids.size === 0) return { summaries: [], cwd: undefined };
+
+    const cwd = join(this.wsDir, "chats", chatId, "tmp");
+    await mkdir(cwd, { recursive: true });
+
+    const summaries: { id: string; name: string; description: string }[] = [];
+    for (const id of ids) {
+      const meta = getSkillFrontmatter(id);
+      if (meta) {
+        summaries.push({ id: meta.id, name: meta.name, description: meta.description });
+      } else {
+        this.log.warn("Skill not found in cache", { id });
+      }
+    }
+
+    return { summaries, cwd };
   }
 
   private async searchKnowledge(

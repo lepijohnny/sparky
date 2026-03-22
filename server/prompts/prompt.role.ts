@@ -151,11 +151,9 @@ export function clearRoleCache(): void {
 
 export function listRoles(): string[] {
   try {
-    const skillDirs = readdirSync(PROMPTS_DIR, { withFileTypes: true })
+    return readdirSync(PROMPTS_DIR, { withFileTypes: true })
       .filter((d) => d.isDirectory() && existsSync(join(PROMPTS_DIR, d.name, "AGENT.md")))
       .map((d) => d.name);
-
-    return skillDirs;
   } catch {
     return [];
   }
