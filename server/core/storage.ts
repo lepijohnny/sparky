@@ -7,9 +7,12 @@ const DEFAULT_ROOT = join(homedir(), ".sparky");
 
 export interface StorageProvider {
   read<T = any>(path: string): T;
+  readText(path: string): string;
   write(path: string, data: any): void;
+  writeText(path: string, content: string): void;
   update(path: string, property: string, value: any): void;
   list(dir: string, ext?: string): string[];
+  listDir(dir: string): { name: string; isDirectory: boolean }[];
   mkdir(path: string): void;
   remove(path: string): void;
   exists(path: string): boolean;
@@ -59,6 +62,20 @@ export function createStorage(log: Logger, root: string = DEFAULT_ROOT): EmptySt
           }
         },
 
+        readText(path: string): string {
+          const full = resolve(path);
+          if (!existsSync(full)) {
+            log.error("File not found", { path });
+            throw new Error(`File not found: ${path}`);
+          }
+          try {
+            return readFileSync(full, "utf-8");
+          } catch (err) {
+            log.error("Failed to read text", { path, error: String(err) });
+            throw err;
+          }
+        },
+
         write(path: string, data: any): void {
           try {
             ensureDir(path);
@@ -66,6 +83,17 @@ export function createStorage(log: Logger, root: string = DEFAULT_ROOT): EmptySt
             log.debug(`Wrote ${path}`);
           } catch (err) {
             log.error("Failed to write", { path, error: String(err) });
+            throw err;
+          }
+        },
+
+        writeText(path: string, content: string): void {
+          try {
+            ensureDir(path);
+            writeFileSync(resolve(path), content, "utf-8");
+            log.debug(`Wrote text ${path}`);
+          } catch (err) {
+            log.error("Failed to write text", { path, error: String(err) });
             throw err;
           }
         },
@@ -101,6 +129,17 @@ export function createStorage(log: Logger, root: string = DEFAULT_ROOT): EmptySt
             return readdirSync(full).filter((f) => f.endsWith(ext));
           } catch (err) {
             log.error("Failed to list", { dir, error: String(err) });
+            throw err;
+          }
+        },
+
+        listDir(dir: string): { name: string; isDirectory: boolean }[] {
+          const full = resolve(dir);
+          if (!existsSync(full)) return [];
+          try {
+            return readdirSync(full, { withFileTypes: true }).map((d) => ({ name: d.name, isDirectory: d.isDirectory() }));
+          } catch (err) {
+            log.error("Failed to listDir", { dir, error: String(err) });
             throw err;
           }
         },

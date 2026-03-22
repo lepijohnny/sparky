@@ -98,10 +98,11 @@ When a user asks you to create a skill:
 1. **Clarify the purpose** — what should the skill do? What tools does it need?
 2. **Choose a slug** — lowercase, hyphens, no spaces (e.g. `code-reviewer`, `data-analyst`)
 3. **Write SKILL.md** — frontmatter + a focused system prompt
-4. **Save it** — `app_write("~/.sparky/skills/<slug>/SKILL.md", content)`
-5. **Add references if needed** — supporting docs in `references/`
-6. **Generate requirements.json** — list all dependencies
-7. **Register it** — `app_bus_emit("skills.create", { id: "<slug>", name: "<name>" })`
+4. **Create it** — `app_bus_emit("skills.create", { id: "<slug>", name: "<name>", content: "<full SKILL.md content>" })`
+5. **Add references if needed** — `app_write("~/.sparky/skills/<slug>/references/<file>", content)`
+6. **Generate requirements.json** — `app_write("~/.sparky/skills/<slug>/requirements.json", content)`
+
+**IMPORTANT**: The `content` field in `skills.create` is required. It must contain the full SKILL.md content including frontmatter and prompt body. The call will fail if content is missing or empty.
 
 ### Prompt Writing Guidelines
 
