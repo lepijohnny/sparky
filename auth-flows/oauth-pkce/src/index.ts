@@ -10,6 +10,10 @@ export interface OAuthPkceFlowConfig {
   clientId: string;
   clientSecret?: string;
   scopes: string[];
+  redirectPort?: number;
+  redirectPath?: string;
+  extraParams?: Record<string, string>;
+  bodyEncoding?: "json" | "form";
   onSuccess?: () => Promise<void>;
 }
 
@@ -30,6 +34,8 @@ export function createOAuthPkceFlow(config: OAuthPkceFlowConfig): AuthPluginFact
         grant: "pkce",
         label: config.label,
       },
+      redirectPort: config.redirectPort,
+      redirectPath: config.redirectPath,
 
       async request(redirectUri) {
         if (!redirectUri) throw new Error("OAuth PKCE flow requires a redirectUri");
@@ -50,6 +56,7 @@ export function createOAuthPkceFlow(config: OAuthPkceFlowConfig): AuthPluginFact
           state,
           code_challenge: codeChallenge,
           code_challenge_method: "S256",
+          ...config.extraParams,
         });
 
         const authorizeUrl = `${config.authorizeUrl}?${params.toString()}`;
@@ -74,7 +81,7 @@ export function createOAuthPkceFlow(config: OAuthPkceFlowConfig): AuthPluginFact
             clientId: config.clientId,
             clientSecret: config.clientSecret,
             codeVerifier: pendingVerifier,
-            state: pendingState,
+            bodyEncoding: config.bodyEncoding,
           });
 
           ctx.log.info("OAuth PKCE completed", { provider: config.provider });

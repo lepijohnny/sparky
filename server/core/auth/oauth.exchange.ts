@@ -15,10 +15,6 @@ export async function exchangeToken(log: Logger, params: OAuthExchangeParams): P
   if (params.codeVerifier) {
     payload.code_verifier = params.codeVerifier;
   }
-  if (params.state) {
-    payload.state = params.state;
-  }
-
   log.info("Token exchange request", {
     tokenUrl: params.tokenUrl,
     redirectUri: params.redirectUri,
