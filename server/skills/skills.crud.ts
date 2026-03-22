@@ -152,11 +152,15 @@ async function loadSkill(storage: StorageProvider, slug: string, envVars: Record
   const files = readTree(storage, dir);
 
   let source = "created";
+  let displayName: string | undefined;
+  let savedState: string | undefined;
   const metaPath = skillPath(slug, "_meta.json");
   if (storage.exists(metaPath)) {
     try {
       const meta = storage.read<any>(metaPath);
       if (meta.slug) source = "clawhub";
+      if (meta.displayName) displayName = meta.displayName;
+      if (meta.state) savedState = meta.state;
     } catch (err) {
       console.debug("skill load error", err);
     }
@@ -177,19 +181,13 @@ async function loadSkill(storage: StorageProvider, slug: string, envVars: Record
     Object.values(requirements.groups).some((g) => !g.satisfied)
   ) : false;
 
-  const statePath = skillPath(slug, "_state.json");
-  if (storage.exists(statePath)) {
-    try {
-      const saved = storage.read<any>(statePath);
-      if (saved.state === "active" && state !== "rejected" && !binsMissing && !secretsMissing) state = "active";
-    } catch (err) {
-      console.debug("skill load error", err);
-    }
+  if (savedState === "active" && state !== "rejected" && !binsMissing && !secretsMissing) {
+    state = "active";
   }
 
   return {
     id: slug,
-    name: fm.name ?? slug,
+    name: displayName ?? fm.name ?? slug,
     description: fm.description ?? "",
     version: fm.version ?? "",
     license: fm.license ?? "",
@@ -311,11 +309,17 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     return { skill, files };
   });
 
+  function updateMeta(id: string, patch: Record<string, unknown>): void {
+    const metaPath = skillPath(id, "_meta.json");
+    const existing = storage.exists(metaPath) ? storage.read<Record<string, unknown>>(metaPath) : {};
+    storage.write(metaPath, { ...existing, ...patch });
+  }
+
   bus.on("skills.activate", async (data) => {
     const { id } = SkillId.parse(data);
     const dir = skillPath(id);
     if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
-    storage.write(skillPath(id, "_state.json"), { state: "active" });
+    updateMeta(id, { state: "active" });
     const skill = await loadSkill(storage, id, getEnvVars(id));
     log.info("Skill activated", { id });
     invalidateSkillCache();
@@ -327,8 +331,7 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     const { id } = SkillId.parse(data);
     const dir = skillPath(id);
     if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
-    const statePath = skillPath(id, "_state.json");
-    if (storage.exists(statePath)) storage.remove(statePath);
+    updateMeta(id, { state: undefined });
     const skill = await loadSkill(storage, id, getEnvVars(id));
     log.info("Skill deactivated", { id });
     invalidateSkillCache();
@@ -340,14 +343,25 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     const { id, state } = SkillStateSet.parse(data);
     const dir = skillPath(id);
     if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
-    if (state === "active") {
-      storage.write(skillPath(id, "_state.json"), { state: "active" });
-    } else {
-      const statePath = skillPath(id, "_state.json");
-      if (storage.exists(statePath)) storage.remove(statePath);
-    }
+    updateMeta(id, { state: state === "active" ? "active" : undefined });
     const skill = await loadSkill(storage, id, getEnvVars(id));
     log.info("Skill state set", { id, state });
+    invalidateSkillCache();
+    broadcast("skills.changed", {});
+    return { skill };
+  });
+
+  bus.on("skills.rename", async (data) => {
+    const { id, name } = z.object({
+      id: z.string().min(1).regex(/^[a-z0-9][a-z0-9-]*$/),
+      name: z.string().min(1).describe("New display name"),
+    }).parse(data);
+
+    const dir = skillPath(id);
+    if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
+    updateMeta(id, { displayName: name.trim() });
+    const skill = await loadSkill(storage, id, getEnvVars(id));
+    log.info("Skill renamed", { id, name: name.trim() });
     invalidateSkillCache();
     broadcast("skills.changed", {});
     return { skill };
@@ -384,7 +398,7 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
 
     const rootDir = storage.root(dir);
-    const excludes = ["_state.json", "_meta.json", "requirements.json"];
+    const excludes = ["_meta.json", "requirements.json"];
     const args = ["-r", dest, ".", ...excludes.flatMap((f) => ["-x", f])];
 
     try {

@@ -49,6 +49,7 @@ export interface CoreEvents {
   "skills.activate":            { req: { id: string }; res: { skill: any } };
   "skills.deactivate":          { req: { id: string }; res: { skill: any } };
   "skills.state.set":           { req: { id: string; state: string }; res: { skill: any } };
+  "skills.rename":              { req: { id: string; name: string }; res: { skill: any } };
   "skills.import":              { req: { path: string }; res: { skill: any; chatId?: string } };
   "skills.export":              { req: { id: string; dest: string }; res: { ok: boolean; path: string } };
   "skills.changed":             { req: void; res: void };
