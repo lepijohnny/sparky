@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { getSkillIcon } from "./skillIcons";
 import ReactMarkdown from "react-markdown";
@@ -132,6 +132,49 @@ function StepTooltip({ step, status, skill }: { step: StepDef; status: string; s
   return null;
 }
 
+const HOVER_DELAY = 350;
+
+function PipelineRow({ steps, statuses, skill }: { steps: StepDef[]; statuses: string[]; skill: Skill }) {
+  const [visibleIdx, setVisibleIdx] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleEnter(idx: number) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setVisibleIdx(idx), HOVER_DELAY);
+  }
+
+  function handleLeave() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = null;
+    setVisibleIdx(null);
+  }
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  return (
+    <div className={styles.pipeline}>
+      {steps.map((step, idx) => {
+        const status = statuses[idx];
+        const lineDone = idx > 0 && statuses[idx - 1] === "done";
+        return (
+          <span key={step.key} style={{ display: "contents" }}>
+            {idx > 0 && <div className={`${styles.stepConnector} ${lineDone ? styles.done : ""}`} />}
+            <div
+              className={`${styles.stepCol} ${status ? styles[status] : ""}`}
+              onMouseEnter={() => handleEnter(idx)}
+              onMouseLeave={handleLeave}
+            >
+              <div className={styles.stepDot} />
+              <span className={styles.stepLabel}>{step.label}</span>
+              {visibleIdx === idx && <StepTooltip step={step} status={status} skill={skill} />}
+            </div>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
   const { conn } = useConnection();
   const skills = useStore((s) => s.skills);
@@ -220,22 +263,7 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
       <div className={styles.statusCard}>
         <div className={shared.cardHeader}>Status</div>
         <div className={styles.statusBody}>
-          <div className={styles.pipeline}>
-            {STEPS.map((step, idx) => {
-              const status = stepStatuses[idx];
-              const lineDone = idx > 0 && stepStatuses[idx - 1] === "done";
-              return (
-                <span key={step.key} style={{ display: "contents" }}>
-                  {idx > 0 && <div className={`${styles.stepConnector} ${lineDone ? styles.done : ""}`} />}
-                  <div className={`${styles.stepCol} ${status ? styles[status] : ""}`}>
-                    <div className={styles.stepDot} />
-                    <span className={styles.stepLabel}>{step.label}</span>
-                    <StepTooltip step={step} status={status} skill={skill} />
-                  </div>
-                </span>
-              );
-            })}
-          </div>
+          <PipelineRow steps={STEPS} statuses={stepStatuses} skill={skill} />
         </div>
       </div>
 

@@ -170,7 +170,6 @@
 /* ── Tooltip ─────────────────────── */
 
 .tooltip {
-  display: none;
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
@@ -184,10 +183,6 @@
   max-width: 280px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   pointer-events: none;
-}
-
-.stepCol:hover .tooltip {
-  display: block;
 }
 
 .tipTitle {
