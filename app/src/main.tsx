@@ -17,6 +17,16 @@ if (navigator.userAgent.includes("Windows")) {
   document.documentElement.classList.add("platform-win");
 }
 
+if (navigator.userAgent.includes("Macintosh")) {
+  document.documentElement.classList.add("platform-mac");
+}
+
+if (window.__TAURI_INTERNALS__) {
+  import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+    getCurrentWindow().setBackgroundColor({ red: 0x1a, green: 0x1a, blue: 0x2e, alpha: 255 });
+  });
+}
+
 document.addEventListener("click", (e) => {
   const anchor = (e.target as HTMLElement).closest("a");
   if (!anchor) return;
