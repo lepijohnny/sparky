@@ -66,6 +66,44 @@
   word-break: break-all;
 }
 
+.targetBlock {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.targetHeader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.targetLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.targetCode {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  color: var(--fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
 .detail code {
   background: var(--bg-overlay);
   padding: 1px 5px;

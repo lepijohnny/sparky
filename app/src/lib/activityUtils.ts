@@ -11,15 +11,48 @@ function inputField(input: unknown, key: string): unknown {
   return undefined;
 }
 
-export function toolLabel(name: string, input: unknown): string {
+const BUS_LABELS: Record<string, string> = {
+  chat: "Chat",
+  settings: "Settings",
+  trust: "Permissions",
+  skills: "Skills",
+  svc: "Service",
+  web: "Web",
+  core: "App",
+};
+
+function busLabel(event: string): string {
+  const domain = event.split(".")[0];
+  return BUS_LABELS[domain] ?? domain.charAt(0).toUpperCase() + domain.slice(1);
+}
+
+function humanizeEvent(event: string): string {
+  const parts = event.split(".");
+  const action = parts.pop() ?? "";
+  const subject = parts.pop() ?? "";
+  const verb = action.charAt(0).toUpperCase() + action.slice(1);
+  const noun = subject.charAt(0).toUpperCase() + subject.slice(1);
+  return noun ? `${verb} ${noun}` : verb;
+}
+
+export function humanizeToolTarget(tool?: string, target?: string): string {
+  if (!target) return tool ?? "action";
+  if (tool === "app_bash") return target.length > 60 ? `${target.slice(0, 57)}...` : target;
+  if (tool === "app_bus_emit") return humanizeEvent(target);
+  if (tool === "app_read") return `Read ${target}`;
+  if (tool === "app_write") return `Write ${target}`;
+  if (tool === "app_edit") return `Edit ${target}`;
+  if (tool === "app_web_read") return `Fetch ${target}`;
+  if (tool === "app_web_search") return `Search "${target}"`;
+  return target;
+}
+
+export function toolLabel(name: string, input: unknown, label?: string): string {
   if (name === "app_bus_emit") {
     const event = String(inputField(input, "event") ?? "");
-    return event || "Bus event";
+    return event ? busLabel(event) : label || "App";
   }
-  if (name === "web_search" || name === "app_web_search") {
-    const query = String(inputField(input, "query") ?? "");
-    return query ? `web search: ${query}` : "web search";
-  }
+  if (label) return label;
   return name;
 }
 
@@ -33,7 +66,7 @@ export function getActivityLabel(activity: ChatActivity): string | null {
       return "Thinking";
 
     case "agent.tool.start":
-      return activity.data.summary || toolLabel(activity.data.name, activity.data.input);
+      return activity.data.summary || toolLabel(activity.data.name, activity.data.input, activity.data.label);
 
     case "agent.tool.result":
       return activity.data.summary ?? truncate(String(activity.data.output));
@@ -42,13 +75,13 @@ export function getActivityLabel(activity: ChatActivity): string | null {
       return `Tool denied: ${activity.data.id}`;
 
     case "agent.approval.requested":
-      return `Approval required: ${activity.data.message}`;
+      return `Approval: ${humanizeToolTarget(activity.data.tool, activity.data.target)}`;
 
     case "agent.approval.approved":
-      return `Approved: ${activity.data.tool}:${activity.data.target}`;
+      return `Approved: ${humanizeToolTarget(activity.data.tool, activity.data.target)}`;
 
     case "agent.approval.denied":
-      return `Denied: ${activity.data.tool}:${activity.data.target}${activity.data.reason === "timeout" ? " (timeout)" : ""}`;
+      return `Denied: ${humanizeToolTarget(activity.data.tool, activity.data.target)}${activity.data.reason === "timeout" ? " (timeout)" : ""}`;
 
     case "agent.trust.denied":
       return `Blocked: ${activity.data.rule ?? activity.data.target}`;
@@ -81,11 +114,11 @@ export function mergeToolActivities(activities: ChatActivity[]): ChatActivity[] 
   for (const a of activities) {
     if (a.type === "agent.tool.start" && a.data?.id && resultById.has(a.data.id)) {
       const result = resultById.get(a.data.id)!;
-      const label = toolLabel(a.data.name, a.data.input);
+      const displayLabel = toolLabel(a.data.name, a.data.input, a.data.label);
       const summary = result.data?.summary ?? truncate(String(result.data?.output));
       merged.push({
         ...result,
-        data: { ...result.data, mergedLabel: `${label} → ${summary}` },
+        data: { ...result.data, icon: a.data.icon, mergedLabel: `${displayLabel} → ${summary}` },
       });
       continue;
     }

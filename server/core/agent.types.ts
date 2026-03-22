@@ -45,6 +45,8 @@ export interface AgentTurn {
 export interface AgentToolDef {
   name: string;
   description: string;
+  label: string;
+  icon: string;
   parameters: {
     type: "object";
     properties: Record<string, { type: string; description: string }>;

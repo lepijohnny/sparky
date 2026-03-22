@@ -58,7 +58,7 @@ describe("app_bash", () => {
   });
 
   test("given summarize, when called, then returns truncated command", () => {
-    expect(bash.summarize!({ command: "echo hi" }, "")).toBe("$ echo hi");
+    expect(bash.summarize!({ command: "echo hi" }, "")).toBe("echo hi");
     const long = "x".repeat(100);
     expect(bash.summarize!({ command: long }, "").length).toBeLessThan(65);
   });

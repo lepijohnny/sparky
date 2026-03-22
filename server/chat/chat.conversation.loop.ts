@@ -67,7 +67,9 @@ function toEntry(
       const def = tools?.defs.find((d) => d.name === cleanName);
       const category = def?.category ?? inferCategory(cleanName, event.input);
       const summary = def?.summarize?.(event.input, "") || undefined;
-      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: cleanName, input: event.input, category, summary } };
+      const label = def?.label;
+      const icon = def?.icon;
+      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: cleanName, input: event.input, category, summary, label, icon } };
     }
     case "tool.result": {
       const pending = pendingTools?.get(event.id);
@@ -76,13 +78,18 @@ function toEntry(
       const output = String(event.output);
       const summary = def?.summarize?.(pending?.input, output) ?? fallbackSummary(output);
       const category = def?.category ?? inferCategory(toolName, pending?.input);
-      return { kind: "activity", messageId, source: "agent", type: "agent.tool.result", timestamp, data: { id: event.id, output: event.output, summary, category } };
+      const label = def?.label;
+      const icon = def?.icon;
+      return { kind: "activity", messageId, source: "agent", type: "agent.tool.result", timestamp, data: { id: event.id, output: event.output, summary, category, label, icon } };
     }
     case "tool.denied":
       return { kind: "activity", messageId, source: "agent", type: "agent.tool.denied", timestamp, data: { id: event.id } };
     case "server_tool.start": {
+      const isWebSearch = event.name === "web_search";
+      const label = isWebSearch ? "Web Searching" : undefined;
+      const icon = isWebSearch ? "globe" : undefined;
       const category = inferCategory(event.name, event.input);
-      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: event.name, input: event.input, category } };
+      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: event.name, input: event.input, category, label, icon } };
     }
     case "error":
       return { kind: "activity", messageId, source: "agent", type: "agent.error", timestamp, data: { message: event.message } };

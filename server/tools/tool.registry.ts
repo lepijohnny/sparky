@@ -25,6 +25,8 @@ export interface ToolSet extends AgentTools {
 
 export interface ToolDef<T extends z.ZodObject = z.ZodObject> {
   name: string;
+  label: string;
+  icon: string;
   description: string;
   schema: T;
   trustScope?: Scope;
@@ -51,6 +53,8 @@ export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
     return {
       name: t.name,
       description: t.description,
+      label: t.label,
+      icon: t.icon,
       parameters,
       category: t.category,
       summarize: t.summarize

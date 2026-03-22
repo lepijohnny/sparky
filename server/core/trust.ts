@@ -89,6 +89,8 @@ const DEFAULT_BASH_DENY: TrustRule[] = [
 
 const DEFAULT_BASH_ASK: TrustRule[] = [
   { label: "rm", pattern: "\\brm\\b", addedAt: 0 },
+  { label: "rmdir", pattern: "\\brmdir\\b", addedAt: 0 },
+  { label: "find -delete", pattern: "-delete\\b", addedAt: 0 },
 ];
 
 const DEFAULT_BUS_DENY: TrustRule[] = [
