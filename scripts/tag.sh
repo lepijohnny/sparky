@@ -9,12 +9,15 @@ fi
 VERSION="$2"
 TAG="v${VERSION}"
 
-if git tag -l "$TAG" | grep -q "$TAG"; then
-  echo "Error: tag $TAG already exists"
+if git tag -l "$TAG" | grep -qxF "$TAG"; then
+  echo "Error: tag $TAG already exists locally"
   exit 1
 fi
 
-echo -n "$VERSION" > .version
+if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+  echo "Error: tag $TAG already exists on remote"
+  exit 1
+fi
 
 STAGED=$(git diff --cached --name-only)
 if [ -n "$STAGED" ]; then
@@ -23,13 +26,28 @@ if [ -n "$STAGED" ]; then
 fi
 
 DIRTY=$(git diff --name-only)
-if [ "$DIRTY" != ".version" ]; then
-  echo "Error: only .version should be modified. Found:"
+if [ -n "$DIRTY" ]; then
+  echo "Error: working tree is dirty. Commit or stash changes first."
   echo "$DIRTY"
   exit 1
 fi
 
-git add .version
+echo -n "$VERSION" > .version
+
+if [ -f app/package.json ]; then
+  sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" app/package.json
+fi
+
+if [ -f src-tauri/tauri.conf.json ]; then
+  sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" src-tauri/tauri.conf.json
+fi
+
+if [ -f src-tauri/Cargo.toml ]; then
+  sed -i '' "s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" src-tauri/Cargo.toml
+  (cd src-tauri && cargo generate-lockfile 2>/dev/null || true)
+fi
+
+git add -A
 git commit -m "chore: release ${VERSION}"
 git tag "$TAG"
 git push --follow-tags

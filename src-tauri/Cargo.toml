@@ -1,6 +1,6 @@
 [package]
 name = "sparky"
-version = "0.4.1"
+version = "0.4.3"
 description = "Sparky - Agent LLM Bridge"
 authors = ["you"]
 license = "Apache-2.0"
