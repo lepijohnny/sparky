@@ -28,7 +28,7 @@ export default memo(function ChatDetailHeader({ chat, onRename, onDelete }: Chat
 
   return (
     <ContextMenu actions={actions}>
-      <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>
+      <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 600, color: "var(--fg)", userSelect: "none", WebkitUserSelect: "none" }}>
         {chat.name}
         <ChevronDown size={14} strokeWidth={1.5} style={{ color: "var(--fg-muted)" }} />
       </span>
