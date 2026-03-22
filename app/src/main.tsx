@@ -22,9 +22,21 @@ if (navigator.userAgent.includes("Macintosh")) {
 }
 
 if (window.__TAURI_INTERNALS__) {
-  import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
-    getCurrentWindow().setBackgroundColor({ red: 0x1a, green: 0x1a, blue: 0x2e, alpha: 255 });
-  });
+  const syncWindowBg = () => {
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    const match = bg.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    if (!match) return;
+    import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+      getCurrentWindow().setBackgroundColor({
+        red: parseInt(match[1], 16),
+        green: parseInt(match[2], 16),
+        blue: parseInt(match[3], 16),
+        alpha: 255,
+      });
+    });
+  };
+  syncWindowBg();
+  new MutationObserver(syncWindowBg).observe(document.documentElement, { attributes: true, attributeFilter: ["style"] });
 }
 
 document.addEventListener("click", (e) => {
