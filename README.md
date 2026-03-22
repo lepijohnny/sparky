@@ -24,7 +24,7 @@
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-green" />
-  <img alt="Version" src="https://img.shields.io/badge/version-0.3.0-orange" />
+  <a href="https://github.com/lepijohnny/sparky/releases/latest"><img alt="Version" src="https://img.shields.io/github/v/release/lepijohnny/sparky?color=orange" /></a>
 </p>
 
 <p align="center">
