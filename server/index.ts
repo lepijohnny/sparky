@@ -1,5 +1,8 @@
 process.title = "sparky-sidecar";
 
+import { initTerminalPath } from "./core/terminal.path";
+initTerminalPath();
+
 /** Capture stdout during init — native modules may write to it */
 const originalWrite = process.stdout.write.bind(process.stdout);
 process.stdout.write = (chunk: any, ...args: any[]) =>
