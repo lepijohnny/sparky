@@ -24,7 +24,7 @@ if (navigator.userAgent.includes("Macintosh")) {
 if (window.__TAURI_INTERNALS__) {
   const syncWindowBg = () => {
     const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-    const match = bg.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    const match = bg.match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
     if (!match) return;
     import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
       getCurrentWindow().setBackgroundColor({
