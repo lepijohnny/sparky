@@ -97,8 +97,8 @@ function baseOpts(run: (msgs: unknown[]) => AsyncGenerator<AgentEvent>) {
   };
 }
 
-describe("agentStream.retryIf", () => {
-  test("given 401 error with no output, when retryIf matches 401, then retries and succeeds", async () => {
+describe("agentStream.retry", () => {
+  test("given error with no output, when retry(3), then retries and succeeds on second attempt", async () => {
     const run = mockStreamSequence([
       [
         { type: "error", message: "401 Unauthorized" } as AgentEvent,
@@ -112,51 +112,13 @@ describe("agentStream.retryIf", () => {
     ]);
     const { opts, emitted } = baseOpts(run);
 
-    const result = await agentStream(opts).retryIf((errs) => errs.some((e) => e.includes("401")));
+    const result = await agentStream(opts).retry(3);
 
     expect(result).toBe("done");
     expect(emitted.some((e) => e.type === "text.done")).toBe(true);
   });
 
-  test("given 401 error with no output, when retryIf does not match, then returns error without retry", async () => {
-    const run = mockStreamSequence([
-      [
-        { type: "error", message: "401 Unauthorized" } as AgentEvent,
-        { type: "done" } as AgentEvent,
-      ],
-      [
-        { type: "text.done", content: "Should not reach" } as AgentEvent,
-        { type: "done" } as AgentEvent,
-      ],
-    ]);
-    const { opts, emitted } = baseOpts(run);
-
-    const result = await agentStream(opts).retryIf((errs) => errs.some((e) => e.includes("500")));
-
-    expect(result).toBe("error");
-    expect(emitted.some((e) => e.type === "text.done")).toBe(false);
-  });
-
-  test("given invalid_type error, when retryIf matches, then retries once", async () => {
-    const run = mockStreamSequence([
-      [
-        { type: "error", message: 'invalid_type: expected string, received undefined' } as AgentEvent,
-        { type: "done" } as AgentEvent,
-      ],
-      [
-        { type: "text.delta", content: "Fixed" } as AgentEvent,
-        { type: "text.done", content: "Fixed" } as AgentEvent,
-        { type: "done" } as AgentEvent,
-      ],
-    ]);
-    const { opts } = baseOpts(run);
-
-    const result = await agentStream(opts).retryIf((errs) => errs.some((e) => e.includes("invalid_type")));
-
-    expect(result).toBe("done");
-  });
-
-  test("given error with text output, when retryIf matches, then does not retry", async () => {
+  test("given error with text output, when retry(3), then does not retry", async () => {
     const run = mockStream([
       { type: "text.delta", content: "Partial..." } as AgentEvent,
       { type: "error", message: "401 Unauthorized" } as AgentEvent,
@@ -164,31 +126,26 @@ describe("agentStream.retryIf", () => {
     ]);
     const { opts, emitted } = baseOpts(run as any);
 
-    const result = await agentStream(opts).retryIf((errs) => errs.some((e) => e.includes("401")));
+    const result = await agentStream(opts).retry(3);
 
     expect(result).toBe("done");
     expect(emitted.some((e) => e.type === "text.delta")).toBe(true);
   });
 
-  test("given 401 error on both attempts, when retryIf matches, then returns error after one retry", async () => {
+  test("given errors on all attempts, when retry(2), then returns error after 3 total attempts", async () => {
     const run = mockStreamSequence([
-      [
-        { type: "error", message: "401 Unauthorized" } as AgentEvent,
-        { type: "done" } as AgentEvent,
-      ],
-      [
-        { type: "error", message: "401 Unauthorized again" } as AgentEvent,
-        { type: "done" } as AgentEvent,
-      ],
+      [{ type: "error", message: "fail 1" } as AgentEvent, { type: "done" } as AgentEvent],
+      [{ type: "error", message: "fail 2" } as AgentEvent, { type: "done" } as AgentEvent],
+      [{ type: "error", message: "fail 3" } as AgentEvent, { type: "done" } as AgentEvent],
     ]);
     const { opts } = baseOpts(run);
 
-    const result = await agentStream(opts).retryIf((errs) => errs.some((e) => e.includes("401")));
+    const result = await agentStream(opts).retry(2);
 
     expect(result).toBe("error");
   });
 
-  test("given successful stream, when retryIf configured, then returns done without retry", async () => {
+  test("given successful stream, when retry(3), then returns done without retry", async () => {
     const run = mockStream([
       { type: "text.delta", content: "All good" } as AgentEvent,
       { type: "text.done", content: "All good" } as AgentEvent,
@@ -196,7 +153,24 @@ describe("agentStream.retryIf", () => {
     ]);
     const { opts } = baseOpts(run as any);
 
-    const result = await agentStream(opts).retryIf(() => true);
+    const result = await agentStream(opts).retry(3);
+
+    expect(result).toBe("done");
+  });
+
+  test("given error then success on third attempt, when retry(3), then succeeds", async () => {
+    const run = mockStreamSequence([
+      [{ type: "error", message: "fail 1" } as AgentEvent, { type: "done" } as AgentEvent],
+      [{ type: "error", message: "fail 2" } as AgentEvent, { type: "done" } as AgentEvent],
+      [
+        { type: "text.delta", content: "OK" } as AgentEvent,
+        { type: "text.done", content: "OK" } as AgentEvent,
+        { type: "done" } as AgentEvent,
+      ],
+    ]);
+    const { opts } = baseOpts(run);
+
+    const result = await agentStream(opts).retry(3);
 
     expect(result).toBe("done");
   });
