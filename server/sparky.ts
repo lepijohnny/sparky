@@ -28,6 +28,7 @@ import { createSearchService } from "./core/search/search";
 import { shutdownWorker } from "./knowledge/worker/kt.worker.client";
 import { createSettingsCrud } from "./settings";
 import { createAdapters } from "./core/adapters/adapters";
+import { configJsonBackwardCompatibilityHook } from "./core/compat";
 
 export interface Sparky {
   start(): Promise<{ port: number; token: string }>;
@@ -264,6 +265,23 @@ export function createSparky(): Sparky {
       await trustStore.init();
       await bus.emit("storage.ready");
       await knowledgeManager.init();
+
+      configJsonBackwardCompatibilityHook(log, [
+        {
+          name: "add workspaceId to labels",
+          run: () => {
+            const wsId = config.get("activeWorkspace");
+            if (!wsId) return;
+            const all = config.get("labels") ?? [];
+            const missing = all.some((l) => !l.workspaceId);
+            if (!missing) return;
+            config.update("labels", (labels = []) =>
+              labels.map((l) => l.workspaceId ? l : { ...l, workspaceId: wsId }),
+            );
+            log.info("Stamped labels missing workspaceId");
+          },
+        },
+      ]);
 
       hub = new Connection(bus, token, logger.createLogger("connection"));
       const port = await hub.start();

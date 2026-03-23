@@ -31,18 +31,28 @@ export class LabelsSettings {
     this.bus.on("settings.labels.reorder", (data) => this.reorder(data));
   }
 
+  private wsId(): string | undefined {
+    return this.config.get("activeWorkspace") ?? undefined;
+  }
+
+  private forWs(): Label[] {
+    const wsId = this.wsId();
+    const all = this.config.get("labels") ?? [];
+    return all.filter((l) => l.workspaceId === wsId);
+  }
+
   private list() {
-    const labels = this.config.get("labels") ?? [];
-    return { labels };
+    return { labels: this.forWs() };
   }
 
   private async create(data: { name: string; color?: string }) {
-    const existing = this.config.get("labels") ?? [];
+    const existing = this.forWs();
     const color = data.color ?? PALETTE[existing.length % PALETTE.length];
     const label: Label = {
       id: crypto.randomUUID(),
       name: data.name.trim(),
       color,
+      workspaceId: this.wsId(),
     };
 
     await this.config.update("labels", (labels: Label[] = []) => [...labels, label]);
@@ -74,32 +84,33 @@ export class LabelsSettings {
   }
 
   private async reorder(data: { ids: string[] }) {
-    const existing = this.config.get("labels") ?? [];
-    const map = new Map(existing.map((l) => [l.id, l]));
-    const reordered = data.ids
-      .map((id) => map.get(id))
-      .filter((l): l is Label => l !== undefined);
-
-    await this.config.set("labels", reordered);
+    const wsId = this.wsId();
+    await this.config.update("labels", (labels: Label[] = []) => {
+      const others = labels.filter((l) => l.workspaceId !== wsId);
+      const mine = labels.filter((l) => l.workspaceId === wsId);
+      const map = new Map(mine.map((l) => [l.id, l]));
+      const reordered = data.ids
+        .map((id) => map.get(id))
+        .filter((l): l is Label => l !== undefined);
+      return [...others, ...reordered];
+    });
     this.log.info("Labels reordered");
-    return { labels: reordered };
+    return { labels: this.forWs() };
   }
 
   private async delete(data: { id: string }) {
-    let found = false;
-
-    await this.config.update("labels", (labels: Label[] = []) => {
-      const filtered = labels.filter((l) => {
-        if (l.id === data.id) { found = true; return false; }
-        return true;
-      });
-      return filtered;
-    });
-
+    const all = this.config.get("labels") ?? [];
+    const found = all.some((l) => l.id === data.id);
     if (!found) return { deleted: false };
+
+    await this.config.update("labels", (labels: Label[] = []) =>
+      labels.filter((l) => l.id !== data.id),
+    );
 
     this.log.info(`Label deleted: ${data.id}`);
     this.bus.emit("settings.labels.deleted", { id: data.id });
     return { deleted: true };
   }
+
+
 }
