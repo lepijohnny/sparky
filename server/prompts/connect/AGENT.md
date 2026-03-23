@@ -110,7 +110,7 @@ service_def     = '{' , id , label , base_url , [ icon ] , auth , [ oauth ] , en
 id              = '"id":' , id_string ;                       (* /^[a-z][a-z0-9_]*$/ e.g. "github", "my_api" *)
 label           = '"label":' , string ;                       (* display name, e.g. "GitHub" *)
 base_url        = '"baseUrl":' , url ;                        (* API root, no trailing slash *)
-icon            = '"icon":' , url ;                           (* service icon URL *)
+icon            = '"icon":' , url ;                           (* service favicon — try https://<domain>/favicon.ico first, then /favicon.png, /apple-touch-icon.png *)
 
 (* authentication *)
 auth            = '"auth":' , ( bearer_auth | header_auth | query_auth | url_auth | oauth_auth | basic_auth | bot_auth ) ;

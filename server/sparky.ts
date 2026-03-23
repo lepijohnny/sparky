@@ -74,7 +74,7 @@ export function createSparky(): Sparky {
   let hub: Connection | null = null;
 
   createRegistryCrud(bus, config, registry);
-  createSvcCrud(bus, config, logger.createLogger("service"), cred);
+  createSvcCrud(bus, config, logger.createLogger("service"), cred, storage);
   createSettingsCrud(bus, storage, config, cred, logger);
   createSearchService(bus, logger.createLogger("search"));
 
