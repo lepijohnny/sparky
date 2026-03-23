@@ -3,9 +3,19 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Sparky',
-  tagline: 'Modern, fast, minimal desktop AI assistant',
+  title: 'Sparky — Desktop AI Assistant',
+  tagline: 'Modern, fast, minimal desktop AI assistant with RAG, skills, and multi-provider support',
   favicon: 'img/favicon.png',
+
+  headTags: [
+    { tagName: 'meta', attributes: { name: 'description', content: 'Sparky is a modern desktop AI assistant with RAG knowledge base, skills, and support for Anthropic, OpenAI, Google, Copilot, and Ollama.' } },
+    { tagName: 'meta', attributes: { name: 'keywords', content: 'AI assistant, desktop AI, RAG, knowledge base, Anthropic, OpenAI, Ollama, Copilot, Google Gemini, LLM, developer tools' } },
+    { tagName: 'meta', attributes: { property: 'og:type', content: 'website' } },
+    { tagName: 'meta', attributes: { property: 'og:title', content: 'Sparky — Desktop AI Assistant' } },
+    { tagName: 'meta', attributes: { property: 'og:description', content: 'Modern, fast, minimal desktop AI assistant with RAG, skills, and multi-provider support.' } },
+    { tagName: 'meta', attributes: { property: 'og:image', content: 'https://getsparky.chat/img/sparky-logo.png' } },
+    { tagName: 'meta', attributes: { name: 'twitter:card', content: 'summary_large_image' } },
+  ],
 
   future: {
     v4: true,
