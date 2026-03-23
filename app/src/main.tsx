@@ -6,7 +6,7 @@ import ConnectionContext from "./context/ConnectionContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import { ToastContainer } from "./components/shared/ToastContainer";
-import ChatWindow from "./pages/chat/ChatWindow";
+import ChatWindow from "./pages/chat/ChatWindowPage";
 import ExpandWindow from "./pages/ExpandWindow";
 import { initShortcuts } from "./store/shortcuts";
 import "./styles/global.css";

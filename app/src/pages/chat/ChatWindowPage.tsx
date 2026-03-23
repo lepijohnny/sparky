@@ -12,7 +12,7 @@ import { type WsConnection, wsFactory } from "../../lib/ws";
 import type { Chat } from "../../types/chat";
 import ChatDetailsPage from "./ChatDetailsPage";
 import PrintDetailsPage from "./PrintDetailsPage";
-import styles from "./ChatWindow.module.css";
+import styles from "./ChatWindowPage.module.css";
 
 interface ChatWindowProps {
   chatId: string;

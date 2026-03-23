@@ -15,7 +15,7 @@ import type { PendingAttachment } from "../../types/attachment";
 import { useToasts } from "../../context/ToastContext";
 import styles from "./AgentTurnInput.module.css";
 
-import { extractPathToken, pathBase, pathParent, normalizePath, pathFilter } from "./pathComplete";
+import { extractPathToken, pathBase, pathParent, normalizePath, pathFilter } from "../../lib/pathComplete";
 
 function getPathTokenFromHandle(handle: RichInputHandle): string | null {
   return handle.getPathToken();
