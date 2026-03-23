@@ -29,7 +29,7 @@ export function runAgentLoop(
       if (entry) await emit(chatId, entry);
     },
     onError: (msg) => emitActivity(chatId, turnId, "agent.error", { message: msg }),
-  }).retryIf((errors) => errors.some((e) => e.includes("401") || e.includes("invalid_type")));
+  }).retry(3);
 }
 
 export interface AgentStreamOpts {
@@ -76,16 +76,19 @@ export function agentStream(opts: AgentStreamOpts) {
       return (await execute(opts.messages)).reason;
     },
 
-    async retryIf(shouldRetry: (errors: string[]) => boolean): Promise<TerminalReason> {
-      const first = await execute(opts.messages);
-      if (first.reason !== "error" || first.errors.length === 0 || opts.signal.aborted) return first.reason;
-      if (!shouldRetry(first.errors)) return first.reason;
-
-      return (await execute([
-        ...opts.messages,
-        { role: "assistant", content: `Error: ${first.errors.join("; ")}` },
-        { role: "user", content: "The previous attempt failed. Please try again." },
-      ])).reason;
+    async retry(times: number): Promise<TerminalReason> {
+      let messages = opts.messages;
+      for (let attempt = 0; attempt <= times; attempt++) {
+        const result = await execute(messages);
+        if (result.reason !== "error" || result.errors.length === 0 || opts.signal.aborted) return result.reason;
+        if (attempt === times) return result.reason;
+        messages = [
+          ...opts.messages,
+          { role: "assistant", content: `Error: ${result.errors.join("; ")}` },
+          { role: "user", content: "The previous attempt failed. Please try again." },
+        ];
+      }
+      return "error";
     },
   };
 }
