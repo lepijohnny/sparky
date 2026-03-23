@@ -15,7 +15,6 @@ Sparky keeps everything inside the `~/.sparky/` folder, all data, models, and de
 
 On first launch, Sparky downloads the required dependencies:
 
-- **Node.js 22.22** — runtime for the backend sidecar server
 - **Embedding model** (~78 MB) — powers the local knowledge base via llama.cpp
 
 The splash screen shows download progress for each dependency. This only happens once.
@@ -32,6 +31,7 @@ Sparky supports the following providers out of the box:
 | Provider | Auth Method |
 |----------|------------|
 | Anthropic Claude | OAuth (Claude Pro/Max) or API key |
+| OpenAI | OAuth (ChatGPT) or API key |
 | GitHub Copilot | Device login |
 | Google Gemini | OAuth |
 | Ollama | Local — no auth needed |

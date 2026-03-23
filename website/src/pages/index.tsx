@@ -58,7 +58,7 @@ export default function Home() {
         <div className={styles.badges}>
           <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue" />
           <img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-green" />
-          <img alt="Version" src="https://img.shields.io/badge/version-0.3.0-orange" />
+          <img alt="Version" src="https://img.shields.io/github/v/release/lepijohnny/sparky?color=orange" />
         </div>
         <div className={styles.actions}>
           <Link to="/docs/getting-started/introduction" className={styles.primaryBtn}>
@@ -94,6 +94,7 @@ export default function Home() {
         <p className={styles.providersTitle}>Works with</p>
         <div className={styles.providerLogos}>
           <img src={b('/icons/providers/anthropic.svg')} alt="Anthropic" className={styles.providerLogo} />
+          <img src={b('/icons/providers/openai.svg')} alt="OpenAI" className={styles.providerLogo} />
           <img src={b('/icons/providers/github-copilot-icon.svg')} alt="GitHub Copilot" className={styles.providerLogo} />
           <img src={b('/icons/providers/google.svg')} alt="Google" className={styles.providerLogo} />
           <img src={b('/icons/providers/ollama.svg')} alt="Ollama" className={styles.providerLogo} />
