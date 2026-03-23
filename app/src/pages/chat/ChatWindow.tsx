@@ -11,6 +11,7 @@ import { buildChatActions } from "../../lib/chatActions";
 import { type WsConnection, wsFactory } from "../../lib/ws";
 import type { Chat } from "../../types/chat";
 import ChatDetailsPage from "./ChatDetailsPage";
+import PrintDetailsPage from "./PrintDetailsPage";
 import styles from "./ChatWindow.module.css";
 
 interface ChatWindowProps {
@@ -127,6 +128,8 @@ function ChatWindowInner({ chatId, printMode }: { chatId: string; printMode?: bo
     onRename: (c) => setRenameChat(c),
   }) : [], [conn, chat, labels, wsPort, sidecarToken]);
 
+  const dragRegion = useDragRegion();
+
   if (deleted) {
     return (
       <div className={styles.centered}>
@@ -143,9 +146,13 @@ function ChatWindowInner({ chatId, printMode }: { chatId: string; printMode?: bo
     );
   }
 
+  if (printMode) {
+    return <PrintDetailsPage chat={chat} />;
+  }
+
   return (
     <div className={styles.window}>
-      <div className={styles.header} {...useDragRegion()}>
+      <div className={styles.header} {...dragRegion}>
         <ContextMenu actions={actions} align="left">
           <span className={styles.title}>
             {chat.name}
@@ -154,7 +161,7 @@ function ChatWindowInner({ chatId, printMode }: { chatId: string; printMode?: bo
         </ContextMenu>
       </div>
       <div className={styles.content}>
-        <ChatDetailsPage chat={chat} printMode={printMode} />
+        <ChatDetailsPage chat={chat} />
       </div>
       {renameChat && (
         <RenameModal

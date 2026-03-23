@@ -9,7 +9,7 @@ type TerminalReason = "done" | "stopped" | "error";
 type EmitFn = (chatId: string, entry: ChatEntry) => Promise<void>;
 type EmitActivityFn = (chatId: string, turnId: string, type: string, data?: any) => Promise<void>;
 
-export async function runAgentLoop(
+export function runAgentLoop(
   agent: Agent,
   chatId: string,
   turnId: string,
@@ -20,27 +20,74 @@ export async function runAgentLoop(
   emitActivity: EmitActivityFn,
   tools?: AgentTools,
 ): Promise<TerminalReason> {
-  try {
-    const stream = agent.stream({ system, messages, cancellation: signal, tools });
-    const pendingTools = new Map<string, { name: string; input: unknown }>();
-
-    for await (const event of stream) {
-      if (signal.aborted) return "stopped";
-
-      if (event.type === "tool.start") {
-        pendingTools.set(event.id, { name: event.name, input: event.input });
-      }
-
+  return agentStream({
+    run: (msgs) => agent.stream({ system, messages: msgs, cancellation: signal, tools }),
+    messages,
+    signal,
+    onEvent: async (event, pendingTools) => {
       const entry = toEntry(event, turnId, tools, pendingTools);
       if (entry) await emit(chatId, entry);
-    }
+    },
+    onError: (msg) => emitActivity(chatId, turnId, "agent.error", { message: msg }),
+  }).retryIf((errors) => errors.some((e) => e.includes("401") || e.includes("invalid_type")));
+}
 
-    return signal.aborted ? "stopped" : "done";
-  } catch (err) {
-    if (signal.aborted) return "stopped";
-    await emitActivity(chatId, turnId, "agent.error", { message: String(err) });
-    return "error";
+export interface AgentStreamOpts {
+  run: (messages: AgentMessage[]) => AsyncGenerator<AgentEvent>;
+  messages: AgentMessage[];
+  signal: AbortSignal;
+  onEvent: (event: AgentEvent, pendingTools: Map<string, { name: string; input: unknown }>) => Promise<void>;
+  onError: (message: string) => Promise<void>;
+}
+
+export function agentStream(opts: AgentStreamOpts) {
+  async function execute(messages: AgentMessage[]): Promise<{ reason: TerminalReason; errors: string[] }> {
+    try {
+      const pendingTools = new Map<string, { name: string; input: unknown }>();
+      let hasOutput = false;
+      const errors: string[] = [];
+
+      for await (const event of opts.run(messages)) {
+        if (opts.signal.aborted) return { reason: "stopped", errors: [] };
+
+        if (event.type === "tool.start") {
+          pendingTools.set(event.id, { name: event.name, input: event.input });
+        }
+        if (event.type === "text.delta" || event.type === "text.done" || event.type === "tool.result") hasOutput = true;
+        if (event.type === "error") errors.push((event as any).message ?? "Unknown error");
+
+        await opts.onEvent(event, pendingTools);
+      }
+
+      if (!hasOutput && errors.length > 0 && !opts.signal.aborted) {
+        return { reason: "error", errors };
+      }
+
+      return { reason: opts.signal.aborted ? "stopped" : "done", errors: [] };
+    } catch (err) {
+      if (opts.signal.aborted) return { reason: "stopped", errors: [] };
+      await opts.onError(String(err));
+      return { reason: "error", errors: [] };
+    }
   }
+
+  return {
+    async once(): Promise<TerminalReason> {
+      return (await execute(opts.messages)).reason;
+    },
+
+    async retryIf(shouldRetry: (errors: string[]) => boolean): Promise<TerminalReason> {
+      const first = await execute(opts.messages);
+      if (first.reason !== "error" || first.errors.length === 0 || opts.signal.aborted) return first.reason;
+      if (!shouldRetry(first.errors)) return first.reason;
+
+      return (await execute([
+        ...opts.messages,
+        { role: "assistant", content: `Error: ${first.errors.join("; ")}` },
+        { role: "user", content: "The previous attempt failed. Please try again." },
+      ])).reason;
+    },
+  };
 }
 
 function toEntry(

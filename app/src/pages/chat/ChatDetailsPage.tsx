@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
-import { Eye, EyeClosed, EyeOff, Paperclip, Pin, Printer } from "lucide-react";
+import { Eye, Paperclip, Pin } from "lucide-react";
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
 import AgentMessageBubble from "../../components/chat/AgentMessageBubble";
 import AnchorTray from "../../components/chat/AnchorTray";
@@ -27,9 +27,9 @@ import { resolveServiceMentions, resolveSkillMentions } from "../../lib/serviceR
 import styles from "./ChatDetailsPage.module.css";
 
 
-const UserBubble = memo(function UserBubble({ message, searchQuery, onToggleAnchor, hidden, onToggleHidden }: { message: Message; searchQuery?: string; onToggleAnchor?: (rowid: number, anchored: boolean) => void; hidden?: boolean; onToggleHidden?: () => void }) {
+const UserBubble = memo(function UserBubble({ message, searchQuery, onToggleAnchor }: { message: Message; searchQuery?: string; onToggleAnchor?: (rowid: number, anchored: boolean) => void }) {
   return (
-    <div className={`${styles.message} ${styles.messageUser} ${hidden ? styles.printHidden : ""}`}>
+    <div className={`${styles.message} ${styles.messageUser}`}>
       <div className={styles.bubbleWrapUser}>
         {message.attachments && message.attachments.length > 0 && (
           <div className={styles.userAttachments}>
@@ -67,11 +67,6 @@ const UserBubble = memo(function UserBubble({ message, searchQuery, onToggleAnch
             <Pin size={12} strokeWidth={1.5} />
           </button>
         )}
-        {onToggleHidden && (
-          <div className={styles.printOverlay} onClick={onToggleHidden}>
-            {hidden ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -80,27 +75,18 @@ const UserBubble = memo(function UserBubble({ message, searchQuery, onToggleAnch
 interface ChatDetailsPageProps {
   chat: Chat;
   searchQuery?: string;
-  printMode?: boolean;
 }
 
 const modelCache = new Map<string, { provider: string; model: string; label: string; supportsThinking: boolean }>();
 
-export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDetailsPageProps) {
+export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPageProps) {
   const { conn } = useConnection();
   const [entries, setEntries] = useState<ChatEntry[]>([]);
   const [ready, setReady] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const loadingMoreRef = useRef(false);
 
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
-  const toggleHidden = useCallback((id: string) => {
-    setHiddenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }, []);
 
   const [modelGeneration, setModelGeneration] = useState(0);
   const modelKey = `${chat.provider}:${chat.model}`;
@@ -504,66 +490,34 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
 
 
   return (
-    <div className={`${styles.chatView} ${printMode ? styles.printMode : ""}`}>
-      {printMode && (
-        <div className={styles.printToolbar}>
-          <button className={styles.printToolbarBtn} onClick={() => setHiddenIds(new Set(messages.map((m) => m.id)))} title="Hide all">
-            <EyeClosed size={16} strokeWidth={1.5} />
-          </button>
-          <button className={styles.printToolbarBtn} onClick={() => setHiddenIds(new Set())} title="Show all">
-            <Eye size={16} strokeWidth={1.5} />
-          </button>
-          <button className={styles.printToolbarBtn} onClick={async () => {
-            const originalTitle = document.title;
-            document.title = chat.name || "Sparky Chat";
-            const restore = () => { document.title = originalTitle; };
-            window.addEventListener("afterprint", restore, { once: true });
-            try {
-              const { getCurrentWebview } = await import("@tauri-apps/api/webview");
-              await getCurrentWebview().print();
-            } catch {
-              window.print();
-            }
-          }} title="Print">
-            <Printer size={16} strokeWidth={1.5} />
-          </button>
-        </div>
-      )}
+    <div className={styles.chatView}>
       <div className={styles.messages} ref={scrollRef} onScroll={onScroll}>
         {!ready && messages.length === 0 ? null : messages.length === 0 && !stream.active ? (
           <div className={styles.empty} />
         ) : (
           <div className={styles.inner} ref={innerRef}>
-            {printMode && chat.name && <h1 className={styles.printTitle}>{chat.name}</h1>}
             {messages.map((msg) =>
               msg.role === "user" ? (
                 <div key={msg.id} data-rowid={msg.rowid}>
                   <UserBubble
                     message={msg}
                     searchQuery={searchQuery}
-                    onToggleAnchor={printMode ? undefined : handleToggleAnchor}
-                    hidden={printMode ? hiddenIds.has(msg.id) : undefined}
-                    onToggleHidden={printMode ? () => toggleHidden(msg.id) : undefined}
+                    onToggleAnchor={handleToggleAnchor}
                   />
                 </div>
               ) : (
                 <div
                   key={msg.id}
                   data-rowid={msg.rowid}
-                  className={`${styles.message} ${styles.messageAssistant} ${printMode && hiddenIds.has(msg.id) ? styles.printHidden : ""}`}
+                  className={`${styles.message} ${styles.messageAssistant}`}
                 >
                   <ErrorBoundary fallback={<div className={styles.bubbleError}>Failed to render message</div>}>
-                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={printMode ? undefined : handleToggleAnchor} />
+                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} />
                   </ErrorBoundary>
-                  {printMode && (
-                    <div className={styles.printOverlay} onClick={() => toggleHidden(msg.id)}>
-                      {hiddenIds.has(msg.id) ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
-                    </div>
-                  )}
                 </div>
               )
             )}
-            {stream.active && !printMode && (
+            {stream.active && (
               <div className={`${styles.message} ${styles.messageAssistant}`}>
                 <AgentMessageBubble
                   message={{
@@ -577,29 +531,24 @@ export default function ChatDetailsPage({ chat, searchQuery, printMode }: ChatDe
                 />
               </div>
             )}
-
           </div>
         )}
       </div>
-      {!printMode && (
-        <>
-          <AnchorTray entries={anchoredEntries} onUnpin={(rowid) => handleToggleAnchor(rowid, false)} onJump={handleAnchorJump} onRename={handleAnchorRename} />
-          <AgentTurnInput
-            chat={chat}
-            conn={conn}
-            streaming={stream.active}
-            chatProvider={chatProvider}
-            chatModel={chatModel}
-            supportsThinking={supportsThinking}
-            supportsAttachments={effectiveModel?.supportsAttachments}
-            contextTokens={messages.findLast((m) => m.role === "assistant" && m.conversationTokens != null)?.conversationTokens}
-            contextWindow={effectiveModel?.contextWindow}
-            onSend={handleSend}
-            onStop={handleStop}
-            onModelChange={handleModelChange}
-          />
-        </>
-      )}
+      <AnchorTray entries={anchoredEntries} onUnpin={(rowid) => handleToggleAnchor(rowid, false)} onJump={handleAnchorJump} onRename={handleAnchorRename} />
+      <AgentTurnInput
+        chat={chat}
+        conn={conn}
+        streaming={stream.active}
+        chatProvider={chatProvider}
+        chatModel={chatModel}
+        supportsThinking={supportsThinking}
+        supportsAttachments={effectiveModel?.supportsAttachments}
+        contextTokens={messages.findLast((m) => m.role === "assistant" && m.conversationTokens != null)?.conversationTokens}
+        contextWindow={effectiveModel?.contextWindow}
+        onSend={handleSend}
+        onStop={handleStop}
+        onModelChange={handleModelChange}
+      />
     </div>
   );
 }

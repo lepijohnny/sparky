@@ -5,6 +5,30 @@
   background: var(--bg-raised);
 }
 
+.windowPrint {
+  background: var(--bg-raised);
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.windowPrint .content {
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 12px;
+}
+
+.windowPrint .content > * {
+  width: 100%;
+  max-width: 840px;
+}
+
+.windowPrint .header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-raised);
+}
+
 .header {
   height: 28px;
   display: flex;

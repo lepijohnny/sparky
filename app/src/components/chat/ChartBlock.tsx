@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
+import { usePrintMode } from "../../context/PrintContext";
 import * as echarts from "echarts/core";
 import { BarChart, LineChart, PieChart, ScatterChart, RadarChart, GaugeChart, FunnelChart, HeatmapChart, TreemapChart, SankeyChart, GraphChart, CandlestickChart } from "echarts/charts";
 import { TitleComponent, TooltipComponent, LegendComponent, GridComponent, VisualMapComponent } from "echarts/components";
@@ -82,11 +83,13 @@ function getThemeOverrides(): Record<string, unknown> {
 }
 
 const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; onError?: () => void }) {
+  const eager = usePrintMode();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(!!eager);
 
   useEffect(() => {
+    if (eager) return;
     const el = containerRef.current;
     if (!el) return;
     const io = new IntersectionObserver(([entry]) => {
@@ -97,7 +100,7 @@ const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; o
     }, { rootMargin: "500px" });
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [eager]);
 
   useEffect(() => {
     if (!visible) return;

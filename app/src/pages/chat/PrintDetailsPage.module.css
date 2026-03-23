@@ -1,0 +1,152 @@
+.page {
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--bg-raised);
+  color: var(--fg);
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbarBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.toolbarBtn:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.content {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.bubble {
+  position: relative;
+  transition: opacity 200ms ease;
+}
+
+.bubbleUser {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.bubbleAssistant {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.bubbleContent {
+  white-space: pre-wrap;
+}
+
+.hidden {
+  opacity: 0.2;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--fg-muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  z-index: 2;
+  border-radius: 8px;
+}
+
+.bubble:hover .overlay,
+.hidden .overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bubble:hover .overlay {
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.hidden .overlay {
+  background: none;
+}
+
+.error {
+  color: var(--fg-danger, #e53e3e);
+  font-size: 13px;
+  padding: 8px;
+}
+
+/* Remove all height limits on message bubbles and code blocks */
+.content :global([class*="bubble"]) {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.content :global(pre) {
+  max-height: none !important;
+  overflow: visible !important;
+  white-space: pre-wrap !important;
+}
+
+@media print {
+  .toolbar {
+    display: none !important;
+  }
+
+  .page {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .overlay {
+    display: none !important;
+  }
+
+  .bubble {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
