@@ -187,11 +187,12 @@ server/             Node.js sidecar (TypeScript, WebSocket API)
   knowledge/        RAG pipeline — chunking, indexing, search, worker
   prompts/          Built-in role files, API docs, format guides
   settings/         Workspace settings (appearance, labels, LLM, profile)
+  skills/           Skill CRUD, import/export, review pipeline
   tools/            Tool definitions with Zod schemas (app_* naming)
 src-tauri/          Tauri shell (Rust) — window, IPC, model downloads, sidecar
 scripts/            Build helpers (macOS, Windows)
 docs/               Architecture docs and assets
-website/            Docusaurus documentation site (getsparky.chat)
+website/            Documentation site — getsparky.chat (Docusaurus)
 ```
 
 ## Local State
@@ -201,10 +202,11 @@ All data stays on your machine in `~/.sparky/`:
 ```
 ~/.sparky/
 ├── config.json              Global app config
-├── cred.enc                 Encrypted credentials (fallback when keychain unavailable)
-├── env.json                 Environment variables
+├── cred.enc                 Encrypted credentials
+├── trust.enc                Encrypted tool approval rules and permission mode
 ├── models/                  Shared GGUF models (embed, rerank)
 ├── plugins/ext/             Extractor plugins
+├── skills/                  Installed skills (each a folder with SKILL.md)
 ├── themes/                  Custom UI themes
 └── workspaces/
     └── <name>/
