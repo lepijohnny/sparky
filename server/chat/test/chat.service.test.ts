@@ -4,7 +4,10 @@ import { createEventBus, type EventBus } from "../../core/bus";
 import type { Configuration } from "../../core/config";
 import type { Logger } from "../../logger.types";
 import type { Credentials } from "../../core/cred";
+import type { StorageProvider } from "../../core/storage";
 import type { ServiceDef } from "../../core/proxy/proxy.schema";
+
+const mockStorage = { root: (p: string) => `/tmp/sparky-test/${p}` } as StorageProvider;
 
 const mockCred: Credentials = {
   init: async () => {},
@@ -83,7 +86,8 @@ describe("chat.service", () => {
   });
 
   test("given svc.register, when valid def, then service is staged but not saved to config", async () => {
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    fetchSpy.mockResolvedValue(new Response("", { status: 404 }));
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await bus.emit("svc.register", makeDef());
 
@@ -91,15 +95,15 @@ describe("chat.service", () => {
   });
 
   test("given svc.register, when invalid def, then throws validation error", async () => {
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await expect(bus.emit("svc.register", { id: "Bad-Name", label: "X", baseUrl: "not-url" } as any))
       .rejects.toThrow("Invalid params");
   });
 
   test("given staged service, when svc.list called, then staged service is not in list", async () => {
-    fetchSpy.mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }));
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    fetchSpy.mockResolvedValue(new Response("Unauthorized", { status: 401 }));
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await bus.emit("svc.register", makeDef());
     const result = await bus.emit("svc.list");
@@ -108,8 +112,8 @@ describe("chat.service", () => {
   });
 
   test("given valid service, when svc.register passes auto-test, then service is saved to config", async () => {
-    fetchSpy.mockResolvedValueOnce(new Response('{"login":"user"}', { status: 200 }));
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    fetchSpy.mockResolvedValue(new Response('{"login":"user"}', { status: 200 }));
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     const result = await bus.emit("svc.register", makeDef());
 
@@ -120,8 +124,8 @@ describe("chat.service", () => {
   });
 
   test("given valid service, when svc.register auto-test fails, then service stays staged", async () => {
-    fetchSpy.mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }));
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    fetchSpy.mockResolvedValue(new Response("Unauthorized", { status: 401 }));
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     const result = await bus.emit("svc.register", makeDef());
 
@@ -132,7 +136,7 @@ describe("chat.service", () => {
   });
 
   test("given no service registered, when svc.test called, then returns deprecation error", async () => {
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     const result = await bus.emit("svc.test", { service: "nonexistent" });
 
@@ -142,7 +146,7 @@ describe("chat.service", () => {
 
   test("given staged and saved services, when svc.list called, then returns only saved", async () => {
     config.data.services = [makeDef({ id: "saved_svc", label: "Saved" })];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await bus.emit("svc.register", makeDef({ id: "staged_svc", label: "Staged" }));
     const result = await bus.emit("svc.list");
@@ -154,7 +158,7 @@ describe("chat.service", () => {
   test("given svc.call with valid service, when endpoint exists, then makes fetch and returns result", async () => {
     fetchSpy.mockResolvedValueOnce(new Response('{"login":"user"}', { status: 200 }));
     config.data.services = [makeDef()];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     const result = await bus.emit("svc.call", { service: "test_svc", action: "get_user" });
 
@@ -178,7 +182,7 @@ describe("chat.service", () => {
         status: "unvalidated",
       }],
     })];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await bus.emit("svc.call", { service: "test_svc", action: "get_item", input: { id: "123" } } as any);
 
@@ -201,7 +205,7 @@ describe("chat.service", () => {
         status: "unvalidated",
       }],
     })];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await bus.emit("svc.call", { service: "test_svc", action: "get_item", arguments: { id: "456" } } as any);
 
@@ -213,7 +217,7 @@ describe("chat.service", () => {
 
   test("given svc.call with params as array, when called, then throws validation error", async () => {
     config.data.services = [makeDef()];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await expect(bus.emit("svc.call", { service: "test_svc", action: "get_user", params: ["bad"] } as any))
       .rejects.toThrow("Invalid params");
@@ -222,7 +226,7 @@ describe("chat.service", () => {
   test("given svc.call with no params field, when called, then uses empty params", async () => {
     fetchSpy.mockResolvedValueOnce(new Response('{"login":"user"}', { status: 200 }));
     config.data.services = [makeDef()];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     const result = await bus.emit("svc.call", { service: "test_svc", action: "get_user" });
 
@@ -245,7 +249,7 @@ describe("chat.service", () => {
         status: "unvalidated",
       }],
     })];
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     await bus.emit("svc.call", { service: "test_svc", action: "get_item", id: "789" } as any);
 
@@ -256,7 +260,7 @@ describe("chat.service", () => {
   });
 
   test("given svc.call with unknown service, when called, then returns not registered error", async () => {
-    createSvcCrud(bus, config, noopLogger, mockCred);
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
 
     const result = await bus.emit("svc.call", { service: "unknown", action: "get_user" });
 
@@ -266,7 +270,7 @@ describe("chat.service", () => {
   test("given svc.delete, when service exists, then removes from config and clears credentials", async () => {
     config.data.services = [makeDef()];
     const cred = { ...mockCred, deleteSvc: vi.fn() };
-    createSvcCrud(bus, config, noopLogger, cred);
+    createSvcCrud(bus, config, noopLogger, cred, mockStorage);
 
     await bus.emit("svc.delete", { service: "test_svc" });
 

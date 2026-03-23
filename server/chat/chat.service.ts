@@ -6,6 +6,8 @@ import type { Logger } from "../logger.types";
 import type { Credentials } from "../core/cred";
 import { ServiceSchema, formatZodError, getDefaults, type ServiceDef } from "../core/proxy/proxy.schema";
 import { createServiceRouter, listMcpTools, mcpToolsToEndpoints, summarizeMcpTools, type ServiceRouter } from "../core/proxy/proxy.router";
+import { downloadServiceIcon, readIconDataUri, deleteServiceIcon, initServiceIconDir } from "./chat.service.icon";
+import type { StorageProvider } from "../core/storage";
 
 function normalizeMarkdown(raw: string): string {
   return raw
@@ -17,17 +19,15 @@ function normalizeMarkdown(raw: string): string {
     .trim();
 }
 
-function servicesDir(): string {
-  const home = process.env.HOME ?? process.env.USERPROFILE ?? "";
-  return join(home, ".sparky", "services");
-}
-
 export function createSvcCrud(
   bus: EventBus,
   config: Configuration,
   log: Logger,
   cred: Credentials,
+  storage: StorageProvider,
 ): void {
+  const svcDir = storage.root("services");
+  initServiceIconDir(svcDir);
 
   const staged = new Map<string, ServiceDef>();
   const routers = new Map<string, ServiceRouter>();
@@ -104,6 +104,8 @@ export function createSvcCrud(
 
     const def = result.data as ServiceDef;
 
+    downloadServiceIcon(def.id, def.icon, def.baseUrl);
+
     if (def.endpoints.length === 0) {
       try {
         const headers = await resolveAuthHeaders(def);
@@ -142,7 +144,7 @@ export function createSvcCrud(
       id: s.id,
       label: s.label,
       baseUrl: s.baseUrl,
-      icon: s.icon,
+      icon: readIconDataUri(s.id),
       auth: s.auth,
       endpoints: s.endpoints.map((e) => ({
         name: e.name,
@@ -223,16 +225,15 @@ export function createSvcCrud(
       return services.filter((s) => s.id !== data.service);
     });
 
-    try {
-      await unlink(join(servicesDir(), `${data.service}.md`));
-    } catch { /* guide may not exist */ }
+    try { await unlink(join(svcDir, `${data.service}.md`)); } catch {}
+    deleteServiceIcon(data.service);
 
     log.info("Service deleted", { service: data.service });
     return { ok: true };
   });
 
   bus.on("svc.guide", async (data) => {
-    const dir = servicesDir();
+    const dir = svcDir;
     await mkdir(dir, { recursive: true });
     const file = join(dir, `${data.service}.md`);
 
@@ -245,7 +246,7 @@ export function createSvcCrud(
 
   bus.on("svc.guide.read", async (data) => {
     try {
-      const file = join(servicesDir(), `${data.service}.md`);
+      const file = join(svcDir, `${data.service}.md`);
       const content = await readFile(file, "utf-8");
       return { content };
     } catch {
