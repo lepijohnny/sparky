@@ -117,5 +117,13 @@ export function buildAuthFlows(lg: FileLogger, cred: Credentials, copilot: Provi
         { name: "key", label: "API Key", placeholder: "sk-…", url: "https://platform.openai.com/api-keys" },
       ],
     })(ctx),
+    ...createPatFlow({
+      domain: "llm",
+      provider: "mistral",
+      label: "Mistral (API Key)",
+      fields: [
+        { name: "key", label: "API Key", placeholder: "…", url: "https://console.mistral.ai/api-keys" },
+      ],
+    })(ctx),
   ];
 }
