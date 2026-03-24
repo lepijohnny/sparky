@@ -4,6 +4,7 @@ import { getSkillIcon } from "./skillIcons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useConnection } from "../../context/ConnectionContext";
+import { useToasts } from "../../context/ToastContext";
 import { useStore } from "../../store";
 import type { Skill, SkillState } from "../../types/skill";
 import CodeBlock from "../../components/chat/CodeBlock";
@@ -177,6 +178,7 @@ function PipelineRow({ steps, statuses, skill }: { steps: StepDef[]; statuses: s
 
 export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
   const { conn } = useConnection();
+  const { addToast } = useToasts();
   const skills = useStore((s) => s.skills);
   const skill = skills.find((s) => s.id === skillId);
   const setSkills = useStore((s) => s.setSkills);
@@ -214,14 +216,18 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
 
   const stepStatuses = getStepStatuses(skill);
   const isActive = skill.state === "active";
-  const canActivate = !isActive && !skill.binsMissing && !skill.secretsMissing && skill.state !== "rejected";
+  const canActivate = !isActive && !skill.binsMissing && !skill.secretsMissing && skill.state === "verified";
 
   const handleToggle = async () => {
     if (!conn) return;
-    if (isActive) {
-      await conn.request("skills.deactivate", { id: skill.id });
-    } else if (canActivate) {
-      await conn.request("skills.activate", { id: skill.id });
+    try {
+      if (isActive) {
+        await conn.request("skills.deactivate", { id: skill.id });
+      } else if (canActivate) {
+        await conn.request("skills.activate", { id: skill.id });
+      }
+    } catch (err: any) {
+      addToast({ id: `skill_err_${Date.now()}`, kind: "error", title: err?.message ?? "Failed to activate skill" });
     }
   };
 
@@ -240,13 +246,11 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
           </div>
           {skill.description && <p className={styles.description}>{skill.description}</p>}
           <div className={styles.metaRow}>
-            {skill.author && <span>{skill.author}</span>}
-            {skill.author && skill.version && <span className={styles.metaDot}>·</span>}
-            {skill.version && <span>v{skill.version}</span>}
-            {(skill.author || skill.version) && skill.license && <span className={styles.metaDot}>·</span>}
-            {skill.license && <span>{skill.license}</span>}
-            {(skill.author || skill.version || skill.license) && skill.source && <span className={styles.metaDot}>·</span>}
-            {skill.source && <span>{skill.source}</span>}
+            <span className={styles.skillId}>{skill.id}</span>
+            {skill.author && <><span className={styles.metaDot}>·</span><span>{skill.author}</span></>}
+            {skill.version && <><span className={styles.metaDot}>·</span><span>v{skill.version}</span></>}
+            {skill.license && <><span className={styles.metaDot}>·</span><span>{skill.license}</span></>}
+            {skill.source && <><span className={styles.metaDot}>·</span><span>{skill.source}</span></>}
           </div>
         </div>
         <button
@@ -265,6 +269,9 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
         <div className={styles.statusBody}>
           <PipelineRow steps={STEPS} statuses={stepStatuses} skill={skill} />
         </div>
+        {skill.state === "pending" && (
+          <p className={styles.hint}>This skill needs to be audited before it can be activated. Ask the agent to review it.</p>
+        )}
       </div>
 
       {/* Files tabbed card */}
