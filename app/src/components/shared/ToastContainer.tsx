@@ -16,6 +16,11 @@ function ToastMessage({ toast, onDismiss }: { toast: Toast; onDismiss: () => voi
       <div className={styles.content}>
         <div className={styles.title}>{toast.title}</div>
         {toast.message && <div className={styles.message}>{toast.message}</div>}
+        {toast.action && (
+          <button className={styles.action} onClick={() => { toast.action!.onClick(); onDismiss(); }}>
+            {toast.action.label}
+          </button>
+        )}
       </div>
       <button className={styles.dismiss} onClick={onDismiss}>
         <X size={14} />

@@ -385,6 +385,7 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     log.info("Skill created", { id, name });
     invalidateSkillCache();
     broadcast("skills.changed", {});
+    broadcast("skills.created", { id, name });
     return { skill };
   });
 

@@ -48,6 +48,22 @@
   margin-top: 4px;
 }
 
+.action {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+.action:hover {
+  text-decoration: underline;
+}
+
 .dismiss {
   background: none;
   border: none;
