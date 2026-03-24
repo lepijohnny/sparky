@@ -71,14 +71,14 @@ export default memo(function BatchActionsPage({ chats, onClear }: BatchActionsPa
 
   const actions: ContextMenuAction[] = [
     {
-      label: allFlagged ? "Unflag" : "Flag",
-      icon: <Flag size={12} strokeWidth={1.5} />,
-      onClick: handleFlag,
-    },
-    {
       label: "Label",
       icon: <Tag size={12} strokeWidth={1.5} />,
       submenu: labelSubmenu,
+    },
+    {
+      label: allFlagged ? "Unflag" : "Flag",
+      icon: <Flag size={12} strokeWidth={1.5} />,
+      onClick: handleFlag,
     },
     {
       label: allArchived ? "Unarchive" : "Archive",

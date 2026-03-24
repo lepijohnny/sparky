@@ -7,6 +7,7 @@ import { type AgentFactory, type KnowledgeSearch, ChatConversation } from "./cha
 
 import type { Profile } from "../settings/profile.types";
 
+import { generateTitle } from "./agent.rename";
 import { registerAttachmentHandlers, cleanupChatAttachments } from "./chat.attachment";
 import { ChatCrud } from "./chat.crud";
 import { ChatDatabase } from "./chat.db";
@@ -84,7 +85,23 @@ export function createChatWorkspace(
     return result;
   });
   bus.on("chat.rename", (data) => crud.rename(data));
+  bus.on("chat.retitle", async (data) => {
+    const result = crud.get({ id: data.id });
+    if (!result?.chat) throw new Error("Chat not found");
+    const chat = result.chat;
+    const { entries } = db.getEntries(chat.id);
+    const firstUserMsg = entries.find((e) => e.kind === "message" && e.role === "user");
+    if (!firstUserMsg || firstUserMsg.kind !== "message") return { ok: false };
+    const resolved = await defaultAgentFactory(chat.id);
+    if (!resolved) return { ok: false };
+    const title = await generateTitle(resolved.agent, firstUserMsg.content);
+    if (!title) return { ok: false };
+    const updated = db.updateChat(chat.id, { name: title });
+    if (updated) bus.emit("chat.updated", { chat: updated });
+    return { ok: !!updated };
+  });
   bus.on("chat.flag", (data) => crud.flag(data));
+  bus.on("chat.unread", (data) => crud.unread(data));
   bus.on("chat.archive", (data) => crud.archive(data));
   bus.on("chat.label", (data) => crud.label(data));
   bus.on("chat.model", (data) => crud.model(data));

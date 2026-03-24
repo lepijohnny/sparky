@@ -14,6 +14,7 @@ export interface Chat {
   mode?: string | null;
   flagged?: boolean;
   archived?: boolean;
+  unread?: boolean;
   /** Prompt role — determines system prompt, tools, and context features */
   role?: string;
   labels?: string[];

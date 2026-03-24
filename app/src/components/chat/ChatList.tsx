@@ -176,7 +176,10 @@ export default memo(function ChatList({
         </span>
       )}
       <div className={styles.itemContent}>
-        <span className={`${styles.itemName} ${chat.role && chat.role !== "sparky" ? styles.itemNameSystem : ""}`}>{chat.name.length > 40 ? chat.name.slice(0, 40) + "…" : chat.name}</span>
+        <span className={`${styles.itemName} ${chat.role && chat.role !== "sparky" ? styles.itemNameSystem : ""} ${chat.unread ? styles.itemNameUnread : ""}`}>
+          {chat.unread && <span className={styles.unreadDot} />}
+          {chat.name.length > 40 ? chat.name.slice(0, 40) + "…" : chat.name}
+        </span>
         <div className={styles.itemMeta}>
           {(!chat.role || chat.role === "sparky") && streamingChats.has(chat.id) && <div className={styles.streamingLine} />}
           {chat.role === "connection" && <Blocks size={10} strokeWidth={1.5} className={styles.metaIcon} />}

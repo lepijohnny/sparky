@@ -1,6 +1,12 @@
 import type { StateCreator } from "zustand";
 import type { Chat } from "../types/chat";
 
+let _onMarkRead: ((chatId: string) => void) | null = null;
+
+export function setMarkReadCallback(fn: (chatId: string) => void) {
+  _onMarkRead = fn;
+}
+
 export interface SelectionSlice {
   anchorChat: Chat | null;
   selectedChats: Map<string, Chat>;
@@ -25,12 +31,15 @@ export const createSelectionSlice: StateCreator<SelectionSlice, [], [], Selectio
   selectedIds: undefined,
   renameChat: null,
 
-  selectChat: (chat) => set({
-    anchorChat: chat,
-    selectedChats: new Map(),
-    isMulti: false,
-    selectedIds: undefined,
-  }),
+  selectChat: (chat) => {
+    if (chat?.unread) _onMarkRead?.(chat.id);
+    set({
+      anchorChat: chat ? { ...chat, unread: false } : null,
+      selectedChats: new Map(),
+      isMulti: false,
+      selectedIds: undefined,
+    });
+  },
 
   toggleChat: (chat) => {
     const { anchorChat, selectedChats } = get();

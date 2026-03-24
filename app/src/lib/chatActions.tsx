@@ -1,9 +1,11 @@
 import {
   Archive,
   ExternalLink,
+  Eye,
   Flag,
   Pencil,
   Printer,
+  RefreshCw,
   Tag,
   Trash2,
 } from "lucide-react";
@@ -28,6 +30,8 @@ interface ChatActionOptions {
   /** WS port + token for opening in new window */
   wsPort?: number | null;
   sidecarToken?: string | null;
+  /** Whether this chat is currently selected/active */
+  isSelected?: boolean;
 }
 
 async function openChatWindow(chat: Chat, wsPort: number, sidecarToken: string) {
@@ -105,31 +109,20 @@ export function buildChatActions({
   archiveValue,
   wsPort,
   sidecarToken,
+  isSelected,
 }: ChatActionOptions): ContextMenuAction[] {
+  const D: ContextMenuAction = { label: "", divider: true };
+
   return [
-    ...(wsPort && sidecarToken
-      ? [
-          {
-            label: "Open in New Window",
-            icon: <ExternalLink size={12} strokeWidth={1.5} />,
-            onClick: () => openChatWindow(chat, wsPort, sidecarToken),
-          },
-          {
-            label: "Print",
-            icon: <Printer size={12} strokeWidth={1.5} />,
-            onClick: () => openPrintWindow(chat, wsPort, sidecarToken),
-          },
-        ]
-      : []),
-    {
-      label: flagLabel ?? (chat.flagged ? "Unflag" : "Flag"),
-      icon: <Flag size={12} strokeWidth={1.5} />,
-      onClick: () => conn?.request("chat.flag", { id: chat.id, flagged: !chat.flagged }),
-    },
     {
       label: "Label",
       icon: <Tag size={12} strokeWidth={1.5} />,
       submenu: buildLabelSubmenu(conn, chat, labels),
+    },
+    {
+      label: flagLabel ?? (chat.flagged ? "Unflag" : "Flag"),
+      icon: <Flag size={12} strokeWidth={1.5} />,
+      onClick: () => conn?.request("chat.flag", { id: chat.id, flagged: !chat.flagged }),
     },
     {
       label: archiveLabel ?? (chat.archived ? "Unarchive" : "Archive"),
@@ -139,11 +132,42 @@ export function buildChatActions({
         archived: archiveValue ?? !chat.archived,
       }),
     },
+    D,
     {
       label: "Rename",
       icon: <Pencil size={12} strokeWidth={1.5} />,
       onClick: () => onRename?.(chat),
     },
+    {
+      label: "Retitle",
+      icon: <RefreshCw size={12} strokeWidth={1.5} />,
+      onClick: () => conn?.request("chat.retitle", { id: chat.id }),
+    },
+    D,
+    ...(wsPort && sidecarToken
+      ? [
+          {
+            label: "Print",
+            icon: <Printer size={12} strokeWidth={1.5} />,
+            onClick: () => openPrintWindow(chat, wsPort, sidecarToken),
+          },
+          D,
+        ]
+      : []),
+    {
+      label: "Open in New Window",
+      icon: <ExternalLink size={12} strokeWidth={1.5} />,
+      onClick: () => {
+        if (wsPort && sidecarToken) openChatWindow(chat, wsPort, sidecarToken);
+      },
+      disabled: !wsPort || !sidecarToken,
+    },
+    ...(!isSelected || chat.unread ? [{
+      label: chat.unread ? "Mark as Read" : "Mark as Unread",
+      icon: <Eye size={12} strokeWidth={1.5} />,
+      onClick: () => conn?.request("chat.unread", { id: chat.id, unread: !chat.unread }),
+    }] : []),
+    D,
     {
       label: "Delete",
       icon: <Trash2 size={12} strokeWidth={1.5} />,

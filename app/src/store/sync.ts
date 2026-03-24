@@ -143,7 +143,10 @@ async function fetchInitialData(conn: WsConnection) {
 
     if (!store.anchorChat && chats.chats.length > 0) {
       const first = chats.chats.find((c) => !c.archived);
-      if (first) store.selectChat(first);
+      if (first) {
+        store.selectChat(first);
+        if (first.unread) conn.request("chat.unread", { id: first.id, unread: false });
+      }
     }
 
     refetchConnectionGuides(conn, connections.services);

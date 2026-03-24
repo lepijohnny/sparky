@@ -46,9 +46,18 @@ const ChatRename = z.object({
   name: z.string().min(1, "Provide the new name"),
 });
 
+const ChatRetitle = z.object({
+  id: z.string().min(1, "Provide the chat ID"),
+});
+
 const ChatFlag = z.object({
   id: z.string().min(1, "Provide the chat ID"),
   flagged: z.boolean().describe("true to flag, false to unflag"),
+});
+
+const ChatUnread = z.object({
+  id: z.string().min(1, "Provide the chat ID"),
+  unread: z.boolean().describe("true to mark unread, false to mark read"),
 });
 
 const ChatArchive = z.object({
@@ -171,7 +180,9 @@ export const BUS_EVENTS: Record<string, BusEventDef> = {
 
   "chat.create": def(ChatCreate),
   "chat.rename": def(ChatRename),
+  "chat.retitle": def(ChatRetitle),
   "chat.flag": def(ChatFlag),
+  "chat.unread": def(ChatUnread),
   "chat.archive": def(ChatArchive),
   "chat.label": def(ChatLabel),
 

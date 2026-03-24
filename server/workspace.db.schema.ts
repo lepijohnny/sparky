@@ -93,7 +93,8 @@ type Migration = (db: MigratableDb) => void;
 const MIGRATIONS: Migration[] = [
   /** v1: add per-chat permission mode */
   (db) => db.exec("ALTER TABLE chats ADD COLUMN mode TEXT"),
-
+  /** v2: add unread flag */
+  (db) => db.exec("ALTER TABLE chats ADD COLUMN unread INTEGER NOT NULL DEFAULT 0"),
 ];
 
 interface MigratableDb {

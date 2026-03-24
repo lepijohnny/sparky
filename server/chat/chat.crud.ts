@@ -69,7 +69,7 @@ export class ChatCrud {
     return { chats };
   }
 
-  create(data?: { name?: string }): { chat: Chat } {
+  create(data?: { name?: string; unread?: boolean }): { chat: Chat } {
     const llmDefault = this.config.get("llmDefault");
     const llms = this.config.get("llms") ?? [];
     const defaultConn = llms.find((c) => c.id === llmDefault?.id);
@@ -82,6 +82,7 @@ export class ChatCrud {
       connectionId: defaultConn?.id,
       thinking: defaultConn?.thinking ?? null,
       knowledge: defaultConn?.knowledge !== false,
+      unread: data?.unread !== false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -149,6 +150,15 @@ export class ChatCrud {
     if (!chat) throw new Error(`Chat not found: ${data.id}`);
 
     this.log.info("Flagged chat", { id: data.id, flagged: data.flagged });
+    this.bus.emit("chat.updated", { chat });
+    return { chat };
+  }
+
+  unread(data: { id: string; unread: boolean }): { chat: Chat } {
+    const chat = this.db.updateChat(data.id, { unread: data.unread });
+    if (!chat) throw new Error(`Chat not found: ${data.id}`);
+
+    this.log.info("Unread chat", { id: data.id, unread: data.unread });
     this.bus.emit("chat.updated", { chat });
     return { chat };
   }

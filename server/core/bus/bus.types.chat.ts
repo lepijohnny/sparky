@@ -11,7 +11,9 @@ export interface ChatEvents {
   "chat.create":              { req: { name?: string }; res: { chat: Chat } };
   "chat.delete":              { req: { id: string }; res: { deleted: boolean } };
   "chat.rename":              { req: { id: string; name: string }; res: { chat: Chat } };
+  "chat.retitle":             { req: { id: string }; res: { ok: boolean } };
   "chat.flag":                { req: { id: string; flagged: boolean }; res: { chat: Chat } };
+  "chat.unread":              { req: { id: string; unread: boolean }; res: { chat: Chat } };
   "chat.archive":             { req: { id: string; archived: boolean }; res: { chat: Chat } };
   "chat.label":               { req: { id: string; labels: string[] }; res: { chat: Chat } };
   "chat.model":               { req: { id: string; provider: string; model: string }; res: { chat: Chat } };
