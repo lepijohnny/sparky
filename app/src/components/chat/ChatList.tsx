@@ -182,7 +182,7 @@ export default memo(function ChatList({
           {chat.role === "connection" && <Blocks size={10} strokeWidth={1.5} className={styles.metaIcon} />}
           {chat.provider && <span className={styles.metaIcon}>{getProviderIcon(chat.provider, 10)}</span>}
           {chat.flagged && <Flag size={10} strokeWidth={1.5} fill="currentColor" className={styles.flagIcon} />}
-          {chat.labels && chat.labels.length > 0 && !matchCountMap && (
+          {chat.labels && chat.labels.length > 0 && (
             <div className={styles.labelBadges}>
               {chat.labels.map((id) => {
                 const label = labelMap.get(id);
