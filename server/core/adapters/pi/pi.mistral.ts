@@ -45,6 +45,7 @@ export function createPiMistralAdapter(
           contextWindow: m.contextWindow,
           supportsThinking: m.reasoning,
           supportsTools: true,
+          webSearch: "local" as const,
           supportsAttachments: m.input.includes("image")
             ? ["png", "jpg", "jpeg", "gif", "webp", "svg", "pdf"]
             : undefined,
