@@ -1,0 +1,119 @@
+/* highlight.js theme — uses app CSS variables */
+
+/* Keywords, built-ins */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-type {
+  color: var(--hl-keyword, #c678dd);
+}
+
+/* Strings, regex */
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: var(--hl-string, #98c379);
+}
+
+/* Numbers, literals */
+.hljs-number,
+.hljs-literal,
+.hljs-variable.constant_,
+.hljs-symbol {
+  color: var(--hl-number, #d19a66);
+}
+
+/* Functions, titles */
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: var(--hl-function, #61afef);
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: var(--hl-comment, #5c6370);
+  font-style: italic;
+}
+
+/* Meta, preprocessor */
+.hljs-meta,
+.hljs-meta .hljs-keyword {
+  color: var(--hl-meta, #e06c75);
+}
+
+/* Attributes, tags */
+.hljs-attr,
+.hljs-attribute {
+  color: var(--hl-attr, #d19a66);
+}
+
+/* Tags (HTML/XML) */
+.hljs-tag {
+  color: var(--hl-tag, #e06c75);
+}
+
+.hljs-name {
+  color: var(--hl-tag, #e06c75);
+}
+
+/* Punctuation, operators */
+.hljs-punctuation {
+  color: var(--fg-muted);
+}
+
+/* Deletion (diff) */
+.hljs-deletion {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Addition (diff) */
+.hljs-addition {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+/* Section headers (diff @@) */
+.hljs-section {
+  color: var(--accent);
+}
+
+/* Params */
+.hljs-params {
+  color: var(--fg);
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
+}
+
+/* Template variable */
+.hljs-template-variable,
+.hljs-variable {
+  color: var(--hl-variable, #e06c75);
+}
+
+/* Subst */
+.hljs-subst {
+  color: var(--fg);
+}
+
+/* Selector (CSS) */
+.hljs-selector-class,
+.hljs-selector-id {
+  color: var(--hl-function, #61afef);
+}
+
+/* Property (CSS) */
+.hljs-property {
+  color: var(--hl-attr, #d19a66);
+}
