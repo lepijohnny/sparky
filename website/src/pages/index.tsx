@@ -33,7 +33,7 @@ const features = [
   {
     icon: Zap,
     title: 'Multi-Provider',
-    desc: 'Anthropic Claude, GitHub Copilot, Google Gemini, Ollama. Switch models mid-conversation or go fully offline.',
+    desc: 'Anthropic Claude, GitHub Copilot, Google Gemini, Mistral, Ollama. Switch models mid-conversation or go fully offline.',
   },
 ];
 
@@ -97,6 +97,7 @@ export default function Home() {
           <img src={b('/icons/providers/openai.svg')} alt="OpenAI" className={styles.providerLogo} />
           <img src={b('/icons/providers/github-copilot-icon.svg')} alt="GitHub Copilot" className={styles.providerLogo} />
           <img src={b('/icons/providers/google.svg')} alt="Google" className={styles.providerLogo} />
+          <img src={b('/icons/providers/mistral.svg')} alt="Mistral" className={styles.providerLogo} />
           <img src={b('/icons/providers/ollama.svg')} alt="Ollama" className={styles.providerLogo} />
         </div>
       </section>

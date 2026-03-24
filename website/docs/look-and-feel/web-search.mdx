@@ -24,9 +24,9 @@ After the response, you will see **search activities** showing the queries Googl
 
 Google grounding is fast and produces well-sourced responses, though the source links point to domain-level URLs rather than specific pages.
 
-## DDG Search (Copilot, Ollama)
+## DDG Search (Copilot, Mistral, Ollama)
 
-**GitHub Copilot** and **Ollama** models do not have native search capabilities. For these providers, Sparky uses a built-in DuckDuckGo (DDG) search tool.
+**GitHub Copilot**, **Mistral**, and **Ollama** models do not have native search capabilities. For these providers, Sparky uses a built-in DuckDuckGo (DDG) search tool.
 
 The model calls the `app_web_search` tool like any other function call. Sparky executes the search via DDG Lite, fetches results, and returns them to the model. A second tool (`app_web_read`) lets the model read specific pages from the results.
 
@@ -50,5 +50,6 @@ Once connected, the model can call the search service via `svc.describe` and `sv
 | **Anthropic** | Native (server-side) | Fast | Yes, with URLs | Free |
 | **Google Gemini** | Grounding | Fast | Domain links | Free |
 | **GitHub Copilot** | DDG tool | Slower | Via tool results | Free |
+| **Mistral** | DDG tool | Slower | Via tool results | Free |
 | **Ollama** | DDG tool | Slower | Via tool results | Free |
 | **Any (via service)** | Connected API | Fast | Via tool results | Paid |
