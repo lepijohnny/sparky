@@ -1,6 +1,8 @@
 import { Check, Copy } from "lucide-react";
 import { memo, type ReactElement, useCallback, useMemo, useState } from "react";
+import { highlight } from "../../lib/highlight.hljs";
 import styles from "./CodeBlock.module.css";
+import "./CodeBlock.highlight.css";
 
 interface CodeBlockProps {
   code: string;
@@ -24,6 +26,14 @@ function parseCodeBlock(raw: string): { language: string; code: string } {
   return { language, code: lines.slice(start, end).join("\n") };
 }
 
+function diffLineClass(line: string): string {
+  if (line.startsWith("+++") || line.startsWith("---")) return styles.diffMeta;
+  if (line.startsWith("@@")) return styles.diffHunk;
+  if (line.startsWith("+")) return styles.diffAdd;
+  if (line.startsWith("-")) return styles.diffDel;
+  return "";
+}
+
 const CodeBlock = memo(function CodeBlock({ code, language }: CodeBlockProps): ReactElement {
   const [copied, setCopied] = useState(false);
   const parsed = useMemo(() => {
@@ -31,7 +41,13 @@ const CodeBlock = memo(function CodeBlock({ code, language }: CodeBlockProps): R
     return parseCodeBlock(code);
   }, [code, language]);
 
+  const isDiff = parsed.language === "diff";
   const codeLines = useMemo(() => parsed.code.split("\n"), [parsed.code]);
+
+  const highlighted = useMemo(() => {
+    if (isDiff) return null;
+    return highlight(parsed.code, parsed.language);
+  }, [parsed.code, parsed.language, isDiff]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(parsed.code);
@@ -49,15 +65,29 @@ const CodeBlock = memo(function CodeBlock({ code, language }: CodeBlockProps): R
             : <><Copy size={13} strokeWidth={1.5} /><span>Copy</span></>}
         </button>
       </div>
-      <pre className={styles.pre}>
-        <code>{codeLines.map((line, i) => (
-          <span key={i} className={styles.line}>
-            <span className={styles.lineNum}>{i + 1}</span>
-            {line}
-            {i < codeLines.length - 1 ? "\n" : ""}
-          </span>
-        ))}</code>
-      </pre>
+      {highlighted ? (
+        <pre className={styles.pre}>
+          <code>
+            {highlighted.split("\n").map((line, i, arr) => (
+              <span key={i} className={styles.line}>
+                <span className={styles.lineNum}>{i + 1}</span>
+                <span dangerouslySetInnerHTML={{ __html: line }} />
+                {i < arr.length - 1 ? "\n" : ""}
+              </span>
+            ))}
+          </code>
+        </pre>
+      ) : (
+        <pre className={styles.pre}>
+          <code>{codeLines.map((line, i) => (
+            <span key={i} className={`${styles.line} ${isDiff ? diffLineClass(line) : ""}`}>
+              {!isDiff && <span className={styles.lineNum}>{i + 1}</span>}
+              {line}
+              {i < codeLines.length - 1 ? "\n" : ""}
+            </span>
+          ))}</code>
+        </pre>
+      )}
     </div>
   );
 });
