@@ -141,7 +141,7 @@ export function createChatWorkspace(
 
   bus.on("chat.system.ask", (data) => {
     const chat = crud.createSystem(data.kind);
-    conversation.ask({ chatId: chat.id, content: data.content }).catch((err) => {
+    conversation.ask({ chatId: chat.id, content: data.content, mode: data.mode }).catch((err) => {
       log.error("chat.system.ask error", { chatId: chat.id, error: String(err) });
     });
     return { chatId: chat.id };

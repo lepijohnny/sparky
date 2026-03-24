@@ -80,7 +80,7 @@ export class ChatConversation {
    * Stores the user message and streams the full agent response.
    * Awaits the entire stream — callers decide whether to await or fire-and-forget.
    */
-  async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[] }): Promise<{ ok: boolean }> {
+  async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[]; mode?: PermissionMode }): Promise<{ ok: boolean }> {
 
     if (this.activeChats.has(data.chatId)) {
       throw new Error("Chat is busy — wait for the current response to finish");
@@ -147,7 +147,7 @@ export class ChatConversation {
       const fetcherFn = (pageSize: number, beforeRowid?: number) => this.db.getEntries(data.chatId, pageSize, beforeRowid);
 
       const roleName = chat.role ?? "sparky";
-      const chatMode = (chat.mode as PermissionMode | undefined) ?? this.trust.data().mode;
+      const chatMode = data.mode ?? (chat.mode as PermissionMode | undefined) ?? this.trust.data().mode;
       const chatTrust = withModeOverride(this.trust, chatMode);
 
       const skills = await this.getSkillsMetadata(data.skills, data.chatId);
