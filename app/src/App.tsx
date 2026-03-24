@@ -53,6 +53,7 @@ import type { Chat } from "./types/chat";
 import type { Source } from "./types/source";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useWsSubscriber } from "./hooks/useWsSubscriber";
+import { setMarkReadCallback } from "./store/selection";
 
 function SourceBatchActions({ sources, onClear }: { sources: Source[]; onClear: () => void }) {
   const { conn } = useConnection();
@@ -159,6 +160,12 @@ export default function App() {
   const connectionPlusRef = useRef<HTMLButtonElement>(null);
   const [skillsAskPos, setSkillsAskPos] = useState({ x: 0, y: 0 });
   const skillsPlusRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!conn) return;
+    setMarkReadCallback((chatId) => conn.request("chat.unread", { id: chatId, unread: false }));
+    return () => setMarkReadCallback(() => {});
+  }, [conn]);
 
   const { addToast } = useToasts();
 
@@ -278,7 +285,7 @@ export default function App() {
   const handleNewChat = useCallback(async () => {
     if (!conn) return;
     try {
-      const res = await conn.request<{ chat: Chat }>("chat.create", {});
+      const res = await conn.request<{ chat: Chat }>("chat.create", { unread: false });
       selectChat(res.chat);
       if (section !== "chats") router.handleSectionChange("chats");
     } catch (err) {

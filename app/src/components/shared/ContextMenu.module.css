@@ -18,6 +18,12 @@
   z-index: 9999;
 }
 
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 8px;
+}
+
 .menuItem {
   appearance: none;
   background: none;

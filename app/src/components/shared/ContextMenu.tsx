@@ -9,9 +9,11 @@ import {
 import { createPortal } from "react-dom";
 import styles from "./ContextMenu.module.css";
 
+let activeMenuClose: (() => void) | null = null;
+
 export interface ContextMenuAction {
   label: string;
-  icon: ReactNode;
+  icon?: ReactNode;
   onClick?: () => void;
   /** Renders in danger/red color */
   danger?: boolean;
@@ -21,6 +23,8 @@ export interface ContextMenuAction {
   suffix?: ReactNode;
   /** Submenu items — renders a flyout on hover */
   submenu?: ContextMenuAction[];
+  /** Render as a horizontal divider instead of an action */
+  divider?: boolean;
 }
 
 interface ContextMenuProps {
@@ -61,28 +65,19 @@ export default function ContextMenu({
   const menuRef = useRef<HTMLDivElement>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const calcPos = useCallback(() => {
-    if (!triggerRef.current) return { top: 0, left: 0 };
-    const rect = triggerRef.current.getBoundingClientRect();
-    const rawTop = rect.bottom + 4;
-    const rawLeft = align === "right" ? rect.right - MENU_WIDTH : rect.left;
-    // Estimate menu height: items * ~32px + padding
-    const estimatedHeight = actions.length * 32 + 16;
-    return clampToViewport(rawTop, rawLeft, estimatedHeight);
-  }, [align, actions.length]);
+  const [positioned, setPositioned] = useState(false);
 
-  // Reposition after mount when we know actual menu height
   useEffect(() => {
-    if (!open || !menuRef.current || !triggerRef.current) return;
+    if (!open || !menuRef.current || !triggerRef.current) { setPositioned(false); return; }
     const rect = triggerRef.current.getBoundingClientRect();
-    const menuRect = menuRef.current.getBoundingClientRect();
-    const rawTop = rect.bottom + 4;
+    const menuH = menuRef.current.getBoundingClientRect().height;
+    const fitsBelow = rect.bottom + 4 + menuH <= window.innerHeight - MENU_PADDING;
+    const top = fitsBelow ? rect.bottom + 4 : rect.top - 4 - menuH;
     const rawLeft = align === "right" ? rect.right - MENU_WIDTH : rect.left;
-    const clamped = clampToViewport(rawTop, rawLeft, menuRect.height);
-    if (clamped.top !== menuPos.top || clamped.left !== menuPos.left) {
-      setMenuPos(clamped);
-    }
-  }, [open]);
+    const left = Math.max(MENU_PADDING, Math.min(rawLeft, window.innerWidth - MENU_WIDTH - MENU_PADDING));
+    setMenuPos({ top: Math.max(MENU_PADDING, top), left });
+    setPositioned(true);
+  }, [open, align]);
 
   // Close on outside click
   useEffect(() => {
@@ -110,11 +105,22 @@ export default function ContextMenu({
     action.onClick?.();
   }, []);
 
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    setActiveSubmenu(null);
+    if (activeMenuClose === closeMenu) activeMenuClose = null;
+  }, []);
+
   const handleToggle = useCallback(() => {
-    if (!open) setMenuPos(calcPos());
+    if (!open) {
+      if (activeMenuClose) activeMenuClose();
+      activeMenuClose = closeMenu;
+    } else {
+      activeMenuClose = null;
+    }
     setOpen(!open);
     setActiveSubmenu(null);
-  }, [open, calcPos]);
+  }, [open, closeMenu]);
 
   return (
     <div className={styles.wrapper} ref={triggerRef}>
@@ -125,25 +131,29 @@ export default function ContextMenu({
         <div
           ref={menuRef}
           className={styles.menu}
-          style={{ top: menuPos.top, left: menuPos.left }}
+          style={{ top: menuPos.top, left: menuPos.left, visibility: positioned ? "visible" : "hidden" }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          {actions.map((action) => (
-            <MenuItem
-              key={action.label}
-              action={action}
-              isSubOpen={activeSubmenu === action.label}
-              onHover={(hasSubmenu) => {
-                if (submenuTimer.current) clearTimeout(submenuTimer.current);
-                if (hasSubmenu) {
-                  submenuTimer.current = setTimeout(() => setActiveSubmenu(action.label), 100);
-                } else {
-                  setActiveSubmenu(null);
-                }
-              }}
-              onAction={handleAction}
-            />
-          ))}
+          {actions.map((action, i) =>
+            action.divider ? (
+              <div key={`div-${i}`} className={styles.divider} />
+            ) : (
+              <MenuItem
+                key={action.label}
+                action={action}
+                isSubOpen={activeSubmenu === action.label}
+                onHover={(hasSubmenu) => {
+                  if (submenuTimer.current) clearTimeout(submenuTimer.current);
+                  if (hasSubmenu) {
+                    submenuTimer.current = setTimeout(() => setActiveSubmenu(action.label), 100);
+                  } else {
+                    setActiveSubmenu(null);
+                  }
+                }}
+                onAction={handleAction}
+              />
+            ),
+          )}
         </div>,
         document.body,
       )}
@@ -219,6 +229,8 @@ function MenuItem({
   return (
     <button
       className={`${styles.menuItem} ${action.danger ? styles.menuItemDanger : ""}`}
+      style={action.disabled ? { opacity: 0.4, pointerEvents: "none" } : undefined}
+      disabled={action.disabled}
       onMouseEnter={() => onHover(false)}
       onClick={() => onAction(action)}
     >

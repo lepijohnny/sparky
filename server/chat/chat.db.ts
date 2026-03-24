@@ -16,6 +16,7 @@ interface ChatRow {
   mode: string | null;
   flagged: number;
   archived: number;
+  unread: number;
   role: string | null;
   labels: string | null;
   created_at: string;
@@ -51,8 +52,8 @@ interface EntryRow {
 function prepare(db: Database.Database) {
   return {
     createChat: db.prepare(`
-      INSERT INTO chats (id, name, provider, model, connection_id, thinking, knowledge, mode, flagged, archived, role, labels, created_at, updated_at)
-      VALUES (:id, :name, :provider, :model, :connection_id, :thinking, :knowledge, :mode, :flagged, :archived, :role, :labels, :created_at, :updated_at)
+      INSERT INTO chats (id, name, provider, model, connection_id, thinking, knowledge, mode, flagged, archived, unread, role, labels, created_at, updated_at)
+      VALUES (:id, :name, :provider, :model, :connection_id, :thinking, :knowledge, :mode, :flagged, :archived, :unread, :role, :labels, :created_at, :updated_at)
     `),
 
     getChat: db.prepare(
@@ -62,7 +63,7 @@ function prepare(db: Database.Database) {
     updateChat: db.prepare(`
       UPDATE chats SET
         name = :name, provider = :provider, model = :model, connection_id = :connection_id,
-        thinking = :thinking, knowledge = :knowledge, mode = :mode, flagged = :flagged, archived = :archived, labels = :labels,
+        thinking = :thinking, knowledge = :knowledge, mode = :mode, flagged = :flagged, archived = :archived, unread = :unread, labels = :labels,
         updated_at = :updated_at
       WHERE id = :id
     `),
@@ -200,6 +201,7 @@ export class ChatDatabase {
         mode: chat.mode ?? null,
         flagged: chat.flagged ? 1 : 0,
         archived: chat.archived ? 1 : 0,
+        unread: chat.unread ? 1 : 0,
         role: chat.role ?? null,
         labels: chat.labels?.length ? JSON.stringify(chat.labels) : null,
         created_at: chat.createdAt,
@@ -215,7 +217,7 @@ export class ChatDatabase {
     return row ? this.toChat(row) : null;
   }
 
-  updateChat(id: string, fields: Partial<Pick<Chat, "name" | "provider" | "model" | "connectionId" | "thinking" | "knowledge" | "mode" | "flagged" | "archived" | "labels" | "updatedAt">>): Chat | null {
+  updateChat(id: string, fields: Partial<Pick<Chat, "name" | "provider" | "model" | "connectionId" | "thinking" | "knowledge" | "mode" | "flagged" | "archived" | "unread" | "labels" | "updatedAt">>): Chat | null {
     const chat = this.getChat(id);
     if (!chat) return null;
 
@@ -232,6 +234,7 @@ export class ChatDatabase {
         mode: updated.mode ?? null,
         flagged: updated.flagged ? 1 : 0,
         archived: updated.archived ? 1 : 0,
+        unread: updated.unread ? 1 : 0,
         labels: updated.labels?.length ? JSON.stringify(updated.labels) : null,
         updated_at: updated.updatedAt,
       });
@@ -517,6 +520,7 @@ export class ChatDatabase {
       mode: row.mode ?? null,
       flagged: row.flagged === 1,
       archived: row.archived === 1,
+      unread: row.unread === 1,
       role: row.role ?? undefined,
       labels: row.labels ? JSON.parse(row.labels) : undefined,
       createdAt: row.created_at,

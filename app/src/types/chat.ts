@@ -10,6 +10,7 @@ export interface Chat {
   mode?: string | null;
   flagged?: boolean;
   archived?: boolean;
+  unread?: boolean;
   role?: string;
   labels?: string[];
   createdAt: string;

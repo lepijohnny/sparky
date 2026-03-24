@@ -52,7 +52,7 @@ export default function ChatListPage({
   // Keep a ref so the actions callback is stable and doesn't bust
   // ChatList's memo on every labels/conn change.
   const depsRef = useRef({ conn, labels, onRenameChat, wsPort, sidecarToken, actionOverrides: config.actionOverrides });
-  depsRef.current = { conn, labels, onRenameChat, wsPort, sidecarToken, actionOverrides: config.actionOverrides };
+  depsRef.current = { conn, labels, onRenameChat, wsPort, sidecarToken, actionOverrides: config.actionOverrides, selectedChatId };
 
   const actions = useCallback((chat: Chat) => {
     const d = depsRef.current;
@@ -63,6 +63,7 @@ export default function ChatListPage({
       onRename: d.onRenameChat,
       wsPort: d.wsPort,
       sidecarToken: d.sidecarToken,
+      isSelected: chat.id === d.selectedChatId,
       ...d.actionOverrides,
     });
   }, []);
