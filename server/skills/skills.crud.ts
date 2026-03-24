@@ -319,12 +319,24 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
     const { id } = SkillId.parse(data);
     const dir = skillPath(id);
     if (!storage.exists(dir)) throw new Error(`Skill not found: ${id}`);
-    updateMeta(id, { state: "active" });
+
     const skill = await loadSkill(storage, id, getEnvVars(id));
+    if (skill.state === "pending") throw new Error("Skill must be audited before activation");
+    if (skill.state === "rejected") throw new Error("Skill was rejected during audit");
+    if (skill.requirements) {
+      const binsMissing = skill.requirements.bins.some((b: any) => b.required && !b.installed);
+      if (binsMissing) throw new Error("Skill has missing required tools");
+      const secretsMissing = skill.requirements.env.some((e: any) => e.required && !e.group && !e.present) ||
+        Object.values(skill.requirements.groups).some((g: any) => !g.satisfied);
+      if (secretsMissing) throw new Error("Skill has missing required secrets");
+    }
+
+    updateMeta(id, { state: "active" });
+    const updated = await loadSkill(storage, id, getEnvVars(id));
     log.info("Skill activated", { id });
     invalidateSkillCache();
     broadcast("skills.changed", {});
-    return { skill };
+    return { skill: updated };
   });
 
   bus.on("skills.deactivate", async (data) => {
@@ -439,7 +451,7 @@ export function registerSkillsBus(bus: EventBus, log: Logger, storage: StoragePr
       let chatId: string | undefined;
       try {
         const res = await bus.emit("chat.system.ask", {
-          content: `Review and verify the imported skill "${slug}". Check its SKILL.md, scripts, and any referenced files for safety and correctness.`,
+          content: `Review and verify the imported skill "${slug}" at ~/.sparky/skills/${slug}/. Check its SKILL.md, scripts, and any referenced files for safety and correctness.`,
           kind: "skills",
         });
         chatId = res.chatId;
