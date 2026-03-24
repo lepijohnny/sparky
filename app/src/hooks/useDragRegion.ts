@@ -46,11 +46,9 @@ async function togglePseudoMaximize() {
   const { PhysicalPosition, PhysicalSize } = dpiApi;
   const win = getCurrentWindow();
 
-  const currentRect = cachedRect ?? (() => {
-    const r = { x: 0, y: 0, w: 800, h: 600 };
-    win.outerPosition().then(p => { r.x = p.x; r.y = p.y; });
-    win.outerSize().then(s => { r.w = s.width; r.h = s.height; });
-    return r;
+  const currentRect = cachedRect ?? await (async () => {
+    const [pos, size] = await Promise.all([win.outerPosition(), win.outerSize()]);
+    return { x: pos.x, y: pos.y, w: size.width, h: size.height };
   })();
 
   let targetRect: typeof currentRect;
