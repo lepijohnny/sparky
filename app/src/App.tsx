@@ -168,6 +168,7 @@ export default function App() {
     const store = useStore.getState();
     if (event.chatId === store.anchorChat?.id) return;
     const name = store.getChatById(event.chatId)?.name || "Chat";
+
     addToast({
       id: `bg_${++bgToastId}`,
       kind: event.type === "agent.error" ? "error" : "info",
@@ -175,6 +176,55 @@ export default function App() {
       expire: true,
     });
   }, [addToast]));
+
+  useWsSubscriber<{ label: string }>(conn, "trust.rule.added", useCallback((data) => {
+    addToast({
+      id: `perm_${Date.now()}`,
+      kind: "success",
+      title: `Permission added: ${data.label}`,
+      expire: false,
+      action: {
+        label: "Go to Permissions →",
+        onClick: () => {
+          router.handleSectionChange("settings");
+          router.handleSettingsSubChange("permissions");
+        },
+      },
+    });
+  }, [addToast, router]));
+
+  useWsSubscriber<{ id: string; name: string }>(conn, "skills.created", useCallback((data) => {
+    addToast({
+      id: `skill_created_${data.id}`,
+      kind: "success",
+      title: `Skill "${data.name}" created`,
+      expire: false,
+      action: {
+        label: "Go to Skills →",
+        onClick: () => {
+          router.handleSectionChange("skills");
+          selectSkill(data.id);
+        },
+      },
+    });
+  }, [addToast, router, selectSkill]));
+
+  useWsSubscriber<{ service: string }>(conn, "svc.guide", useCallback((data) => {
+    const label = data.service.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    addToast({
+      id: `svc_guide_${data.service}`,
+      kind: "success",
+      title: `${label} connected`,
+      expire: false,
+      action: {
+        label: "Go to Connections →",
+        onClick: () => {
+          router.handleSectionChange("connections");
+          selectConnection(data.service);
+        },
+      },
+    });
+  }, [addToast, router, selectConnection]));
 
   const handleAddFile = useCallback(async () => {
     if (!conn) return;

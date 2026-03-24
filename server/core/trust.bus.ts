@@ -41,6 +41,7 @@ export function registerTrustBus(bus: EventBus, trust: TrustStore, broadcast: (r
     const { scope, list, label, pattern } = RuleAddSchema.parse(data);
     trust.addRule(scope, list, { label, pattern, addedAt: Date.now() });
     changed();
+    broadcast("trust.rule.added", { scope, list, label, pattern });
     return { ok: true };
   });
 

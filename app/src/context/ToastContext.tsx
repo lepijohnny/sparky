@@ -8,6 +8,7 @@ export interface Toast {
   message?: string;
   expire?: boolean;
   leaving?: boolean;
+  action?: { label: string; onClick: () => void };
 }
 
 const AUTO_DISMISS_MS = 5000;
