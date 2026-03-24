@@ -14,7 +14,7 @@ interface SvcOAuthSession {
   clientSecret?: string;
 }
 
-export function registerServiceOAuth(bus: EventBus, cred: Credentials, gateway: OAuthGateway, log: Logger): void {
+export function loopbackOAuthService(bus: EventBus, cred: Credentials, gateway: OAuthGateway, log: Logger): void {
   const pending = new Map<string, SvcOAuthSession>();
 
   bus.on("svc.oauth.start", async (data) => {

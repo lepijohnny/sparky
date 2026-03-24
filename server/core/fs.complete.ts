@@ -1,5 +1,5 @@
-import { readdirSync, statSync } from "node:fs";
-import { resolve, dirname, basename } from "node:path";
+import { readdirSync } from "node:fs";
+import { resolve } from "node:path";
 import { homedir } from "node:os";
 import type { EventBus } from "./bus";
 

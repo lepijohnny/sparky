@@ -160,24 +160,27 @@ export function listRoles(): string[] {
 }
 
 export function buildRolePrompt(role: RoleDef, preferences: string, mode?: string, chatId?: string, cwd?: string): string {
-  let prompt = role.prompt;
+  const parts: string[] = [role.prompt];
 
-  prompt += `\n\n## System\n- Platform: ${process.platform}\n- Home: ${homedir()}\n- CWD: ${cwd ?? process.cwd()}`;
-  if (chatId) prompt += `\n- ChatId: ${chatId}`;
+  const sys: string[] = [
+    `Platform: ${process.platform}`,
+    `Home: ${homedir()}`,
+    `CWD: ${cwd ?? process.cwd()}`,
+  ];
+  if (chatId) sys.push(`ChatId: ${chatId}`);
   if (mode) {
     const desc = mode === "read" ? "read-only (no file writes or shell commands)"
       : mode === "write" ? "read + write (no shell commands)"
       : "full access (read, write, shell commands)";
-    prompt += `\n- Mode: ${mode} — ${desc}`;
+    sys.push(`Mode: ${mode} — ${desc}`);
   }
+  parts.push(sys.map((s) => `- ${s}`).join("\n"));
 
-  if (preferences) {
-    prompt += `\n\nHere are some details about the user: ${preferences}`;
-  }
+  if (preferences) parts.push(`Here are some details about the user: ${preferences}`);
 
   if (role.meta.formats) {
-    prompt += `\n\nRich formats: \`\`\`echart (ECharts JSON), \`\`\`mermaid, and LaTeX (\$...\$ inline, \$\$...\$\$ display). Read \`sparky/references/formats/<name>.md\` before first use.`;
+    parts.push("Rich formats: ```echart (ECharts JSON), ```mermaid, and LaTeX ($...$ inline, $$...$$ display). Read `sparky/references/formats/<name>.md` before first use.");
   }
 
-  return prompt;
+  return parts.join("\n");
 }
