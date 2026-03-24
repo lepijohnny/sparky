@@ -30,10 +30,10 @@ export interface ChatEvents {
   "chat.attachment.add":      { req: { chatId: string; filePath: string; mimeType?: string; thumbnail?: string }; res: { attachment: { id: string; filename: string; mimeType: string; size: number } } };
   "chat.attachment.remove":   { req: { chatId: string; attachmentId: string }; res: { removed: boolean } };
   "chat.attachment.list":     { req: { chatId: string }; res: { attachments: { id: string; filename: string; mimeType: string; size: number }[] } };
-  "chat.ask":                 { req: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[] }; res: { ok: boolean } };
+  "chat.ask":                 { req: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[]; mode?: "read" | "write" | "execute" }; res: { ok: boolean } };
   "chat.stop":                { req: { chatId: string }; res: { ok: boolean } };
   "chat.search":              { req: { query: string; flagged?: boolean; archived?: boolean; labelId?: string }; res: { results: { chat: Chat; matchCount: number }[] } };
-  "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" | "permissions" | "skills" }; res: { chatId: string } };
+  "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" | "permissions" | "skills"; mode?: "read" | "write" | "execute" }; res: { chatId: string } };
   "chat.created":             { req: { chat: Chat }; res: void };
   "chat.updated":             { req: { chat: Chat }; res: void };
   "chat.deleted":             { req: { id: string }; res: void };
