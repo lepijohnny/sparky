@@ -9,8 +9,8 @@ import { loadRole } from "../prompts/prompt.role";
 
 function getAgentRole(kind?: string): { role: string; name: string } {
   const map: Record<string, { role: string; name: string }> = {
-    connection: { role: "connect", name: "Connection Setup" },
-    permissions: { role: "trust", name: "Permission Setup" },
+    connection: { role: "connect", name: "Connection Assistant" },
+    permissions: { role: "trust", name: "Permission Assistant" },
     skills: { role: "skills", name: "Skills Assistant" },
   };
   return map[kind ?? ""] ?? { role: "sparky", name: "System Chat" };
