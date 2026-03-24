@@ -51,12 +51,30 @@ function OpenAIIcon({ size }: { size: number }) {
   );
 }
 
+function MistralIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 191 135" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+      <path d="M54.322 0H27.153v27.089h27.169V0z" fill="#FFD800"/>
+      <path d="M162.984 0h-27.169v27.089h27.169V0z" fill="#FFD800"/>
+      <path d="M81.482 27.091H27.153v27.09h54.329v-27.09z" fill="#FFAF00"/>
+      <path d="M162.99 27.091h-54.329v27.09h54.329v-27.09z" fill="#FFAF00"/>
+      <path d="M162.971 54.168H27.153v27.09h135.818v-27.09z" fill="#FF8205"/>
+      <path d="M54.322 81.259H27.153v27.09h27.169v-27.09z" fill="#FA500F"/>
+      <path d="M108.661 81.259H81.492v27.09h27.169v-27.09z" fill="#FA500F"/>
+      <path d="M162.984 81.259h-27.169v27.09h27.169v-27.09z" fill="#FA500F"/>
+      <path d="M81.488 108.339H-.001v27.09h81.49v-27.09z" fill="#E10500"/>
+      <path d="M190.159 108.339h-81.498v27.09h81.498v-27.09z" fill="#E10500"/>
+    </svg>
+  );
+}
+
 const PROVIDER_ICONS: Record<string, (size: number) => JSX.Element> = {
   anthropic: (size) => <AnthropicIcon size={size} />,
   copilot: (size) => <CopilotIcon size={size} />,
   ollama: (size) => <OllamaIcon size={size} />,
   google: (size) => <GoogleIcon size={size} />,
   openai: (size) => <OpenAIIcon size={size + 2} />,
+  mistral: (size) => <MistralIcon size={size} />,
 };
 
 function resolveBase(providerId: string): string {

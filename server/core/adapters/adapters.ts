@@ -5,6 +5,7 @@ import { createPiAnthropicAdapter } from "./pi/pi.anthropic";
 import { createPiCopilotAdapter } from "./pi/pi.copilot";
 import { createPiGoogleAdapter } from "./pi/pi.google";
 import { createPiOllamaAdapter } from "./pi/pi.ollama";
+import { createPiMistralAdapter } from "./pi/pi.mistral";
 import { createPiOpenAIApiAdapter, createPiOpenAIOAuthAdapter } from "./pi/pi.openai";
 
 export interface AdapterCatalog {
@@ -21,6 +22,7 @@ export function createAdapters(cred: Credentials, log: Logger): AdapterCatalog {
     ["copilot", createPiCopilotAdapter(cred, log, { credPrefix: "llm.copilot.device" })],
     ["openai-oauth", createPiOpenAIOAuthAdapter(cred, log, { credPrefix: "llm.openai-oauth.pkce" })],
     ["openai-api", createPiOpenAIApiAdapter(cred, log, { credPrefix: "llm.openai-api.pat" })],
+    ["mistral", createPiMistralAdapter(cred, log, { credPrefix: "llm.mistral.pat" })],
   ]);
 
   return {
