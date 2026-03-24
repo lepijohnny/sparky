@@ -10,25 +10,24 @@ import { createRegistryCrud } from "./core/registry.crud";
 import { createPlatformKeychain } from "./core/keychain";
 import { createCredStore } from "./core/cred";
 import { createTrustStore } from "./core/trust";
-import { registerTrustBus } from "./core/trust.bus";
-import { registerSkillsBus } from "./skills/skills.crud";
-import { registerFsComplete } from "./core/fs.complete";
+import { registerTrustBus as createTrustCrud } from "./core/trust.bus";
+import { registerSkillsBus as createSkillsCrud } from "./skills/skills.crud";
+import { registerFsComplete as createFsComplete } from "./core/fs.complete";
 import { createAuthManager } from "./core/auth/auth";
 import { createOAuthGateway } from "./core/auth/oauth.gateway";
-import { registerServiceOAuth } from "./core/auth/oauth.service";
+import { loopbackOAuthService } from "./core/auth/oauth.service";
 import { buildAuthFlows } from "./sparky.flows";
-
 
 import { createStorage } from "./core/storage";
 import { createWorkspace } from "./core/workspace.seed";
-import { createFileLogger, type FileLogger } from "./logger";
+import { createFileLogger } from "./logger";
 import { createKtDatabase } from "./knowledge/kt.db";
 import { createKtManager } from "./knowledge/kt";
 import { createSearchService } from "./core/search/search";
 import { shutdownWorker } from "./knowledge/worker/kt.worker.client";
 import { createSettingsCrud } from "./settings";
 import { createAdapters } from "./core/adapters/adapters";
-import { configJsonBackwardCompatibilityHook } from "./core/compat";
+import { configJsonBackwardCompatibilityHook as backwardCompatibilityHook } from "./core/compat";
 
 export interface Sparky {
   start(): Promise<{ port: number; token: string }>;
@@ -44,19 +43,15 @@ export function createSparky(): Sparky {
   const keychain = createPlatformKeychain();
   const cred = createCredStore(logger.createLogger("cred"), storage.root(""), keychain);
   const trustStore = createTrustStore(logger.createLogger("trust"), storage.root(""), keychain);
-
   const adapters = createAdapters(cred, logger.createLogger("adapters"));
   const authLog = logger.createLogger("auth");
   const oauthGateway = createOAuthGateway(authLog);
   const auth = createAuthManager(authLog, cred, oauthGateway, buildAuthFlows(logger, cred, adapters.getById("copilot")));
   const registry = createRegistry(bus, config, adapters, auth, logger.createLogger("registry"));
-
   const workspace = createWorkspace(config, storage);
   let currentWorkspacePath = storage.root(workspace.dir);
-
   const ktDb = createKtDatabase(workspace.dbPath.replace(/\.db$/, ".kt.db"), logger.createLogger("knowledge.db"));
   const knowledgeManager = createKtManager(bus, ktDb, config, logger.createLogger("knowledge"), storage.root(""), storage);
-
   const getEnvVars = () => cred.getEnvVars();
 
   const chatManager = createChatWorkspace(
@@ -77,7 +72,8 @@ export function createSparky(): Sparky {
   createSvcCrud(bus, config, logger.createLogger("service"), cred, storage);
   createSettingsCrud(bus, storage, config, cred, logger);
   createSearchService(bus, logger.createLogger("search"));
-
+  createTrustCrud(bus, trustStore, broadcast);
+  createSkillsCrud(bus, logger.createLogger("skills"), storage, (skillId?: string) => skillId ? cred.getEnvVarsForSkill(skillId) : cred.getEnvVars(), broadcast);
 
   async function agentFn(chatId: string): Promise<{ agent: Agent; contextWindow?: number; webSearch?: string } | null> {
     const chat = chatManager.getChat(chatId);
@@ -176,8 +172,6 @@ export function createSparky(): Sparky {
     return auth.verify(data.domain, data.provider, data.grant, data.params);
   });
 
-  registerServiceOAuth(bus, cred, oauthGateway, authLog);
-
   bus.on("cred.get", async (data) => {
     return { value: await cred.get(data.key) };
   });
@@ -196,10 +190,6 @@ export function createSparky(): Sparky {
     await cred.deletePrefix(data.prefix);
     return {};
   });
-
-  registerTrustBus(bus, trustStore, broadcast);
-  registerSkillsBus(bus, logger.createLogger("skills"), storage, (skillId?: string) => skillId ? cred.getEnvVarsForSkill(skillId) : cred.getEnvVars(), broadcast);
-
   bus.on("core.config.get", (data) => {
     return config.get(data.key as any) ?? null;
   });
@@ -207,15 +197,13 @@ export function createSparky(): Sparky {
     await config.set(data.key as any, data.value);
     return { ok: true };
   });
-
   bus.on("diagnostics.logs.read", () => {
     const lines = logger.readTodayLinesSync();
     return { lines };
   });
 
-  registerFsComplete(bus);
-
-
+  loopbackOAuthService(bus, cred, oauthGateway, authLog);
+  createFsComplete(bus);
 
   bus.subscribe("settings.appearance.theme.changed", (data) => broadcast("settings.appearance.theme.changed", data));
   bus.subscribe("settings.appearance.theme.created", (data) => broadcast("settings.appearance.theme.created", data));
@@ -266,7 +254,7 @@ export function createSparky(): Sparky {
       await bus.emit("storage.ready");
       await knowledgeManager.init();
 
-      configJsonBackwardCompatibilityHook(log, [
+      backwardCompatibilityHook(log, [
         {
           name: "add workspaceId to labels",
           run: () => {
