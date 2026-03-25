@@ -348,7 +348,7 @@ const AgentMessageBubble = memo(
         )}
         {streaming && <Spinner status={status} />}
         {!streaming && <AgentMessageBubbleStatus status={status} conversationTokens={message.conversationTokens} contextWindow={message.contextWindow} />}
-        {!streaming && message.rowid != null && onToggleAnchor && (
+        {!streaming && onToggleAnchor && message.rowid != null && (
           <button
             className={`${styles.anchorBtn} ${message.anchored ? styles.anchorBtnActive : ""}`}
             onClick={() => onToggleAnchor(message.rowid!, !message.anchored)}
@@ -365,6 +365,7 @@ const AgentMessageBubble = memo(
     prev.message.status === next.message.status &&
     prev.message.activities.length === next.message.activities.length &&
     prev.message.anchored === next.message.anchored &&
+    prev.message.rowid === next.message.rowid &&
     prev.message.conversationTokens === next.message.conversationTokens &&
     prev.role === next.role &&
     prev.searchQuery === next.searchQuery,

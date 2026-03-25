@@ -171,6 +171,10 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
       next.splice(terminalIdx, 0, ...newActivities);
       return next;
     });
+
+    connRef.current?.request("chat.entries", { chatId: chatIdRef.current })
+      .then((data: any) => { if (data?.entries) setEntries(data.entries); })
+      .catch(() => {});
   }, []);
 
   const stream = useAgentReplyStream(conn, chat.id, onStreamEntry, onStreamEnd);
@@ -184,7 +188,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     setRenderAll(false);
     const id = requestAnimationFrame(() => setRenderAll(true));
     return () => cancelAnimationFrame(id);
-  }, [entries]);
+  }, [chat.id]);
   const messages = renderAll ? allMessages : allMessages.slice(-10);
 
   const scrollRef = useRef<HTMLDivElement>(null);
