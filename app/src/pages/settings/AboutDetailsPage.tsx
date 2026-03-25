@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useStore } from "../../store";
 import shared from "../../styles/shared.module.css";
 import styles from "./AboutDetailsPage.module.css";
 
@@ -11,83 +12,15 @@ const LINKS = [
   { label: "Documentation", url: "https://getsparky.chat/docs/getting-started/introduction" },
 ];
 
-function parseNotes(body: string): string[] {
-  return body
-    .split("\n")
-    .map((l) => l.replace(/^[-*]\s+/, "").trim())
-    .filter((l) => l.length > 0 && !l.startsWith("#"));
-}
-
-interface UpdateState {
-  status: "idle" | "checking" | "available" | "downloading" | "ready" | "error" | "unavailable";
-  version?: string;
-  notes?: string[];
-  progress?: number;
-  error?: string;
-}
-
 export default function AboutDetailsPage() {
-  const [update, setUpdate] = useState<UpdateState>({ status: "idle" });
-
-  const checkForUpdates = useCallback(async () => {
-    if (!window.__TAURI_INTERNALS__) {
-      setUpdate({ status: "idle" });
-      return;
-    }
-    setUpdate({ status: "checking" });
-    const start = Date.now();
-    try {
-      const { check } = await import("@tauri-apps/plugin-updater");
-      const result = await check();
-      const elapsed = Date.now() - start;
-      if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
-      if (!result) {
-        setUpdate({ status: "idle" });
-        return;
-      }
-      const notes = result.body ? parseNotes(result.body) : [];
-      setUpdate({ status: "available", version: result.version, notes });
-    } catch {
-      const elapsed = Date.now() - start;
-      if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
-      setUpdate({ status: "unavailable" });
-    }
-  }, []);
-
-  const downloadAndInstall = useCallback(async () => {
-    setUpdate((prev) => ({ ...prev, status: "downloading", progress: 0 }));
-    try {
-      const { check } = await import("@tauri-apps/plugin-updater");
-      const result = await check();
-      if (!result) return;
-
-      let total = 0;
-      let downloaded = 0;
-      await result.downloadAndInstall((event: any) => {
-        if (event.event === "Started" && event.data.contentLength) {
-          total = event.data.contentLength;
-        } else if (event.event === "Progress") {
-          downloaded += event.data.chunkLength;
-          if (total > 0) setUpdate((prev) => ({ ...prev, progress: Math.round((downloaded / total) * 100) }));
-        } else if (event.event === "Finished") {
-          setUpdate((prev) => ({ ...prev, status: "ready" }));
-        }
-      });
-    } catch (err) {
-      setUpdate({ status: "error", error: String(err) });
-    }
-  }, []);
-
-  const restart = useCallback(async () => {
-    try {
-      const { relaunch } = await import("@tauri-apps/plugin-process");
-      await relaunch();
-    } catch {}
-  }, []);
+  const update = useStore((s) => s.updater);
+  const checkForUpdates = useStore((s) => s.checkForUpdates);
+  const downloadAndInstall = useStore((s) => s.downloadAndInstall);
+  const restart = useStore((s) => s.restartApp);
 
   useEffect(() => {
-    checkForUpdates();
-  }, [checkForUpdates]);
+    if (update.status === "idle") checkForUpdates();
+  }, []);
 
   return (
     <div className={shared.contentArea}>
