@@ -188,6 +188,8 @@ export default function MenuPanel({
           />
         )}
 
+        <div className={styles.navDivider} />
+
         {NAV_AFTER_LABELS.map((item) => (
           <NavItem
             key={item.id}
@@ -224,14 +226,6 @@ export default function MenuPanel({
           onCreate={handleCreateWorkspace}
         />
       )}
-
-      <StatusBar
-        connected={connected}
-        wsPort={wsPort}
-        debugUnlocked={debugUnlocked}
-        onOpenLogs={onOpenLogs}
-        onDebugUnlock={onDebugUnlock}
-      />
     </>
   );
 }

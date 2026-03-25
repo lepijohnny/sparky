@@ -142,14 +142,10 @@
   border-radius: 4px;
   color: var(--fg-subtle);
   cursor: pointer;
-  opacity: 0;
+  opacity: 0.4;
   transition: opacity 100ms ease, color 100ms ease;
   margin-top: 4px;
   align-self: flex-end;
-}
-
-.bubbleWrapUser:hover .anchorBtn {
-  opacity: 1;
 }
 
 .anchorBtnActive {

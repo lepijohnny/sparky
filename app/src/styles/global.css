@@ -12,7 +12,7 @@
   --bg-surface:  #2a2a4a;
   --bg-overlay:  #2a2a4a;
   --bg-hover:    color-mix(in srgb, var(--fg) 5%, transparent);
-  --border:      #3a3a5c;
+  --border:      #4a4a6c;
   --fg-muted:    #8888aa;
   --fg-subtle:   #555570;
   --accent:      hsl(240, 60%, 65%);
