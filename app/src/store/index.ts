@@ -12,6 +12,7 @@ import { createSourceSelectionSlice, type SourceSelectionSlice } from "./sourceS
 import { createWorkspaceSlice, type WorkspaceSlice } from "./workspace";
 import { createTrustSlice, type TrustSlice } from "./trust";
 import { createSkillsSlice, type SkillsSlice } from "./skills";
+import { createUpdaterSlice, type UpdaterSlice } from "./updater";
 
 export type AppState =
   & NavigationSlice
@@ -25,7 +26,8 @@ export type AppState =
   & SourceSelectionSlice
   & WorkspaceSlice
   & TrustSlice
-  & SkillsSlice;
+  & SkillsSlice
+  & UpdaterSlice;
 
 export const useStore = create<AppState>()(
   persist(
@@ -42,6 +44,7 @@ export const useStore = create<AppState>()(
       ...createWorkspaceSlice(...a),
       ...createTrustSlice(...a),
       ...createSkillsSlice(...a),
+      ...createUpdaterSlice(...a),
     }),
     {
       name: "sparky-app",
