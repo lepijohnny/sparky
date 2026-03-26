@@ -42,6 +42,16 @@ html, body, #root {
     height: auto !important;
     overflow: visible !important;
   }
+
+  svg, canvas, img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  tr, th, td {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
 
 [data-streaming] .latexBlock {
