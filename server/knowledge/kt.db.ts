@@ -102,9 +102,11 @@ export interface KtDatabase {
   searchVectors(queryVector: Float32Array, limit: number): { chunkId: string; sourceId: string; distance: number }[];
   updateSourceFileChunkCount(sourceFileId: string, count: number): void;
   deleteChunksBySource(sourceId: string): void;
+  deleteSourceFiles(sourceId: string): void;
   transaction<T>(fn: () => T): T;
   updateSourceFileStatus(id: string, status: SourceFile["status"], error?: string): void;
   deleteSource(id: string): boolean;
+  vacuum(): void;
   searchFts(query: string, limit: number): { chunkId: string; rank: number }[];
   getChunksBySourceIds(sourceIds: string[]): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
   getAdjacentChunks(chunkId: string): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
@@ -237,6 +239,10 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
       db.prepare("DELETE FROM chunks WHERE source_file_id IN (SELECT id FROM source_files WHERE source_id = :sourceId)").run({ sourceId });
     },
 
+    deleteSourceFiles(sourceId) {
+      db.prepare("DELETE FROM source_files WHERE source_id = :sourceId").run({ sourceId });
+    },
+
     transaction<T>(fn: () => T): T {
       return db.transaction(fn)();
     },
@@ -248,6 +254,11 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
     deleteSource(id) {
       db.prepare("DELETE FROM sources WHERE id = :id").run({ id });
       return true;
+    },
+
+    vacuum() {
+      db.pragma("wal_checkpoint(TRUNCATE)");
+      db.exec("VACUUM");
     },
 
     searchFts(query, limit) {
