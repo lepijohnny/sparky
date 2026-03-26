@@ -106,7 +106,6 @@ export interface KtDatabase {
   transaction<T>(fn: () => T): T;
   updateSourceFileStatus(id: string, status: SourceFile["status"], error?: string): void;
   deleteSource(id: string): boolean;
-  vacuum(): void;
   searchFts(query: string, limit: number): { chunkId: string; rank: number }[];
   getChunksBySourceIds(sourceIds: string[]): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
   getAdjacentChunks(chunkId: string): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
@@ -221,6 +220,12 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
 
     deleteVectorsBySource(sourceId) {
       db.prepare("DELETE FROM vec_chunks WHERE source_id = :sourceId").run({ sourceId });
+      const remaining = db.prepare("SELECT count(*) as cnt FROM vec_chunks").get() as { cnt: number };
+      if (remaining.cnt === 0) {
+        for (const t of ["vec_chunks_vector_chunks00", "vec_chunks_metadatachunks00", "vec_chunks_metadatatext00", "vec_chunks_chunks", "vec_chunks_rowids"]) {
+          try { db.prepare(`DELETE FROM ${t}`).run(); } catch {}
+        }
+      }
     },
 
     searchVectors(queryVector, limit) {
@@ -236,7 +241,11 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
     },
 
     deleteChunksBySource(sourceId) {
+      db.exec("DROP TRIGGER IF EXISTS chunks_fts_delete");
       db.prepare("DELETE FROM chunks WHERE source_file_id IN (SELECT id FROM source_files WHERE source_id = :sourceId)").run({ sourceId });
+      try { db.prepare("INSERT INTO chunks_fts(chunks_fts) VALUES ('rebuild')").run(); } catch {}
+      db.exec(`CREATE TRIGGER IF NOT EXISTS chunks_fts_delete AFTER DELETE ON chunks
+        BEGIN INSERT INTO chunks_fts(chunks_fts, rowid, content) VALUES ('delete', old.rowid, old.content); END`);
     },
 
     deleteSourceFiles(sourceId) {
@@ -254,11 +263,6 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
     deleteSource(id) {
       db.prepare("DELETE FROM sources WHERE id = :id").run({ id });
       return true;
-    },
-
-    vacuum() {
-      db.pragma("wal_checkpoint(TRUNCATE)");
-      db.exec("VACUUM");
     },
 
     searchFts(query, limit) {

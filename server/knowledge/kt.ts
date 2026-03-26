@@ -56,7 +56,6 @@ export function createKtManager(
       return db.deleteSource(id);
     });
     if (deleted) {
-      try { db.vacuum(); } catch {}
       bus.emit("kt.source.deleted", { id });
       log.info("Source deleted", { id });
     }
