@@ -49,9 +49,14 @@ export function createKtManager(
   }
 
   function deleteSource(id: string) {
-    const deleted = db.deleteSource(id);
+    const deleted = db.transaction(() => {
+      db.deleteChunksBySource(id);
+      db.deleteVectorsBySource(id);
+      db.deleteSourceFiles(id);
+      return db.deleteSource(id);
+    });
     if (deleted) {
-      try { db.deleteVectorsBySource(id); } catch {}
+      try { db.vacuum(); } catch {}
       bus.emit("kt.source.deleted", { id });
       log.info("Source deleted", { id });
     }
