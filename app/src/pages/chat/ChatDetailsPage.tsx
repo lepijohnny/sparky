@@ -308,6 +308,16 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
         stream.setActive(true, undefined, loaded.partialContent ?? undefined);
       }
     }
+    if (loaded.hasMore && conn) {
+      conn.request("chat.entries", { chatId: loaded.chat.id })
+        .then((data: any) => {
+          if (data?.entries) {
+            setEntries(data.entries);
+            setHasMore(false);
+          }
+        })
+        .catch(() => {});
+    }
   }, [loaded]);
 
   useEffect(() => {

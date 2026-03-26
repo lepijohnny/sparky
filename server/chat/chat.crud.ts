@@ -248,11 +248,17 @@ export class ChatCrud {
     const chat = this.db.getChat(data.id);
     if (!chat) return null;
 
-    const entries = this.db.getAllEntries(data.id);
+    const { entries: recent, hasMore } = this.db.getEntries(data.id, 10);
+    const anchored = this.db.getAnchored(data.id);
+
+    const recentRowids = new Set(recent.map((e) => e.rowid));
+    const extra = anchored.filter((e) => !recentRowids.has(e.rowid));
+    const entries = extra.length > 0 ? [...extra, ...recent] : recent;
+
     this.db.enrichWithAttachments(entries, this.workspacePath);
 
-    this.log.debug("Loaded chat", { id: data.id, entries: entries.length });
-    return { chat, entries, hasMore: false };
+    this.log.debug("Loaded chat", { id: data.id, entries: entries.length, anchored: anchored.length, hasMore });
+    return { chat, entries, hasMore };
   }
 
   entries(data: { chatId: string; before?: number }): { entries: ChatEntry[]; hasMore: boolean } {
