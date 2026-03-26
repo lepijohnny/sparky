@@ -249,25 +249,30 @@ function formatTokens(n: number): string {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
-function AgentMessageBubbleStatus({ status, conversationTokens, contextWindow }: { status: SpinnerStatus; conversationTokens?: number; contextWindow?: number }): ReactElement {
-  const usage = conversationTokens != null && contextWindow
-    ? Math.min(Math.round(conversationTokens / contextWindow * 100), 100)
-    : undefined;
-
+function AgentMessageBubbleStatusLeft({ status }: { status: SpinnerStatus }): ReactElement {
   return (
     <div className={styles.statusRow}>
       <div className={styles.statusDot} style={{ background: STATUS_COLORS[status] }} />
       <span className={styles.statusLabel}>{STATUS_LABELS[status]}</span>
-      {usage != null && (
-        <span className={styles.usageGroup} title={`${formatTokens(conversationTokens!)} / ${formatTokens(contextWindow!)} tokens`}>
-          <span className={styles.statusLabel}>Context</span>
-          <span className={styles.usageBar}>
-            <span className={styles.usageFill} style={{ width: `${usage}%` }} />
-          </span>
-          <span className={styles.statusLabel}>{usage}%</span>
-        </span>
-      )}
     </div>
+  );
+}
+
+function AgentMessageBubbleStatusRight({ conversationTokens, contextWindow }: { conversationTokens?: number; contextWindow?: number }): ReactElement | null {
+  const usage = conversationTokens != null && contextWindow
+    ? Math.min(Math.round(conversationTokens / contextWindow * 100), 100)
+    : undefined;
+
+  if (usage == null) return null;
+
+  return (
+    <span className={styles.usageGroup} title={`${formatTokens(conversationTokens!)} / ${formatTokens(contextWindow!)} tokens`}>
+      <span className={styles.statusLabel}>Context</span>
+      <span className={styles.usageBar}>
+        <span className={styles.usageFill} style={{ width: `${usage}%` }} />
+      </span>
+      <span className={styles.statusLabel}>{usage}%</span>
+    </span>
   );
 }
 
@@ -350,12 +355,19 @@ const AgentMessageBubble = memo(
           </div>
         )}
         {content.length > 0 && (
-          <div className={styles.bubbleGroup} data-bubble data-streaming={streaming || undefined}>
-            {rendered}
+          <div className={styles.bubbleOuter}>
+            <div className={styles.bubbleGroup} data-bubble data-streaming={streaming || undefined}>
+              {rendered}
+            </div>
+            {!streaming && (
+              <div className={styles.bubbleFooter}>
+                <AgentMessageBubbleStatusLeft status={status} />
+                <AgentMessageBubbleStatusRight conversationTokens={message.conversationTokens} contextWindow={message.contextWindow} />
+              </div>
+            )}
           </div>
         )}
         {streaming && <Spinner status={status} />}
-        {!streaming && <AgentMessageBubbleStatus status={status} conversationTokens={message.conversationTokens} contextWindow={message.contextWindow} />}
         {!streaming && onToggleAnchor && message.rowid != null && (
           <button
             className={`${styles.anchorBtn} ${message.anchored ? styles.anchorBtnActive : ""}`}

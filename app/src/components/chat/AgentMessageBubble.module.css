@@ -5,10 +5,22 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 0 6px;
+  padding: 0;
   box-sizing: border-box;
 }
 
+
+.bubbleOuter {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg-surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  overflow: hidden;
+}
 
 .bubbleGroup {
   display: flex;
@@ -17,11 +29,6 @@
   max-height: 60vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--bg-surface);
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  border-bottom-left-radius: 4px;
 }
 
 .bubble {
@@ -328,11 +335,19 @@
   border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
 }
 
+.bubbleFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in srgb, var(--bg-surface) 96%, black);
+  padding: 10px 16px;
+}
+
+
 .statusRow {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px 0;
   font-size: 11px;
   color: var(--fg-muted);
 }
@@ -352,7 +367,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
+  font-size: 11px;
+  color: var(--fg-muted);
 }
 
 .usageBar {
@@ -382,9 +398,11 @@
   border-radius: 4px;
   color: var(--fg-subtle);
   cursor: pointer;
-  opacity: 0.4;
+  opacity: 0.8;
   transition: opacity 100ms ease, color 100ms ease;
   align-self: flex-end;
+  margin-top: 4px;
+  flex-shrink: 0;
 }
 
 .anchorBtnActive {
