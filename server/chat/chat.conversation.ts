@@ -125,6 +125,7 @@ export class ChatConversation {
       }
 
       await this.emitActivity(data.chatId, turnId, "agent.start");
+      const startTime = Date.now();
 
       const resolved = await this.getAgent(data.chatId);
       if (!resolved) {
@@ -227,9 +228,11 @@ export class ChatConversation {
 
       // Release before terminal emit so subscribers see the chat as idle
       this.activeChats.delete(data.chatId);
+      const durationMs = Date.now() - startTime;
       await this.emitActivity(data.chatId, turnId, `agent.${answer}`, {
-        conversationTokens: ctx.budget.conversationTokens,
+        conversationTokens: ctx.budget.total - ctx.budget.remaining,
         contextWindow: ctx.budget.total,
+        durationMs,
       });
 
       if (!isSystemRole && answer === "done") {
