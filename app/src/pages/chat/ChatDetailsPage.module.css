@@ -25,6 +25,8 @@
   min-width: 0;
   animation: fadeIn 150ms ease;
   will-change: transform;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 36px, black calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 36px, black calc(100% - 36px), transparent);
 }
 
 @keyframes fadeIn {

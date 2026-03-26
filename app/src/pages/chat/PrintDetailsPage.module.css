@@ -44,6 +44,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .title {
@@ -55,6 +57,7 @@
 .bubble {
   position: relative;
   transition: opacity 200ms ease;
+  overflow: visible;
 }
 
 .bubbleUser {
@@ -68,8 +71,31 @@
 }
 
 .bubbleAssistant {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
+  padding: 12px 16px;
+  background: var(--bg-raised);
+  border: none;
+  border-radius: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.blockContent {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.blockContent ul,
+.blockContent ol {
+  padding-left: 24px;
+  list-style-position: inside;
 }
 
 .bubbleContent {
@@ -86,7 +112,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   color: var(--fg-muted);
   opacity: 0;
   pointer-events: none;
@@ -95,10 +120,21 @@
   border-radius: 8px;
 }
 
+.overlayBtn {
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 100ms ease;
+}
+
+.overlayBtn:hover {
+  background: var(--bg-hover);
+}
+
 .bubble:hover .overlay,
 .hidden .overlay {
   opacity: 1;
-  pointer-events: auto;
 }
 
 .bubble:hover .overlay {
@@ -146,7 +182,21 @@
   }
 
   .bubble {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .bubbleUser {
+    padding: 8px 0 !important;
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .bubbleAssistant {
+    padding: 4px 16px !important;
+    break-inside: auto;
+    page-break-inside: auto;
   }
 }

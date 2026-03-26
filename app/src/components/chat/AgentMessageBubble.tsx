@@ -313,13 +313,17 @@ const AgentMessageBubble = memo(
           const isNew = !seenBlocksRef.current.has(key);
           if (isNew) seenBlocksRef.current.add(key);
           elements.push(
-            <div key={key} className={isNew ? styles.blockFadeIn : undefined}>
+            <div key={key} className={`${styles.bubble}${isNew ? ` ${styles.blockFadeIn}` : ""}`}>
               {renderer.render(block.content, key)}
             </div>
           );
         }
         if (pending && !isIncompleteBlock(pending)) {
-          elements.push(md.render(pending, "pending"));
+          elements.push(
+            <div key="pending" className={styles.bubble}>
+              {md.render(pending, "pending")}
+            </div>
+          );
         }
         return elements;
       }
@@ -327,7 +331,11 @@ const AgentMessageBubble = memo(
       const blocks = tokenize(content);
       return blocks.map((block, i) => {
         const renderer = rendererMap.get(block.type) ?? md;
-        return renderer.render(block.content, `${block.type}-${i}`);
+        return (
+          <div key={`${block.type}-${i}`} className={styles.bubble}>
+            {renderer.render(block.content, `${block.type}-${i}`)}
+          </div>
+        );
       });
     }, [content, streaming, rendererMap]);
 
@@ -342,7 +350,7 @@ const AgentMessageBubble = memo(
           </div>
         )}
         {content.length > 0 && (
-          <div className={styles.bubble} data-bubble data-streaming={streaming || undefined}>
+          <div className={styles.bubbleGroup} data-bubble data-streaming={streaming || undefined}>
             {rendered}
           </div>
         )}
