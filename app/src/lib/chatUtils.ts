@@ -11,6 +11,7 @@ export interface Message {
   anchored?: boolean;
   conversationTokens?: number;
   contextWindow?: number;
+  durationMs?: number;
   attachments?: MessageAttachment[];
 }
 
@@ -23,7 +24,7 @@ const HIDDEN_ACTIVITY_TYPES = new Set(["agent.start", "agent.thinking.done"]);
  */
 export function collapseEntries(entries: ChatEntry[]): Message[] {
   const messages: Message[] = [];
-  const turnMap = new Map<string, { activities: ChatActivity[]; status: SpinnerStatus; assistantContent: string; conversationTokens?: number; contextWindow?: number }>();
+  const turnMap = new Map<string, { activities: ChatActivity[]; status: SpinnerStatus; assistantContent: string; conversationTokens?: number; contextWindow?: number; durationMs?: number }>();
 
   for (const entry of entries) {
     if (entry.kind === "activity") {
@@ -36,18 +37,21 @@ export function collapseEntries(entries: ChatEntry[]): Message[] {
         if ((entry.data as any)?.conversationTokens != null) {
           turn.conversationTokens = (entry.data as any).conversationTokens;
           turn.contextWindow = (entry.data as any).contextWindow;
+          turn.durationMs = (entry.data as any).durationMs;
         }
       } else if (entry.type === "agent.stopped") {
         turn.status = "stopped";
         if ((entry.data as any)?.conversationTokens != null) {
           turn.conversationTokens = (entry.data as any).conversationTokens;
           turn.contextWindow = (entry.data as any).contextWindow;
+          turn.durationMs = (entry.data as any).durationMs;
         }
       } else if (entry.type === "agent.error") {
         turn.status = "error";
         if ((entry.data as any)?.conversationTokens != null) {
           turn.conversationTokens = (entry.data as any).conversationTokens;
           turn.contextWindow = (entry.data as any).contextWindow;
+          turn.durationMs = (entry.data as any).durationMs;
         }
         turn.activities.push(entry);
       } else if (!HIDDEN_ACTIVITY_TYPES.has(entry.type)) {
@@ -89,6 +93,7 @@ export function collapseEntries(entries: ChatEntry[]): Message[] {
         anchored: assistantEntry?.kind === "message" ? assistantEntry.anchored : undefined,
         conversationTokens: turn.conversationTokens,
         contextWindow: turn.contextWindow,
+        durationMs: turn.durationMs,
       });
     }
   }

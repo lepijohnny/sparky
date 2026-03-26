@@ -61,6 +61,7 @@ export interface AgentMessage {
   anchored?: boolean;
   conversationTokens?: number;
   contextWindow?: number;
+  durationMs?: number;
 }
 
 export interface AgentMessageBubbleProps {
@@ -249,11 +250,17 @@ function formatTokens(n: number): string {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
-function AgentMessageBubbleStatusLeft({ status }: { status: SpinnerStatus }): ReactElement {
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  const s = ms / 1000;
+  return s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
+}
+
+function AgentMessageBubbleStatusLeft({ status, durationMs }: { status: SpinnerStatus; durationMs?: number }): ReactElement {
   return (
     <div className={styles.statusRow}>
       <div className={styles.statusDot} style={{ background: STATUS_COLORS[status] }} />
-      <span className={styles.statusLabel}>{STATUS_LABELS[status]}</span>
+      <span className={styles.statusLabel}>{STATUS_LABELS[status]}{durationMs != null ? ` after ${formatDuration(durationMs)}` : ""}</span>
     </div>
   );
 }
@@ -267,7 +274,7 @@ function AgentMessageBubbleStatusRight({ conversationTokens, contextWindow }: { 
 
   return (
     <span className={styles.usageGroup} title={`${formatTokens(conversationTokens!)} / ${formatTokens(contextWindow!)} tokens`}>
-      <span className={styles.statusLabel}>Context</span>
+      <span className={styles.statusLabel}>Est. Context</span>
       <span className={styles.usageBar}>
         <span className={styles.usageFill} style={{ width: `${usage}%` }} />
       </span>
@@ -361,7 +368,7 @@ const AgentMessageBubble = memo(
             </div>
             {!streaming && (
               <div className={styles.bubbleFooter}>
-                <AgentMessageBubbleStatusLeft status={status} />
+                <AgentMessageBubbleStatusLeft status={status} durationMs={message.durationMs} />
                 <AgentMessageBubbleStatusRight conversationTokens={message.conversationTokens} contextWindow={message.contextWindow} />
               </div>
             )}
