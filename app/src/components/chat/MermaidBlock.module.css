@@ -22,3 +22,10 @@
 .error {
   opacity: 0.5;
 }
+
+@media print {
+  .wrap {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

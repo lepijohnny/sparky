@@ -28,3 +28,10 @@
   background: var(--bg-hover);
   color: var(--fg);
 }
+
+@media print {
+  .wrap {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
