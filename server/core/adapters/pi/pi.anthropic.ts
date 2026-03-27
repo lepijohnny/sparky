@@ -48,7 +48,7 @@ export function createPiAnthropicAdapter(
           supportsThinking: m.reasoning,
           supportsTools: true,
           supportsAttachments: m.input.includes("image")
-            ? ["png", "jpg", "jpeg", "gif", "webp", "svg", "pdf", "txt", "md", "csv", "json", "xml", "html"]
+            ? ["png", "jpg", "jpeg", "gif", "webp"]
             : undefined,
           webSearch: "native" as const,
         }));

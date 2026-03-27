@@ -4,15 +4,15 @@ import { stat, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { EventBus } from "../core/bus";
 import type { Configuration } from "../core/config";
-import type { StorageProvider } from "../core/storage";
 import type { Logger } from "../logger.types";
 import type { Source, SourceFile, SearchResult } from "./kt.types";
 import type { KtDatabase } from "./kt.db";
 import { ExtractorRegistry } from "./kt.extractor";
-import { loadExtractors, listExtractors } from "./kt.extractor.loader";
 import { IndexPipeline } from "./kt.indexing";
 import { search } from "./kt.search";
-import { getExtractorOptions, setExtractorOptions } from "./kt.extractor.options";
+import { getFileToMarkdownConverter } from "../core/md.converter";
+import { createUrlExtractor } from "./kt.url.converter";
+import { CONVERTER_DEFAULTS } from "../core/config";
 
 export interface KtManager {
   init(): Promise<void>;
@@ -29,7 +29,6 @@ export function createKtManager(
   config: Configuration,
   log: Logger,
   storageRoot: string,
-  storage: StorageProvider,
 ): KtManager {
   const registry = new ExtractorRegistry();
   let pipeline: IndexPipeline;
@@ -193,12 +192,7 @@ export function createKtManager(
   bus.on("kt.sources.reindex", (data) => reindex(data));
   bus.on("kt.sources.cancel", (data) => cancel(data));
   bus.on("kt.sources.extensions", () => ({ extensions: registry.supportedExtensions() }));
-  bus.on("extractors.list", async () => ({ extractors: await listExtractors(storageRoot) }));
-  bus.on("extractors.options.get", (data) => ({ options: getExtractorOptions(storage, data.name) }));
-  bus.on("extractors.options.set", (data) => {
-    setExtractorOptions(storage, data.name, data.options);
-    return { ok: true };
-  });
+
   bus.on("kt.search", async (data: { query: string; limit?: number; minScore?: number }) => {
     const cacheDir = join(storageRoot, "models");
     const results = await search(db, data.query, cacheDir, log, {
@@ -209,8 +203,14 @@ export function createKtManager(
 
   return {
     async init() {
-      await loadExtractors(registry, storageRoot, log);
-      pipeline = new IndexPipeline(db, registry, bus, log, storageRoot, storage);
+      const converterCfg = config.get("converter") ?? {};
+      registry.register(getFileToMarkdownConverter());
+      registry.register(createUrlExtractor({
+        maxDepth: converterCfg.urlMaxDepth ?? CONVERTER_DEFAULTS.urlMaxDepth,
+        maxPages: converterCfg.urlMaxPages ?? CONVERTER_DEFAULTS.urlMaxPages,
+        respectRobots: converterCfg.urlRespectRobots ?? CONVERTER_DEFAULTS.urlRespectRobots,
+      }));
+      pipeline = new IndexPipeline(db, registry, bus, log, storageRoot);
       log.info("Extractors loaded", { extensions: registry.supportedExtensions() });
     },
 

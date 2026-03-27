@@ -5,6 +5,7 @@ import type { LlmConnection, LlmDefault } from "../../settings/llm.types";
 import type { Profile } from "../../settings/profile.types";
 import type { Workspace, WorkspaceSpace } from "../../settings/workspace.types";
 import type { QemuStatus, SandboxImage } from "../sandbox/sandbox.types";
+import type { ConverterSettings } from "../config";
 
 export interface SettingsEvents {
   "settings.appearance.theme.changed":  { req: { theme: ThemeFile }; res: void };
@@ -50,4 +51,7 @@ export interface SettingsEvents {
   "settings.labels.created":          { req: { label: Label }; res: void };
   "settings.labels.updated":          { req: { label: Label }; res: void };
   "settings.labels.deleted":          { req: { id: string }; res: void };
+
+  "settings.converter.get":            { req: void; res: { settings: ConverterSettings } };
+  "settings.converter.set":            { req: Partial<ConverterSettings>; res: { settings: ConverterSettings } };
 }

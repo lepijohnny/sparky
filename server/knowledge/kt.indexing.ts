@@ -11,8 +11,6 @@ import type { KtDatabase } from "./kt.db";
 import type { ExtractorRegistry } from "./kt.extractor";
 import type { Source, SourceFile } from "./kt.types";
 import { chunkText } from "./kt.chunker";
-import { getExtractorOptions } from "./kt.extractor.options";
-import type { StorageProvider } from "../core/storage";
 import { queue, Embed, terminateWorker } from "./worker/kt.worker.client";
 
 interface QueueItem {
@@ -32,7 +30,6 @@ export class IndexPipeline {
     private bus: EventBus,
     private log: Logger,
     storageRoot: string,
-    private storage: StorageProvider,
   ) {
     this.embedCacheDir = join(storageRoot, "models");
   }
@@ -166,13 +163,10 @@ export class IndexPipeline {
       this.broadcastSource(file.sourceId);
 
       const logFn = (msg: string) => this.log.info(`[extractor] ${msg}`, { fileId: file.id });
-      const options = extractor.name ? getExtractorOptions(this.storage, extractor.name) : {};
-      if (extractor.name && Object.keys(options).length > 0) {
-        this.log.info("Pipeline: extractor options", { extractor: extractor.name, options });
-      }
+
       let totalChunks = 0;
 
-      for await (const segment of extractor.extract(file.path, logFn, options)) {
+      for await (const segment of extractor.extract(file.path, logFn)) {
         if (this.isCancelled(file.sourceId)) {
           this.db.updateSourceFileStatus(file.id, "pending");
           return;

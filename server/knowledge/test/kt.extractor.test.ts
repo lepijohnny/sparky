@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vitest";
 import { ExtractorRegistry } from "../kt.extractor";
-import type { FileExtractor } from "../kt.types";
+import type { FileMdConverter } from "../kt.types";
 
-function mockExtractor(extensions: string[]): FileExtractor {
+function mockExtractor(extensions: string[]): FileMdConverter {
   return {
     extensions,
     extract: async function*() { yield { text: "mock" }; },

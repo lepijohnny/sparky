@@ -54,7 +54,7 @@ export function createChatWorkspace(
     return parts.join(" ");
   };
 
-  const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences, getEnvVars);
+  const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences, getEnvVars, config);
   conversation.wsDir = workspacePath;
 
   bus.on("tool.approval.pending", (data) => approval.getPending(data.chatId));

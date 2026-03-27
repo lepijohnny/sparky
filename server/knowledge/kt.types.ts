@@ -44,7 +44,7 @@ export interface ExtractionResult {
 }
 
 /** Interface all file extractors must implement */
-export interface FileExtractor {
+export interface FileMdConverter {
   name?: string;
   extensions: string[];
   extract(target: string, log: (msg: string) => void, options?: Record<string, unknown>): AsyncGenerator<ExtractionResult>;

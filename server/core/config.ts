@@ -6,6 +6,20 @@ import type { ServiceDef } from "./proxy/proxy.schema";
 const CONFIG_PATH = "config.json";
 
 /** Shape of the unified config.json file */
+export interface ConverterSettings {
+  maxOutputChars: number;
+  urlMaxDepth: number;
+  urlMaxPages: number;
+  urlRespectRobots: boolean;
+}
+
+export const CONVERTER_DEFAULTS: ConverterSettings = {
+  maxOutputChars: 100_000,
+  urlMaxDepth: 3,
+  urlMaxPages: 200,
+  urlRespectRobots: true,
+};
+
 export interface ConfigFile {
   activeTheme?: string;
   activeWorkspace?: string;
@@ -15,6 +29,7 @@ export interface ConfigFile {
   labels?: Label[];
   allowlist?: string[];
   services?: ServiceDef[];
+  converter?: Partial<ConverterSettings>;
 }
 
 export interface Configuration {

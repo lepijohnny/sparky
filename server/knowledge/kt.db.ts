@@ -73,13 +73,14 @@ export function sanitizeForFts(query: string): string {
 function openDb(dbPath: string): Database.Database {
   const db = new Database(dbPath);
   sqliteVec.load(db);
-  db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   db.exec(KT_SCHEMA);
   const cols = db.prepare("PRAGMA table_info(sources)").all() as { name: string }[];
   if (!cols.some((c) => c.name === "mode")) {
     db.exec("ALTER TABLE sources ADD COLUMN mode TEXT NOT NULL DEFAULT 'keyword' CHECK(mode IN ('keyword', 'hybrid'))");
   }
+  db.exec("VACUUM");
+  db.pragma("journal_mode = WAL");
   return db;
 }
 

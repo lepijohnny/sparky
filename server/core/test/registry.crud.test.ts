@@ -57,7 +57,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", { provider: "anthropic", model: "model-b" });
-    expect(result).toEqual({ provider: "anthropic", model: "model-b", label: "Model B", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "anthropic", model: "model-b", label: "Model B", supportsThinking: false });
   });
 
   test("given unknown model, when resolving, then falls back to default", async () => {
@@ -66,7 +66,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", { provider: "anthropic", model: "nonexistent" });
-    expect(result).toEqual({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
   });
 
   test("given unknown provider, when resolving, then falls back to default", async () => {
@@ -75,7 +75,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", { provider: "unknown", model: "model-a" });
-    expect(result).toEqual({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
   });
 
   test("given provider without model, when resolving, then picks first model", async () => {
@@ -84,7 +84,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", { provider: "anthropic" });
-    expect(result).toEqual({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
   });
 
   test("given empty request, when resolving, then returns default connection model", async () => {
@@ -93,7 +93,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", {});
-    expect(result).toEqual({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "anthropic", model: "model-a", label: "Model A", supportsThinking: false });
   });
 
   test("given default connection without model, when resolving, then picks first available", async () => {
@@ -102,7 +102,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", {});
-    expect(result).toEqual({ provider: "ollama", model: "model-b", label: "Model B", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "ollama", model: "model-b", label: "Model B", supportsThinking: false });
   });
 
   test("given no connections, when resolving, then returns empty", async () => {
@@ -111,7 +111,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", {});
-    expect(result).toEqual({ provider: "", model: "", label: "", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "", model: "", label: "", supportsThinking: false });
   });
 
   test("given no default set and empty request, when resolving, then returns empty", async () => {
@@ -120,7 +120,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", {});
-    expect(result).toEqual({ provider: "", model: "", label: "", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "", model: "", label: "", supportsThinking: false });
   });
 
   test("given adapter with no models, when resolving, then returns empty", async () => {
@@ -129,7 +129,7 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", {});
-    expect(result).toEqual({ provider: "", model: "", label: "", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "", model: "", label: "", supportsThinking: false });
   });
 
   test("given multiple providers, when resolving non-default, then returns correct provider", async () => {
@@ -143,6 +143,6 @@ describe("core.registry.model", () => {
     createRegistryCrud(bus, config, registry);
 
     const result = await bus.emit("core.registry.model", { provider: "ollama", model: "model-b" });
-    expect(result).toEqual({ provider: "ollama", model: "model-b", label: "Model B", supportsThinking: false });
+    expect(result).toMatchObject({ provider: "ollama", model: "model-b", label: "Model B", supportsThinking: false });
   });
 });

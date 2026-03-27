@@ -1,5 +1,4 @@
 import type { Source, SourceFile, SearchResult } from "../../knowledge/kt.types";
-import type { InstalledExtractor, ExtractorOptionValues } from "../../knowledge/kt.extractor.types";
 
 export interface KtEvents {
   "kt.sources.list":       { req: void; res: { sources: Source[] } };
@@ -17,7 +16,4 @@ export interface KtEvents {
   "kt.search":             { req: { query: string; limit?: number; minScore?: number }; res: { results: SearchResult[] } };
   "kt.source.deleted":     { req: { id: string }; res: void };
 
-  "extractors.list":           { req: void; res: { extractors: InstalledExtractor[] } };
-  "extractors.options.get":    { req: { name: string }; res: { options: ExtractorOptionValues } };
-  "extractors.options.set":    { req: { name: string; options: ExtractorOptionValues }; res: { ok: boolean } };
 }

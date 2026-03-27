@@ -47,7 +47,7 @@ export function createPiMistralAdapter(
           supportsTools: true,
           webSearch: "local" as const,
           supportsAttachments: m.input.includes("image")
-            ? ["png", "jpg", "jpeg", "gif", "webp", "svg", "pdf"]
+            ? ["png", "jpg", "jpeg", "gif", "webp"]
             : undefined,
         }));
         return cachedModels;

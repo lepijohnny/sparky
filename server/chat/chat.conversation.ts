@@ -8,6 +8,9 @@ import type { EventBus } from "../core/bus";
 import { type ToolApproval, createApprovalContext } from "../core/tool.approval";
 import { type PermissionMode, type TrustStore, withModeOverride } from "../core/trust";
 import type { Logger } from "../logger.types";
+import { getFileToMarkdownConverter } from "../core/md.converter";
+import { type Configuration, CONVERTER_DEFAULTS } from "../core/config";
+import type { FileMdConverter } from "../knowledge/kt.types";
 import { type ContextResult, contextBuilder } from "./chat.context";
 import { generateSummary, shouldSummarize } from "./agent.summarize";
 import { loadRole, buildRolePrompt } from "../prompts/prompt.role";
@@ -43,7 +46,13 @@ export class ChatConversation {
     private knowledge: KnowledgeSearch | null = null,
     private getSystemPromptPreferences: SystemPromptPreferencesFn = () => DEFAULT_PREFERENCES,
     private getEnvVars: () => Record<string, string> = () => ({}),
+    private config?: Configuration,
   ) {}
+
+  private getConverter(): FileMdConverter {
+    const maxOutputChars = this.config?.get("converter")?.maxOutputChars ?? CONVERTER_DEFAULTS.maxOutputChars;
+    return getFileToMarkdownConverter({ maxOutputChars });
+  }
 
   switchDb(db: ChatDatabase): void {
     this.db = db;
@@ -219,7 +228,7 @@ export class ChatConversation {
         webSearch: resolved.webSearch ?? "none",
       });
 
-      const currentTurnContent = this.buildCurrentTurnContent(data.content, data.attachmentIds);
+      const currentTurnContent = await this.buildCurrentTurnContent(data.content, data.attachmentIds);
 
       const [answer, _] = await Promise.all([
         this.chatAgentLoop(agent, data.chatId, turnId, ctx, signal, tools, currentTurnContent),
@@ -319,7 +328,7 @@ export class ChatConversation {
     }
   }
 
-  private buildCurrentTurnContent(text: string, attachmentIds?: string[]): MessageContent | undefined {
+  private async buildCurrentTurnContent(text: string, attachmentIds?: string[]): Promise<MessageContent | undefined> {
     if (!attachmentIds || attachmentIds.length === 0) return undefined;
 
     const parts: MessagePart[] = [{ type: "text", text }];
@@ -335,7 +344,18 @@ export class ChatConversation {
       if (att.mime_type.startsWith("image/") && att.mime_type !== "image/svg+xml") {
         parts.push({ type: "image", filePath, mimeType: att.mime_type });
       } else {
-        parts.push({ type: "document", filePath, mimeType: att.mime_type, filename: att.filename });
+        try {
+          let markdown = "";
+          const converter = this.getConverter();
+          for await (const segment of converter.extract(filePath, (msg) => this.log.debug(msg))) {
+            markdown += segment.text;
+          }
+          this.log.info("Converted attachment", { filename: att.filename, inputSize: att.size, outputLength: markdown.length });
+          parts.push({ type: "text", text: `📎 ${att.filename}:\n\n${markdown}` });
+        } catch (err) {
+          this.log.warn("Markit conversion failed", { id, filename: att.filename, error: String(err) });
+          parts.push({ type: "text", text: `📎 ${att.filename}: ${String(err)}` });
+        }
       }
     }
 

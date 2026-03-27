@@ -35,10 +35,10 @@ import LabelsDetailsPage from "./pages/settings/LabelsDetailsPage";
 import LlmDetailsPage from "./pages/settings/LlmDetailsPage";
 import SettingsContextPage, { type SettingsSub } from "./pages/settings/SettingsContextPage";
 import AboutDetailsPage from "./pages/settings/AboutDetailsPage";
-import ExtractorsDetailsPage from "./pages/settings/ExtractorsDetailsPage";
 import ProfileDetailsPage from "./pages/settings/ProfileDetailsPage";
 import WorkspaceDetailsPage from "./pages/settings/WorkspaceDetailsPage";
 import PermissionsDetailsPage from "./pages/settings/PermissionsDetailsPage";
+import ConvertersDetailsPage from "./pages/settings/ConvertersDetailsPage";
 import SourceAddButton from "./components/knowledge/SourceAddButton";
 import SourceListPage from "./pages/knowledge/SourceListPage";
 import SourceDetailsPage from "./pages/knowledge/SourceDetailsPage";
@@ -101,7 +101,7 @@ const SETTINGS_SUB_LABELS: Record<SettingsSub, string> = {
   labels: "Labels",
   environment: "Environment",
   workspace: "Workspace",
-  extractors: "Extractors",
+  converters: "Converters",
   permissions: "Permissions",
   about: "About",
   debug: "Debug",
@@ -114,7 +114,7 @@ const SETTINGS_PAGES: Record<SettingsSub, React.FC> = {
   labels: LabelsDetailsPage,
   environment: EnvironmentDetailsPage,
   workspace: WorkspaceDetailsPage,
-  extractors: ExtractorsDetailsPage,
+  converters: ConvertersDetailsPage,
   permissions: PermissionsDetailsPage,
   about: AboutDetailsPage,
   debug: DebugDetailsPage,

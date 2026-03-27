@@ -78,26 +78,6 @@ const __dirname = __dirname_fn(__filename);
   console.log("Copying prompts...");
   cpSync(join(__dirname, "prompts"), join(outDir, "prompts"), { recursive: true });
 
-  console.log("Bundling built-in extractors...");
-  const extractorsDir = join(__dirname, "knowledge", "extractors");
-  for (const name of readdirSync(extractorsDir)) {
-    const src = join(extractorsDir, name);
-    if (!statSync(src).isDirectory()) continue;
-    const destDir = join(outDir, "extractors", name);
-    mkdirSync(destDir, { recursive: true });
-    const pkgPath = join(src, "package.json");
-    if (existsSync(pkgPath)) cpSync(pkgPath, join(destDir, "package.json"));
-    await build({
-      entryPoints: [join(src, "index.ts")],
-      outfile: join(destDir, "index.js"),
-      bundle: true,
-      platform: "node",
-      format: "esm",
-      target: "node22",
-    });
-    console.log(`  ${name}`);
-  }
-
   console.log("Cleaning unnecessary files...");
   pruneDistJunk(join(outDir, "node_modules"));
 

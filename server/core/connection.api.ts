@@ -28,6 +28,8 @@ const ROUTES: RouteEntry[] = [
 
   "settings.profile.get",
   ["settings.profile.set", { notifiable: true }],
+  "settings.converter.get",
+  ["settings.converter.set", { notifiable: true }],
 
   "settings.workspace.list",
   ["settings.workspace.add", { notifiable: true }],
@@ -94,9 +96,7 @@ const ROUTES: RouteEntry[] = [
   ["kt.sources.cancel", { notifiable: true }],
   "kt.sources.extensions",
 
-  "extractors.list",
-  "extractors.options.get",
-  ["extractors.options.set", { notifiable: true }],
+
 
   "auth.start",
   "auth.finish",

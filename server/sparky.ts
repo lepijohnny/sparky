@@ -51,7 +51,7 @@ export function createSparky(): Sparky {
   const workspace = createWorkspace(config, storage);
   let currentWorkspacePath = storage.root(workspace.dir);
   const ktDb = createKtDatabase(workspace.dbPath.replace(/\.db$/, ".kt.db"), logger.createLogger("knowledge.db"));
-  const knowledgeManager = createKtManager(bus, ktDb, config, logger.createLogger("knowledge"), storage.root(""), storage);
+  const knowledgeManager = createKtManager(bus, ktDb, config, logger.createLogger("knowledge"), storage.root(""));
   const getEnvVars = () => cred.getEnvVars();
 
   const chatManager = createChatWorkspace(
