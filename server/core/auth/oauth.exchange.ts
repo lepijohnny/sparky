@@ -15,13 +15,17 @@ export async function exchangeToken(log: Logger, params: OAuthExchangeParams): P
   if (params.codeVerifier) {
     payload.code_verifier = params.codeVerifier;
   }
+  if (params.state) {
+    payload.state = params.state;
+  }
+  const useForm = params.bodyEncoding === "form";
   log.info("Token exchange request", {
     tokenUrl: params.tokenUrl,
     redirectUri: params.redirectUri,
     usePkce: !!params.codeVerifier,
+    bodyEncoding: useForm ? "form" : "json",
+    keys: Object.keys(payload),
   });
-
-  const useForm = params.bodyEncoding === "form";
   const res = await fetch(params.tokenUrl, {
     method: "POST",
     headers: {

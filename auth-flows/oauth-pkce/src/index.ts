@@ -81,6 +81,7 @@ export function createOAuthPkceFlow(config: OAuthPkceFlowConfig): AuthPluginFact
             clientId: config.clientId,
             clientSecret: config.clientSecret,
             codeVerifier: pendingVerifier,
+            state: pendingState,
             bodyEncoding: config.bodyEncoding,
           });
 
