@@ -362,8 +362,8 @@ const AgentMessageBubble = memo(
           </div>
         )}
         {content.length > 0 && (
-          <div className={styles.bubbleOuter}>
-            <div className={styles.bubbleGroup} data-bubble data-streaming={streaming || undefined}>
+          <div className={styles.bubbleOuter} data-bubble>
+            <div className={styles.bubbleGroup} data-streaming={streaming || undefined}>
               {rendered}
             </div>
             {!streaming && (
