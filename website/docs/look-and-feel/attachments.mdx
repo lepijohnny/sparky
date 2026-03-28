@@ -1,0 +1,77 @@
+---
+sidebar_position: 6
+description: "Attach files to chat messages. Images, documents, code, and more. Converted to markdown and sent inline to the LLM."
+sidebar_label: Attachments
+---
+
+<span className="section-label">Look and Feel</span>
+
+# Attachments
+
+Attach files directly to your chat messages. Sparky handles each file type intelligently — images are sent natively to the LLM, while documents and code are converted to markdown and included as inline text.
+
+## How It Works
+
+### Images
+
+Image files (PNG, JPG, JPEG, GIF, WebP) are sent directly to the LLM as visual content. The model sees the actual image and can describe, analyze, or extract information from it.
+
+### Documents & Code
+
+All other supported files — PDFs, Word documents, spreadsheets, code, config files, and more — are converted to markdown using [markit](https://github.com/Michaelliv/markit) before being sent to the LLM. This means the model receives clean, structured text it can reason about.
+
+For example:
+- A **PDF** is extracted to text with headings preserved
+- A **DOCX** keeps its heading structure and tables
+- An **XLSX** becomes markdown tables (one per sheet)
+- A **CSV** becomes a markdown table
+- **Code files** are wrapped in fenced code blocks with language detection
+- **JSON/YAML** are formatted as code blocks
+
+### Size Limit
+
+Documents that exceed the configured character limit (default: 100K characters, ~25K tokens) are rejected with a helpful message suggesting you add the file to the **Knowledge Base** instead. This prevents a single large document from consuming the entire context window.
+
+You can adjust this limit in **Settings → Converters → Max output size** (range: 10K–200K characters).
+
+## Adding Attachments
+
+There are two ways to attach files:
+
+1. **Click the attachment button** (📎) in the chat input toolbar — opens a file picker filtered to supported formats
+2. **Drag and drop** — drag files from your file manager directly onto the Sparky window
+
+Attached files appear as thumbnails above the input area. Click the ✕ to remove an attachment before sending.
+
+## Supported Formats
+
+| Category | Formats |
+|----------|---------|
+| **Images** | PNG, JPG, JPEG, GIF, WebP |
+| **Documents** | PDF, DOCX, PPTX, XLSX, EPUB |
+| **Data** | CSV, TSV, JSON, YAML, XML |
+| **Web** | HTML, HTM, RSS, Atom |
+| **Code** | Python, TypeScript, JavaScript, Rust, Go, Java, C/C++, C#, Swift, Kotlin, Ruby, PHP, SQL, and many more |
+| **Text** | TXT, Markdown, RST, LOG, TOML, INI, ENV |
+| **Archives** | ZIP (contents extracted recursively) |
+| **Notebooks** | Jupyter (`.ipynb`) |
+
+## Large Documents
+
+For documents too large to include inline (books, lengthy reports, codebases), use the [Knowledge Base](/docs/knowledge/rag) instead. The Knowledge Base:
+
+- **Chunks** the document into smaller sections
+- **Indexes** them with BM25 full-text search and optional vector embeddings
+- **Retrieves** only the relevant sections for each query
+
+This is far more efficient than sending an entire document in every message.
+
+## Converter Settings
+
+Adjust attachment behavior in **Settings → Converters**:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **Max output size** | 100K chars | Maximum converted document size for chat attachments |
+
+URL extractor settings (for the Knowledge Base) are also available on this page — see [Knowledge Base](/docs/knowledge/rag) for details.
