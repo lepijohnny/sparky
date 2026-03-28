@@ -82,6 +82,11 @@
   overflow: hidden;
   position: relative;
   z-index: 1;
+  transition: border-color 150ms ease;
+}
+
+.inputCardDragOver {
+  border-color: var(--accent);
 }
 
 .inputCard::after {
