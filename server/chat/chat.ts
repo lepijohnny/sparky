@@ -39,8 +39,9 @@ export function createChatWorkspace(
 ): ChatWorkspace {
   let db = new ChatDatabase(dbPath, log);
   let buffer = new StreamBufferManager(db, log);
+  let currentWorkspacePath = workspacePath;
   const crud = new ChatCrud(bus, config, db, log);
-  crud.workspacePath = workspacePath;
+  crud.workspacePath = currentWorkspacePath;
   const approval = new ToolApproval(bus, log);
   approval.registerDefaultRules();
 
@@ -55,7 +56,7 @@ export function createChatWorkspace(
   };
 
   const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences, getEnvVars, config);
-  conversation.wsDir = workspacePath;
+  conversation.wsDir = currentWorkspacePath;
 
   bus.on("tool.approval.pending", (data) => approval.getPending(data.chatId));
 
@@ -81,7 +82,7 @@ export function createChatWorkspace(
   bus.on("chat.create", (data) => crud.create(data));
   bus.on("chat.delete", (data) => {
     const result = crud.delete(data);
-    if (result.deleted) cleanupChatAttachments(workspacePath, data.id);
+    if (result.deleted) cleanupChatAttachments(currentWorkspacePath, data.id);
     return result;
   });
   bus.on("chat.rename", (data) => crud.rename(data));
@@ -121,7 +122,7 @@ export function createChatWorkspace(
   bus.on("chat.anchor.rename", (data) => crud.anchorRename(data));
   bus.on("chat.anchored", (data) => crud.anchored(data));
 
-  const attachments = registerAttachmentHandlers(bus, db, log, () => workspacePath);
+  const attachments = registerAttachmentHandlers(bus, db, log, () => currentWorkspacePath);
 
   bus.on("chat.ask", (data) => {
     conversation.ask(data).catch((err) => {
@@ -157,6 +158,7 @@ export function createChatWorkspace(
     },
 
     setWorkspacePath(path) {
+      currentWorkspacePath = path;
       conversation.wsDir = path;
       crud.workspacePath = path;
     },
