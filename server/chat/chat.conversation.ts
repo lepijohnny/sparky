@@ -85,6 +85,21 @@ export class ChatConversation {
     return { ok: true };
   }
 
+  async stopAll(): Promise<void> {
+    if (this.activeChats.size === 0) return;
+    this.log.info("Stopping all active chats", { count: this.activeChats.size });
+    for (const [chatId, controller] of this.activeChats) {
+      this.approval.denyAll(chatId);
+      controller.abort();
+    }
+    const maxWait = 3000;
+    const start = Date.now();
+    while (this.activeChats.size > 0 && Date.now() - start < maxWait) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    this.log.info("All chats stopped", { remaining: this.activeChats.size });
+  }
+
   /**
    * Stores the user message and streams the full agent response.
    * Awaits the entire stream — callers decide whether to await or fire-and-forget.

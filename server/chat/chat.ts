@@ -19,6 +19,7 @@ export interface ChatWorkspace {
   removeLabel(labelId: string): void;
   setWorkspacePath(path: string): void;
   switchDb(dbPath: string, log: Logger): void;
+  stopAll(): Promise<void>;
   dispose(): void;
 }
 
@@ -161,6 +162,10 @@ export function createChatWorkspace(
       currentWorkspacePath = path;
       conversation.wsDir = path;
       crud.workspacePath = path;
+    },
+
+    async stopAll() {
+      await conversation.stopAll();
     },
 
     switchDb(newDbPath, newLog) {

@@ -216,6 +216,7 @@ export function createSparky(): Sparky {
       : storage.root("workspace.db");
     currentWorkspacePath = storage.root(newWsDir);
 
+    await chatManager.stopAll();
     chatManager.switchDb(newDbPath, logger.createLogger("chat"));
     chatManager.setWorkspacePath(currentWorkspacePath);
     knowledgeManager.switchDb(newDbPath.replace(/\.db$/, ".kt.db"));
