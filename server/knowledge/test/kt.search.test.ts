@@ -254,8 +254,8 @@ describe("kt.search — hybrid mode", () => {
     });
     await search(db, "hello", "/cache", log, { mode: "hybrid", minScore: 0 });
     expect(db.searchFts).toHaveBeenCalledTimes(2);
-    expect(db.searchFts).toHaveBeenCalledWith("hello", expect.any(Number));
-    expect(db.searchFts).toHaveBeenCalledWith("keyword1 keyword2", expect.any(Number));
+    expect(db.searchFts).toHaveBeenCalledWith("hello", expect.any(Number), undefined);
+    expect(db.searchFts).toHaveBeenCalledWith("keyword1 keyword2", expect.any(Number), undefined);
   });
 
   test("given hybrid results, when scored below threshold, then filtered out", async () => {

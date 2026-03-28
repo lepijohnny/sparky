@@ -1,4 +1,4 @@
-import { BookOpen, Loader2, Paperclip, Send, Square, X } from "lucide-react";
+import { BookOpen, Check, Database, Loader2, Paperclip, Send, Square, X } from "lucide-react";
 import { withAlpha } from "../../lib/color";
 import { memo, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useStore } from "../../store";
@@ -52,9 +52,74 @@ interface ChatInputProps {
   supportsAttachments?: string[];
   contextTokens?: number;
   contextWindow?: number;
-  onSend: (text: string, attachments: PendingAttachment[]) => void;
+  onSend: (text: string, attachments: PendingAttachment[], knowledgeFilters?: string[]) => void;
   onStop: () => void;
   onModelChange: (provider: string, model: string) => void;
+}
+
+const MAX_SOURCE_ITEMS = 15;
+
+function SourcePickerDropdown({ sources, selectedSources, onToggle, onClear, anchorEl, workspaceMode }: {
+  sources: import("../../types/source").Source[];
+  selectedSources: Set<string>;
+  onToggle: (id: string) => void;
+  onClear: () => void;
+  anchorEl: HTMLElement;
+  workspaceMode: "keyword" | "hybrid";
+}) {
+  const [filter, setFilter] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const ready = sources.filter((s) => s.status === "ready");
+  const filtered = filter
+    ? ready.filter((s) => s.name.toLowerCase().includes(filter.toLowerCase()))
+    : ready;
+  const visible = filtered.slice(0, MAX_SOURCE_ITEMS);
+
+  const rect = anchorEl.getBoundingClientRect();
+
+  return (
+    <div
+      className={styles.sourcePickerDropdown}
+      style={{ bottom: window.innerHeight - rect.top + 6, left: rect.left }}
+    >
+      <div className={styles.sourcePickerSearch}>
+        <input
+          ref={inputRef}
+          className={styles.sourcePickerSearchInput}
+          placeholder="Search sources…"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      </div>
+      {visible.map((source) => {
+        const disabled = workspaceMode === "hybrid" && source.mode === "keyword";
+        const selected = selectedSources.has(source.id);
+        return (
+          <div
+            key={source.id}
+            className={`${styles.sourcePickerItem} ${selected ? styles.sourcePickerItemActive : ""} ${disabled ? styles.sourcePickerItemDisabled : ""}`}
+            onClick={() => !disabled && onToggle(source.id)}
+          >
+            <span className={styles.sourcePickerCheck}>{selected && <Check size={12} strokeWidth={2} />}</span>
+            <span className={styles.sourcePickerName}>{source.name}</span>
+            <span className={styles.sourcePickerMode}>{source.mode === "hybrid" ? "Hybrid" : "BM25"}</span>
+          </div>
+        );
+      })}
+      {filtered.length > MAX_SOURCE_ITEMS && (
+        <div className={styles.sourcePickerMore}>{filtered.length - MAX_SOURCE_ITEMS} more…</div>
+      )}
+      {visible.length === 0 && (
+        <div className={styles.sourcePickerMore}>No sources found</div>
+      )}
+      {selectedSources.size > 0 && (
+        <button className={styles.sourcePickerClear} onClick={onClear}>Clear filter</button>
+      )}
+    </div>
+  );
 }
 
 export default memo(function ChatInput({
@@ -146,7 +211,8 @@ export default memo(function ChatInput({
     setSending(true);
     if (sendingTimer.current) clearTimeout(sendingTimer.current);
     sendingTimer.current = setTimeout(() => setSending(false), 5000);
-    onSend(text.trim(), currentAttachments);
+    const filters = selectedSources.size > 0 ? [...selectedSources] : undefined;
+    onSend(text.trim(), currentAttachments, filters);
     handle.focus();
   }, [sending, chat.id, onSend, attachments]);
 
@@ -340,6 +406,11 @@ export default memo(function ChatInput({
   }, [addFiles]);
 
   const [dragOver, setDragOver] = useState(false);
+  const [showSourcePicker, setShowSourcePicker] = useState(false);
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());
+  const sources = useStore((s) => s.sources);
+  const workspaceMode = useStore((s) => s.workspace?.knowledgeSearch ?? "keyword");
+  const sourcePickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setDropHandlers(
@@ -353,6 +424,17 @@ export default memo(function ChatInput({
     );
     initDragDrop();
   }, [addToast, saveDraft]);
+
+  useEffect(() => {
+    if (!showSourcePicker) return;
+    const handler = (e: MouseEvent) => {
+      if (sourcePickerRef.current && !sourcePickerRef.current.contains(e.target as Node)) {
+        setShowSourcePicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showSourcePicker]);
 
   const removeAttachment = useCallback((id: string) => {
     setAttachments((prev) => {
@@ -489,6 +571,33 @@ export default memo(function ChatInput({
                 <span className={styles.toggleThumb} />
               </span>
             </button>}
+            {(!chat.role || chat.role === "sparky") && useKnowledge && sources.length > 0 && (
+              <div className={styles.sourcePickerWrap} ref={sourcePickerRef}>
+                <button
+                  className={`${styles.sourcePickerBtn} ${selectedSources.size > 0 ? styles.sourcePickerBtnActive : ""}`}
+                  onClick={() => setShowSourcePicker((v) => !v)}
+                  title={selectedSources.size > 0 ? `${selectedSources.size} source(s) selected` : "Filter knowledge sources"}
+                >
+                  <Database size={12} strokeWidth={1.5} />
+                  {selectedSources.size > 0 && <span className={styles.sourcePickerCount}>{selectedSources.size}</span>}
+                </button>
+                {showSourcePicker && sourcePickerRef.current && (
+                  <SourcePickerDropdown
+                    anchorEl={sourcePickerRef.current}
+                    workspaceMode={workspaceMode}
+                    sources={sources}
+                    selectedSources={selectedSources}
+                    onToggle={(id) => setSelectedSources((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(id)) next.delete(id);
+                      else next.add(id);
+                      return next;
+                    })}
+                    onClear={() => setSelectedSources(new Set())}
+                  />
+                )}
+              </div>
+            )}
             {(!chat.role || chat.role === "sparky") && <ThinkingSelector
               value={chat.thinking ?? 0}
               onChange={handleThinkingChange}

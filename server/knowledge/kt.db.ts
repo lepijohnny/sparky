@@ -100,14 +100,14 @@ export interface KtDatabase {
   insertChunks(sourceFileId: string, chunks: { id: string; content: string; startOffset: number; endOffset: number; tokenEstimate: number; section?: string }[]): void;
   insertVectors(rows: { id: string; sourceId: string; vector: Float32Array }[]): void;
   deleteVectorsBySource(sourceId: string): void;
-  searchVectors(queryVector: Float32Array, limit: number): { chunkId: string; sourceId: string; distance: number }[];
+  searchVectors(queryVector: Float32Array, limit: number, sourceIds?: string[]): { chunkId: string; sourceId: string; distance: number }[];
   updateSourceFileChunkCount(sourceFileId: string, count: number): void;
   deleteChunksBySource(sourceId: string): void;
   deleteSourceFiles(sourceId: string): void;
   transaction<T>(fn: () => T): T;
   updateSourceFileStatus(id: string, status: SourceFile["status"], error?: string): void;
   deleteSource(id: string): boolean;
-  searchFts(query: string, limit: number): { chunkId: string; rank: number }[];
+  searchFts(query: string, limit: number, sourceIds?: string[]): { chunkId: string; rank: number }[];
   getChunksBySourceIds(sourceIds: string[]): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
   getAdjacentChunks(chunkId: string): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
   getChunksByIds(ids: string[]): { id: string; sourceId: string; sourceFileName: string; content: string; section: string | null }[];
@@ -229,7 +229,16 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
       }
     },
 
-    searchVectors(queryVector, limit) {
+    searchVectors(queryVector, limit, sourceIds) {
+      if (sourceIds && sourceIds.length > 0) {
+        const placeholders = sourceIds.map(() => "?").join(",");
+        const rows = db.prepare(`
+          SELECT id, source_id, distance FROM vec_chunks
+          WHERE embedding MATCH ? AND source_id IN (${placeholders})
+          ORDER BY distance LIMIT ?
+        `).all(Buffer.from(queryVector.buffer), ...sourceIds, limit) as { id: string; source_id: string; distance: number }[];
+        return rows.map((r) => ({ chunkId: r.id, sourceId: r.source_id, distance: r.distance }));
+      }
       const rows = db.prepare(`
         SELECT id, source_id, distance FROM vec_chunks
         WHERE embedding MATCH :query ORDER BY distance LIMIT :limit
@@ -266,9 +275,20 @@ export function createKtDatabase(dbPath: string, log: Logger): KtDatabase {
       return true;
     },
 
-    searchFts(query, limit) {
+    searchFts(query, limit, sourceIds) {
       const sanitized = sanitizeForFts(query);
       if (!sanitized) return [];
+      if (sourceIds && sourceIds.length > 0) {
+        const placeholders = sourceIds.map(() => "?").join(",");
+        const rows = db.prepare(`
+          SELECT c.id, f.rank FROM chunks_fts f
+          JOIN chunks c ON c.rowid = f.rowid
+          JOIN source_files sf ON sf.id = c.source_file_id
+          WHERE chunks_fts MATCH ? AND sf.source_id IN (${placeholders})
+          ORDER BY f.rank LIMIT ?
+        `).all(sanitized, ...sourceIds, limit) as { id: string; rank: number }[];
+        return rows.map((r) => ({ chunkId: r.id, rank: r.rank }));
+      }
       const rows = db.prepare(`
         SELECT c.id, f.rank FROM chunks_fts f
         JOIN chunks c ON c.rowid = f.rowid

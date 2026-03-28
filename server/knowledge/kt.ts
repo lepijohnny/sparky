@@ -16,7 +16,7 @@ import { CONVERTER_DEFAULTS } from "../core/config";
 
 export interface KtManager {
   init(): Promise<void>;
-  search(query: string): Promise<SearchResult[]>;
+  search(query: string, sourceIds?: string[]): Promise<SearchResult[]>;
   switchDb(dbPath: string): void;
 }
 
@@ -214,7 +214,7 @@ export function createKtManager(
       log.info("Extractors loaded", { extensions: registry.supportedExtensions() });
     },
 
-    async search(query) {
+    async search(query, sourceIds) {
       const sourceCount = db.countSources();
       if (sourceCount === 0) {
         log.debug("Knowledge search skipped, no sources");
@@ -222,8 +222,8 @@ export function createKtManager(
       }
       const cacheDir = join(storageRoot, "models");
       const mode = getMode();
-      log.debug("Knowledge search", { query, mode, sources: sourceCount });
-      const results = await search(db, query, cacheDir, log, { mode });
+      log.debug("Knowledge search", { query, mode, sources: sourceCount, sourceIds });
+      const results = await search(db, query, cacheDir, log, { mode, sourceIds });
       log.debug("Knowledge search done", { results: results.length });
       return results;
     },

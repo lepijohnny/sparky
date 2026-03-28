@@ -23,7 +23,7 @@ import { generateTitle } from "./agent.rename";
 export type AgentFactory = (chatId: string) => Promise<{ agent: Agent; contextWindow?: number; webSearch?: string } | null> | { agent: Agent; contextWindow?: number; webSearch?: string } | null;
 
 export interface KnowledgeSearch {
-  search(query: string): Promise<{ sourceFileName: string; content: string; section?: string; score: number }[]>;
+  search(query: string, sourceIds?: string[]): Promise<{ sourceFileName: string; content: string; section?: string; score: number }[]>;
 }
 
 export type SystemPromptPreferencesFn = () => string;
@@ -104,7 +104,7 @@ export class ChatConversation {
    * Stores the user message and streams the full agent response.
    * Awaits the entire stream — callers decide whether to await or fire-and-forget.
    */
-  async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[]; mode?: PermissionMode }): Promise<{ ok: boolean }> {
+  async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[]; mode?: PermissionMode; knowledgeFilters?: string[] }): Promise<{ ok: boolean }> {
 
     if (this.activeChats.has(data.chatId)) {
       throw new Error("Chat is busy — wait for the current response to finish");
@@ -196,7 +196,7 @@ export class ChatConversation {
 
       const shouldSearch = role.meta.knowledge && chat.knowledge !== false;
       const knowledgeResults = shouldSearch
-        ? await this.searchKnowledge(data.content, data.chatId, chat.name)
+        ? await this.searchKnowledge(data.content, data.chatId, chat.name, data.knowledgeFilters)
         : [];
       const anchoredEntries = role.meta.anchors ? this.db.getAnchored(data.chatId) : [];
       const existingSummary = role.meta.summary ? this.db.getSummary(data.chatId) : null;
@@ -417,6 +417,7 @@ export class ChatConversation {
     query: string,
     chatId: string,
     chatName?: string,
+    sourceIds?: string[],
   ): Promise<{ sourceFileName: string; content: string; section?: string; score: number }[]> {
     if (!this.knowledge) return [];
     try {
@@ -433,7 +434,7 @@ export class ChatConversation {
       const searchQuery = parts.join("\n");
       this.log.debug("Knowledge search query", { searchQuery });
 
-      const results = await this.knowledge.search(searchQuery);
+      const results = await this.knowledge.search(searchQuery, sourceIds);
       if (results.length > 0) {
         this.log.debug("Knowledge search results", {
           query: searchQuery,
