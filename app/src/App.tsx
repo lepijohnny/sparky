@@ -233,6 +233,14 @@ export default function App() {
     });
   }, [addToast, router, selectConnection]));
 
+  useWsSubscriber<{ source: Source }>(conn, "kt.source.updated", useCallback((data) => {
+    if (data.source.status === "ready") {
+      addToast({ id: `kt-done-${data.source.id}`, kind: "success", title: `"${data.source.name}" imported` });
+    } else if (data.source.status === "error") {
+      addToast({ id: `kt-fail-${data.source.id}`, kind: "error", title: `"${data.source.name}" import failed`, message: data.source.error });
+    }
+  }, [addToast]));
+
   const handleAddFile = useCallback(async () => {
     if (!conn) return;
     try {
