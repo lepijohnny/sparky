@@ -33,6 +33,7 @@ export interface SearchOptions {
   minScore?: number;
   mode?: "keyword" | "hybrid";
   rankingFn?: RankingFn;
+  sourceIds?: string[];
 }
 
 export async function search(
@@ -48,17 +49,19 @@ export async function search(
   const rank = opts.rankingFn ?? rrf;
   const candidates = limit * CANDIDATE_MULTIPLIER;
 
+  const sourceIds = opts.sourceIds;
+
   if (mode === "keyword") {
-    const ftsResults = db.searchFts(query, candidates);
+    const ftsResults = db.searchFts(query, candidates, sourceIds);
     const scores = rank([ftsResults]);
     return buildResults(db, scores, limit, minScore);
   }
 
   try {
-    return await hybridSearch(db, query, cacheDir, log, rank, candidates, limit, minScore);
+    return await hybridSearch(db, query, cacheDir, log, rank, candidates, limit, minScore, sourceIds);
   } catch (err) {
     log.warn("Hybrid search failed, falling back to keyword", { error: String(err) });
-    const ftsResults = db.searchFts(query, candidates);
+    const ftsResults = db.searchFts(query, candidates, sourceIds);
     const scores = rank([ftsResults]);
     return buildResults(db, scores, limit, minScore);
   } finally {
@@ -75,6 +78,7 @@ async function hybridSearch(
   candidates: number,
   limit: number,
   minScore: number,
+  sourceIds?: string[],
 ): Promise<SearchResult[]> {
   const rewritten = await queue(Rewrite(query), cacheDir, log);
   log.debug("Query rewrite", { original: query, rewritten });
@@ -88,8 +92,8 @@ async function hybridSearch(
 
   log.debug("Query analysis", { rewritten, keywords: extracted, expanded, candidates });
 
-  const ftsOriginal = db.searchFts(rewritten, candidates);
-  const ftsKeywords = keywordsJoined.length > 0 ? db.searchFts(keywordsJoined, candidates) : [];
+  const ftsOriginal = db.searchFts(rewritten, candidates, sourceIds);
+  const ftsKeywords = keywordsJoined.length > 0 ? db.searchFts(keywordsJoined, candidates, sourceIds) : [];
 
   log.debug("BM25 results", {
     original: ftsOriginal.length,
@@ -102,7 +106,7 @@ async function hybridSearch(
 
   const vecLists: { chunkId: string }[][] = [];
   for (let i = 0; i < vectors.length; i++) {
-    const results = db.searchVectors(vectors[i], candidates)
+    const results = db.searchVectors(vectors[i], candidates, sourceIds)
       .filter((r) => r.distance <= MAX_VECTOR_DISTANCE)
       .map((r) => ({ chunkId: r.chunkId }));
     vecLists.push(results);
