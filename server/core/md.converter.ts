@@ -1,3 +1,4 @@
+import { extname } from "node:path";
 import { Markit } from "markit-ai";
 import type { ExtractionResult, FileMdConverter } from "../knowledge/kt.types";
 
@@ -35,18 +36,110 @@ export function supportedAttachmentExtensions(): string[] {
   return [...MARKIT_EXTENSIONS];
 }
 
-/**
- * Parse markdown heading sections from text.
- * Used by the knowledge extractor to enable section-aware chunking.
- */
-function parseSections(text: string): { offset: number; label?: string }[] {
-  const sections: { offset: number; label?: string }[] = [];
-  const re = /^#{1,3}\s+(.+)$/gm;
+const MAX_LINES_PER_SEGMENT = 500;
+const MAX_CHARS_PER_SEGMENT = 200_000;
+
+interface Heading {
+  offset: number;
+  label?: string;
+}
+
+export function recognizeMarkdownSegments(text: string): Heading[] {
+  const sections: Heading[] = [];
+  const re = /^(#{1,3})\s+(.+)$/gm;
   let match: RegExpExecArray | null;
   while ((match = re.exec(text)) !== null) {
-    sections.push({ offset: match.index, label: match[1].trim() });
+    sections.push({ offset: match.index, label: match[2].trim() });
   }
   return sections;
+}
+
+function headingLevelAt(text: string, offset: number): number {
+  let i = offset;
+  let level = 0;
+  while (i < text.length && text.charCodeAt(i) === 0x23) {
+    level++;
+    i++;
+  }
+  return level;
+}
+
+export async function* splitIntoSegments(text: string, sections: Heading[]): AsyncGenerator<string> {
+  if (sections.length < 2) {
+    yield text;
+    return;
+  }
+
+  const topLevel = sections.filter((s) => headingLevelAt(text, s.offset) <= 2);
+  const splits = topLevel.length >= 2 ? topLevel : sections;
+
+  if (splits[0].offset > 0) {
+    const preamble = text.slice(0, splits[0].offset).trim();
+    if (preamble.length > 0) yield preamble;
+  }
+
+  for (let i = 0; i < splits.length; i++) {
+    const start = splits[i].offset;
+    const end = i + 1 < splits.length ? splits[i + 1].offset : text.length;
+    const segment = text.slice(start, end).trim();
+    if (segment.length > 0) yield segment;
+  }
+}
+
+function isTableSeparator(line: string): boolean {
+  const trimmed = line.trim();
+  const core = trimmed.replace(/^\|/, "").replace(/\|$/, "");
+  const cols = core.split("|").map((c) => c.trim()).filter((c) => c.length > 0);
+  if (cols.length === 0) return false;
+  return cols.every((c) => /^:?-{3,}:?$/.test(c));
+}
+
+export function appendTableHeader(lines: string[], chunk: string[]): string {
+  if (lines[0]?.startsWith("|") && isTableSeparator(lines[1] ?? "")) {
+    return `${lines[0]}\n${lines[1]}\n${chunk.join("\n")}`;
+  }
+  return chunk.join("\n");
+}
+
+function splitByChars(text: string): string[] {
+  if (text.length <= MAX_CHARS_PER_SEGMENT) return [text];
+  const parts: string[] = [];
+  let pos = 0;
+  while (pos < text.length) {
+    const end = Math.min(pos + MAX_CHARS_PER_SEGMENT, text.length);
+    parts.push(text.slice(pos, end).trim());
+    pos = end;
+  }
+  return parts.filter((p) => p.length > 0);
+}
+
+export function splitByLines(text: string, extension = ".md"): string[] {
+  const lines = text.split("\n");
+  const isCsvLike = extension === ".csv" || extension === ".tsv";
+
+  if (!isCsvLike && lines.length <= MAX_LINES_PER_SEGMENT && text.length <= MAX_CHARS_PER_SEGMENT) {
+    return [text];
+  }
+
+  if (lines.length <= 1) {
+    return splitByChars(text);
+  }
+
+  const dataStart = (lines[0]?.startsWith("|") && isTableSeparator(lines[1] ?? "")) ? 2 : 0;
+  const dataLines = lines.slice(dataStart);
+  const groups: string[] = [];
+
+  for (let i = 0; i < dataLines.length; i += MAX_LINES_PER_SEGMENT) {
+    const chunk = dataLines.slice(i, i + MAX_LINES_PER_SEGMENT);
+    const merged = appendTableHeader(lines, chunk).trim();
+    if (merged.length <= MAX_CHARS_PER_SEGMENT) {
+      groups.push(merged);
+    } else {
+      groups.push(...splitByChars(merged));
+    }
+  }
+
+  return groups.length > 0 ? groups : [text];
 }
 
 /**
@@ -68,33 +161,16 @@ export function getFileToMarkdownConverter(options?: { maxOutputChars?: number }
       }
 
       const text = result.markdown;
-      const sections = parseSections(text);
-      log(`Extraction started: ${target}, ${text.length} chars, ${sections.length} sections`);
+      const extension = extname(target).toLowerCase();
+      const headings = recognizeMarkdownSegments(text);
+      log(`Extraction started: ${target}, ${text.length} chars, ${headings.length} sections`);
 
-      if (sections.length < 2 || text.length < 50_000) {
-        yield { text, sections: sections.length > 0 ? sections : undefined };
-        log(`Extraction finished: 1 segment`);
-        return;
-      }
-
-      const topLevel = sections.filter((s) => s.label && /^#{1,2}\s/.test(text.slice(s.offset, s.offset + 4)));
-      const splits = topLevel.length >= 2 ? topLevel : sections;
       let yielded = 0;
 
-      for (let i = 0; i < splits.length; i++) {
-        const start = splits[i].offset;
-        const end = i + 1 < splits.length ? splits[i + 1].offset : text.length;
-        const segment = text.slice(start, end);
-        if (segment.trim().length === 0) continue;
-        const segSections = parseSections(segment);
-        yield { text: segment, sections: segSections.length > 0 ? segSections : undefined };
-        yielded++;
-      }
-
-      if (splits[0].offset > 0) {
-        const preamble = text.slice(0, splits[0].offset);
-        if (preamble.trim().length > 0) {
-          yield { text: preamble };
+      for await (const seg of splitIntoSegments(text, headings)) {
+        for (const sub of splitByLines(seg, extension)) {
+          const subSections = recognizeMarkdownSegments(sub).map((s) => ({ offset: s.offset, label: s.label }));
+          yield { text: sub, sections: subSections.length > 0 ? subSections : undefined };
           yielded++;
         }
       }

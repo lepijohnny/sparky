@@ -4,9 +4,9 @@
  */
 import { estimateTokens } from "../tokens";
 
-const CHUNK_SIZE = 2000;     // ~500 tokens
-const OVERLAP = 200;         // ~50 tokens (10%)
-const MIN_CHUNK = 200;       // ~50 tokens — merge tiny trailing chunks
+const CHUNK_SIZE = 2000;
+const OVERLAP = 200;
+const MIN_CHUNK = 200;
 
 export interface ChunkResult {
   content: string;
@@ -21,24 +21,50 @@ interface Section {
   label?: string;
 }
 
-/**
- * Chunk text into overlapping pieces, respecting section boundaries.
- * If sections are provided, each section is chunked independently.
- */
+interface SectionSlice {
+  offset: number;
+  end: number;
+  label?: string;
+}
+
 export function chunkText(
   text: string,
   sections?: Section[],
 ): ChunkResult[] {
-  if (!text || text.trim().length === 0) return [];
+  return [...chunkTextStream(text, sections)];
+}
+
+export function* chunkTextStream(
+  text: string,
+  sections?: Section[],
+): Generator<ChunkResult> {
+  if (!text || text.trim().length === 0) return;
 
   if (!sections || sections.length === 0) {
-    return chunkSegment(text, 0);
+    yield* chunkSegmentStream(text, 0);
+    return;
   }
 
-  // Sort sections by offset
   const sorted = [...sections].sort((a, b) => a.offset - b.offset);
+  const merged = mergeSections(text, sorted);
 
-  const merged: { offset: number; end: number; label?: string }[] = [];
+  if (sorted[0].offset > 0) {
+    const before = text.slice(0, sorted[0].offset);
+    if (before.trim().length > 0) {
+      yield* chunkSegmentStream(before, 0);
+    }
+  }
+
+  for (const seg of merged) {
+    const segment = text.slice(seg.offset, seg.end);
+    if (segment.trim().length === 0) continue;
+    yield* chunkSegmentStream(segment, seg.offset, seg.label);
+  }
+}
+
+function mergeSections(text: string, sorted: Section[]): SectionSlice[] {
+  const merged: SectionSlice[] = [];
+
   for (let i = 0; i < sorted.length; i++) {
     const start = sorted[i].offset;
     const end = i + 1 < sorted.length ? sorted[i + 1].offset : text.length;
@@ -51,80 +77,50 @@ export function chunkText(
     }
   }
 
-  const results: ChunkResult[] = [];
-
-  for (const seg of merged) {
-    const segment = text.slice(seg.offset, seg.end);
-    if (segment.trim().length === 0) continue;
-
-    const chunks = chunkSegment(segment, seg.offset, seg.label);
-    results.push(...chunks);
-  }
-
-  // Handle text before the first section
-  if (sorted[0].offset > 0) {
-    const before = text.slice(0, sorted[0].offset);
-    if (before.trim().length > 0) {
-      const chunks = chunkSegment(before, 0);
-      results.unshift(...chunks);
-    }
-  }
-
-  return results;
+  return merged;
 }
 
-/**
- * Chunk a single segment (no section boundaries to respect).
- * Splits at paragraph > sentence > word boundaries.
- */
-function chunkSegment(text: string, baseOffset: number, section?: string): ChunkResult[] {
-  const chunks: ChunkResult[] = [];
+function* chunkSegmentStream(text: string, baseOffset: number, section?: string): Generator<ChunkResult> {
   let pos = 0;
+  let prev: ChunkResult | null = null;
 
   while (pos < text.length) {
     const remaining = text.length - pos;
+
     if (remaining <= CHUNK_SIZE) {
-      // Last piece — check if it should merge
-      if (chunks.length > 0 && remaining < MIN_CHUNK) {
-        // Merge into previous
-        const prev = chunks[chunks.length - 1];
-        prev.content = text.slice(prev.startOffset - baseOffset, pos + remaining);
+      if (prev && remaining < MIN_CHUNK) {
+        const mergedContent = text.slice(prev.startOffset - baseOffset, pos + remaining);
+        prev.content = mergedContent;
         prev.endOffset = baseOffset + pos + remaining;
-        prev.tokenEstimate = estimateTokens(prev.content);
+        prev.tokenEstimate = estimateTokens(mergedContent);
       } else {
-        chunks.push(makeChunk(text, pos, pos + remaining, baseOffset, section));
+        const chunk = makeChunk(text, pos, pos + remaining, baseOffset, section);
+        if (prev) yield prev;
+        prev = chunk;
       }
       break;
     }
 
-    // Find best split point within CHUNK_SIZE
     const end = findSplitPoint(text, pos, pos + CHUNK_SIZE);
-    chunks.push(makeChunk(text, pos, end, baseOffset, section));
+    const chunk = makeChunk(text, pos, end, baseOffset, section);
 
-    // Advance with overlap
+    if (prev) yield prev;
+    prev = chunk;
+
     pos = Math.max(pos + 1, end - OVERLAP);
   }
 
-  return chunks;
+  if (prev) yield prev;
 }
 
-/**
- * Find the best split point near `target`, preferring:
- * 1. Paragraph break (\n\n)
- * 2. Sentence break (. or ? or ! followed by space/newline)
- * 3. Word break (space)
- * 4. Hard cut at target
- */
 function findSplitPoint(text: string, start: number, target: number): number {
   const window = text.slice(start, target);
 
-  // 1. Last paragraph break
   const paraIdx = window.lastIndexOf("\n\n");
   if (paraIdx > window.length * 0.3) {
     return start + paraIdx + 2;
   }
 
-  // 2. Last sentence break
   const sentenceRe = /[.!?]\s/g;
   let lastSentence = -1;
   let match: RegExpExecArray | null;
@@ -137,13 +133,11 @@ function findSplitPoint(text: string, start: number, target: number): number {
     return start + lastSentence + 2;
   }
 
-  // 3. Last word break
   const spaceIdx = window.lastIndexOf(" ");
   if (spaceIdx > window.length * 0.3) {
     return start + spaceIdx + 1;
   }
 
-  // 4. Hard cut
   return target;
 }
 

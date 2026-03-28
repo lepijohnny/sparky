@@ -10,7 +10,7 @@ import type { EventBus } from "../core/bus";
 import type { KtDatabase } from "./kt.db";
 import type { ExtractorRegistry } from "./kt.extractor";
 import type { Source, SourceFile } from "./kt.types";
-import { chunkText } from "./kt.chunker";
+import { chunkTextStream, type ChunkResult } from "./kt.chunker";
 import { queue, Embed, terminateWorker } from "./worker/kt.worker.client";
 
 interface QueueItem {
@@ -166,16 +166,18 @@ export class IndexPipeline {
 
       let totalChunks = 0;
 
-      for await (const segment of extractor.extract(file.path, logFn)) {
-        if (this.isCancelled(file.sourceId)) {
-          this.db.updateSourceFileStatus(file.id, "pending");
-          return;
-        }
+      const CHUNK_BATCH_SIZE = 128;
+      const PROGRESS_UPDATE_EVERY = 8;
 
-        const chunks = chunkText(segment.text, segment.sections);
-        if (chunks.length === 0) continue;
+      const flushProgress = (force = false) => {
+        if (!force && totalChunks % PROGRESS_UPDATE_EVERY !== 0) return;
+        this.db.updateSourceFileChunkCount(file.id, totalChunks);
+        this.db.updateSourceCounts(file.sourceId);
+        this.broadcastSource(file.sourceId);
+      };
 
-        const chunkRows = chunks.map((c) => {
+      const toRows = (chunkBatch: ChunkResult[]) => {
+        return chunkBatch.map((c) => {
           const header = c.section
             ? `Source: ${file.name}\nSection: ${c.section}\n\n`
             : `Source: ${file.name}\n\n`;
@@ -188,29 +190,62 @@ export class IndexPipeline {
             section: c.section,
           };
         });
+      };
+
+      const flushBatch = async (chunkBatch: ChunkResult[]) => {
+        if (chunkBatch.length === 0) return;
+        const chunkRows = toRows(chunkBatch);
 
         this.db.transaction(() => {
           this.db.insertChunks(file.id, chunkRows);
         });
 
-        if (embed) {
+        if (!embed) return;
+        if (this.isCancelled(file.sourceId)) return;
+
+        try {
+          const texts = chunkRows.map((c) => c.content);
+          const vectors = await queue(Embed(texts), this.embedCacheDir, this.log);
           if (this.isCancelled(file.sourceId)) return;
-          try {
-            const texts = chunkRows.map((c) => c.content);
-            const vectors = await queue(Embed(texts), this.embedCacheDir, this.log);
-            if (this.isCancelled(file.sourceId)) return;
-            this.db.insertVectors(
-              chunkRows.map((c, i) => ({ id: c.id, sourceId: file.sourceId, vector: vectors[i] })),
-            );
-          } catch (err) {
-            this.log.warn("Pipeline: embedding failed for segment", { fileId: file.id, error: String(err) });
+          this.db.insertVectors(
+            chunkRows.map((c, i) => ({ id: c.id, sourceId: file.sourceId, vector: vectors[i] })),
+          );
+        } catch (err) {
+          this.log.warn("Pipeline: embedding failed for chunk batch", { fileId: file.id, batch: chunkRows.length, error: String(err) });
+        }
+      };
+
+      for await (const segment of extractor.extract(file.path, logFn)) {
+        if (this.isCancelled(file.sourceId)) {
+          this.db.updateSourceFileStatus(file.id, "pending");
+          return;
+        }
+
+        const batch: ChunkResult[] = [];
+        for (const chunk of chunkTextStream(segment.text, segment.sections)) {
+          batch.push(chunk);
+          totalChunks++;
+          flushProgress();
+          if (batch.length >= CHUNK_BATCH_SIZE) {
+            await flushBatch(batch);
+            batch.length = 0;
+            if (this.isCancelled(file.sourceId)) {
+              this.db.updateSourceFileStatus(file.id, "pending");
+              return;
+            }
           }
         }
 
-        totalChunks += chunkRows.length;
-        this.db.updateSourceFileChunkCount(file.id, totalChunks);
-        this.db.updateSourceCounts(file.sourceId);
-        this.broadcastSource(file.sourceId);
+        if (batch.length > 0) {
+          await flushBatch(batch);
+          batch.length = 0;
+          if (this.isCancelled(file.sourceId)) {
+            this.db.updateSourceFileStatus(file.id, "pending");
+            return;
+          }
+        }
+
+        flushProgress(true);
       }
 
       this.db.updateSourceFileStatus(file.id, "ready");

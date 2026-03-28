@@ -76,17 +76,16 @@ describe("getFileToMarkdownConverter", () => {
     const content = "# Title\n\nSome text\n\n## Section A\n\nContent A\n\n## Section B\n\nContent B";
     const path = tmpFile("doc.md", content);
     const converter = getFileToMarkdownConverter();
-    let sections: { offset: number; label?: string }[] | undefined;
+    const allSections: { offset: number; label?: string }[] = [];
 
     for await (const segment of converter.extract(path, noop)) {
-      sections = segment.sections;
+      if (segment.sections) allSections.push(...segment.sections);
     }
 
-    expect(sections).toBeDefined();
-    expect(sections!.length).toBe(3);
-    expect(sections![0].label).toBe("Title");
-    expect(sections![1].label).toBe("Section A");
-    expect(sections![2].label).toBe("Section B");
+    expect(allSections.length).toBe(3);
+    expect(allSections.map((s) => s.label)).toContain("Title");
+    expect(allSections.map((s) => s.label)).toContain("Section A");
+    expect(allSections.map((s) => s.label)).toContain("Section B");
     cleanup();
   });
 
