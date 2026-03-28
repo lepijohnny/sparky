@@ -208,7 +208,7 @@ export function createSparky(): Sparky {
   bus.subscribe("settings.appearance.theme.changed", (data) => broadcast("settings.appearance.theme.changed", data));
   bus.subscribe("settings.appearance.theme.created", (data) => broadcast("settings.appearance.theme.created", data));
 
-  bus.subscribe("settings.workspace.changed", (data: { workspace: { id: string; path: string } }) => {
+  bus.subscribe("settings.workspace.changed", async (data: { workspace: { id: string; path: string } }) => {
     const newWsDir = data.workspace.path;
     if (newWsDir) storage.mkdir(newWsDir);
     const newDbPath = newWsDir
