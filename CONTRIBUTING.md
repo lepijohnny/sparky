@@ -1,6 +1,6 @@
 # Contributing to Sparky
 
-> **Note:** Sparky is not yet accepting external contributions. This document is here for reference as the project approaches its first public release.
+Thank you for your interest in contributing to Sparky! We welcome bug fixes, features, documentation improvements, and ideas.
 
 ## Prerequisites
 

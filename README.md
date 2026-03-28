@@ -10,10 +10,6 @@
 </p>
 
 <p align="center">
-  🚧 <strong>Under active development</strong>. Expect breaking changes.
-</p>
-
-<p align="center">
   A private, local-first desktop AI assistant with multi-provider LLM support, built-in knowledge base, and service integrations.
 </p>
 
@@ -219,7 +215,7 @@ All secrets (API keys, tokens) are stored in the **OS native keychain** (macOS K
 
 ## Contributing
 
-Sparky is not yet accepting external contributions. Once the project stabilizes, contribution guidelines will be published in [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 

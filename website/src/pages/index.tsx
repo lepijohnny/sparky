@@ -41,10 +41,6 @@ export default function Home() {
   const b = useBaseUrl;
   return (
     <Layout title="Private AI Assistant" description="A private, local-first desktop AI assistant with multi-provider LLM support, built-in knowledge base, and service integrations.">
-      <div className={styles.banner}>
-        🚧 <strong>Under active development</strong>. Expect breaking changes.
-      </div>
-
       <section className={styles.hero}>
         <img
           src={b('/img/sparky-logo.png')}
