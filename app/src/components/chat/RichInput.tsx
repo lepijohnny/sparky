@@ -538,10 +538,51 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     }
   }, [onSend, moveCursorLeft, moveCursorRight, render]);
 
+  const deleteSelectionRange = useCallback((): boolean => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.anchorNode || !sel.focusNode) return false;
+
+    const el = divRef.current;
+    if (!el) return false;
+
+    const selText = sel.toString().replace(/\u200B/g, "");
+    const fullText = serialize(model.current.segments);
+    if (selText === fullText || (sel.anchorNode === el || sel.focusNode === el)) {
+      for (const s of model.current.segments) if (s.type === "paste") pasteStore.delete(s.id);
+      model.current = mkModel();
+      return true;
+    }
+
+    const a = resolveOffset(sel.anchorNode, sel.anchorOffset);
+    const f = resolveOffset(sel.focusNode, sel.focusOffset);
+    if (!a || !f) return false;
+
+    const { segments: segs } = model.current;
+    if (!isText(segs[a.seg]) || !isText(segs[f.seg])) return false;
+
+    let start = a, end = f;
+    if (a.seg > f.seg || (a.seg === f.seg && a.offset > f.offset)) { start = f; end = a; }
+
+    if (start.seg === end.seg) {
+      const s = segs[start.seg] as { type: "text"; value: string };
+      s.value = s.value.slice(0, start.offset) + s.value.slice(end.offset);
+    } else {
+      const ss = segs[start.seg] as { type: "text"; value: string };
+      const se = segs[end.seg] as { type: "text"; value: string };
+      ss.value = ss.value.slice(0, start.offset) + se.value.slice(end.offset);
+      segs.splice(start.seg + 1, end.seg - start.seg);
+      model.current.segments = normalize(segs);
+    }
+    model.current.cursor = { seg: start.seg, offset: start.offset };
+    return true;
+  }, [resolveOffset, render, onChange]);
+
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
     const text = e.clipboardData.getData("text/plain");
     if (!text) return;
+
+    deleteSelectionRange();
 
     const lines = text.split("\n");
     if (lines.length <= 3) {
@@ -565,7 +606,18 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     model.current = { segments: norm, cursor: { seg: ci + 1, offset: 1 } };
     render();
     onChange();
-  }, [insertText, render, onChange]);
+  }, [deleteSelectionRange, insertText, render, onChange]);
+
+  const handleCut = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    const text = sel.toString();
+    if (text) e.clipboardData.setData("text/plain", text);
+    deleteSelectionRange();
+    render();
+    onChange();
+  }, [deleteSelectionRange, render, onChange]);
 
   const handleChipHover = useCallback((e: React.MouseEvent) => {
     const t = (e.target as HTMLElement).closest("[data-chip='paste']") as HTMLElement | null;
@@ -638,6 +690,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
         data-shortcut-input
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
+        onCut={handleCut}
         onClick={handleClick}
         onMouseOver={handleChipHover}
         onMouseLeave={() => setPreview(null)}
