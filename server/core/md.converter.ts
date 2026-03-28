@@ -66,9 +66,40 @@ export function getFileToMarkdownConverter(options?: { maxOutputChars?: number }
       if (limit && result.markdown.length > limit) {
         throw new Error(`Document too large (${result.markdown.length} chars, limit is ${limit}). Tell the user to add this file to the Knowledge Base in Sparky settings instead, where it will be chunked and searchable.`);
       }
-      const sections = parseSections(result.markdown);
-      log(`File ${target} converted, ${result.markdown.length} chars, ${sections.length} sections.`);
-      yield { text: result.markdown, sections: sections.length > 0 ? sections : undefined };
+
+      const text = result.markdown;
+      const sections = parseSections(text);
+      log(`Extraction started: ${target}, ${text.length} chars, ${sections.length} sections`);
+
+      if (sections.length < 2 || text.length < 50_000) {
+        yield { text, sections: sections.length > 0 ? sections : undefined };
+        log(`Extraction finished: 1 segment`);
+        return;
+      }
+
+      const topLevel = sections.filter((s) => s.label && /^#{1,2}\s/.test(text.slice(s.offset, s.offset + 4)));
+      const splits = topLevel.length >= 2 ? topLevel : sections;
+      let yielded = 0;
+
+      for (let i = 0; i < splits.length; i++) {
+        const start = splits[i].offset;
+        const end = i + 1 < splits.length ? splits[i + 1].offset : text.length;
+        const segment = text.slice(start, end);
+        if (segment.trim().length === 0) continue;
+        const segSections = parseSections(segment);
+        yield { text: segment, sections: segSections.length > 0 ? segSections : undefined };
+        yielded++;
+      }
+
+      if (splits[0].offset > 0) {
+        const preamble = text.slice(0, splits[0].offset);
+        if (preamble.trim().length > 0) {
+          yield { text: preamble };
+          yielded++;
+        }
+      }
+
+      log(`Extraction finished: ${yielded} segments`);
     },
   };
 }

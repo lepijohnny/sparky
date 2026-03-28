@@ -177,7 +177,7 @@ describe("getFileToMarkdownConverter", () => {
 
     for await (const _ of converter.extract(path, (msg) => logs.push(msg))) {}
 
-    expect(logs.some((l) => l.includes("converted"))).toBe(true);
+    expect(logs.some((l) => l.includes("Extraction"))).toBe(true);
     cleanup();
   });
 });
