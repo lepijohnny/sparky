@@ -339,16 +339,17 @@ export default memo(function ChatInput({
   }, [addFiles]);
 
   const [dragOver, setDragOver] = useState(false);
-  const dragUnlisten = useRef<(() => void) | null>(null);
+  const dragSetup = useRef(false);
 
   useEffect(() => {
+    if (dragSetup.current) return;
+    dragSetup.current = true;
+    let unlisten: (() => void) | undefined;
     (async () => {
       try {
-        dragUnlisten.current?.();
-        dragUnlisten.current = null;
         const { getCurrentWebview } = await import("@tauri-apps/api/webview");
         const { stat, readFile } = await import("@tauri-apps/plugin-fs");
-        dragUnlisten.current = await getCurrentWebview().onDragDropEvent(async (event) => {
+        unlisten = await getCurrentWebview().onDragDropEvent(async (event) => {
           if (event.payload.type === "over" || event.payload.type === "enter") { setDragOver(true); return; }
           if (event.payload.type === "leave" || event.payload.type === "cancel") { setDragOver(false); return; }
           if (event.payload.type !== "drop") return;
@@ -388,7 +389,7 @@ export default memo(function ChatInput({
         });
       } catch {}
     })();
-    return () => { dragUnlisten.current?.(); dragUnlisten.current = null; };
+    return () => { unlisten?.(); dragSetup.current = false; };
   }, [addToast, saveDraft]);
 
   const removeAttachment = useCallback((id: string) => {
