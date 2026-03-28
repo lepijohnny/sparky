@@ -338,6 +338,59 @@ export default memo(function ChatInput({
     e.target.value = "";
   }, [addFiles]);
 
+  const [dragOver, setDragOver] = useState(false);
+  const dragUnlisten = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        dragUnlisten.current?.();
+        dragUnlisten.current = null;
+        const { getCurrentWebview } = await import("@tauri-apps/api/webview");
+        const { stat, readFile } = await import("@tauri-apps/plugin-fs");
+        dragUnlisten.current = await getCurrentWebview().onDragDropEvent(async (event) => {
+          if (event.payload.type === "over" || event.payload.type === "enter") { setDragOver(true); return; }
+          if (event.payload.type === "leave" || event.payload.type === "cancel") { setDragOver(false); return; }
+          if (event.payload.type !== "drop") return;
+          setDragOver(false);
+          const paths = event.payload.paths;
+          if (!paths || paths.length === 0) return;
+          for (const filePath of paths) {
+            try {
+              const meta = await stat(filePath);
+              if (!meta.size || meta.size > MAX_FILE_SIZE) {
+                if (meta.size && meta.size > MAX_FILE_SIZE) {
+                  const name = filePath.split("/").pop() ?? filePath;
+                  addToast({ id: `file-too-large-${Date.now()}`, kind: "error", title: `${name} exceeds 10 MB limit` });
+                }
+                continue;
+              }
+              const filename = filePath.split("/").pop() ?? filePath;
+              const mimeType = guessMime(filename);
+              const bytes = await readFile(filePath);
+              const file = new File([bytes], filename, { type: mimeType });
+              const thumb = await generateThumbnail(file);
+              const att: PendingAttachment = {
+                id: crypto.randomUUID(),
+                filename,
+                mimeType,
+                size: meta.size,
+                thumbnailUrl: thumb ? URL.createObjectURL(thumb) : null,
+                filePath,
+              };
+              setAttachments((prev) => {
+                const next = [...prev, att];
+                saveDraft(undefined, next);
+                return next;
+              });
+            } catch {}
+          }
+        });
+      } catch {}
+    })();
+    return () => { dragUnlisten.current?.(); dragUnlisten.current = null; };
+  }, [addToast, saveDraft]);
+
   const removeAttachment = useCallback((id: string) => {
     setAttachments((prev) => {
       const removed = prev.find((a) => a.id === id);
@@ -386,7 +439,7 @@ export default memo(function ChatInput({
         </div>
       )}
       <div
-        className={styles.inputCard}
+        className={`${styles.inputCard} ${dragOver ? styles.inputCardDragOver : ""}`}
         style={contextTokens != null && contextWindow != null && contextWindow > 0
           ? {
               "--context-pct": `${Math.min(Math.round(contextTokens / contextWindow * 100), 100)}%`,
