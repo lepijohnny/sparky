@@ -160,6 +160,14 @@
   color: var(--fg-subtle);
 }
 
+.modeBadge {
+  font-size: 10px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
 /* ─── Progress line ─── */
 .progressLine {
   position: absolute;

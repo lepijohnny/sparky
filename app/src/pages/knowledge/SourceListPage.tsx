@@ -162,6 +162,7 @@ export default function SourceListPage({
             <span className={`${styles.badge} ${styles[`badge_${source.status}`]}`}>
               {STATUS_LABELS[source.status]}
             </span>
+            <span className={styles.modeBadge}>{source.mode === "hybrid" ? "Hybrid" : "BM25"}</span>
             {source.chunkCount > 0 && (
               <span className={styles.chunkCount}>{source.chunkCount} chunks</span>
             )}
