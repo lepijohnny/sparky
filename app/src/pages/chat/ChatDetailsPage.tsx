@@ -443,7 +443,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
   const pendingAttachmentsRef = useRef<import("../../types/chat").MessageAttachment[] | null>(null);
   const optimisticIdRef = useRef<string | null>(null);
 
-  const handleSend = useCallback(async (text: string, attachments: import("../../types/attachment").PendingAttachment[]) => {
+  const handleSend = useCallback(async (text: string, attachments: import("../../types/attachment").PendingAttachment[], knowledgeFilters?: string[]) => {
     if (!conn) return;
     scrollToBottom();
 
@@ -492,6 +492,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
         attachmentIds: attachmentIds.length > 0 ? attachmentIds : undefined,
         services: services.length > 0 ? services : undefined,
         skills: skills.length > 0 ? skills : undefined,
+        knowledgeFilters,
       });
     } catch (err) {
       console.error("Failed to send message:", err);

@@ -311,3 +311,152 @@
 }
 
 
+
+/* ─── Source picker ─── */
+.sourcePickerWrap {
+  position: relative;
+}
+
+.sourcePickerBtn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 150ms ease;
+}
+
+.sourcePickerBtn:hover {
+  color: var(--fg);
+}
+
+.sourcePickerBtnActive {
+  color: var(--accent);
+}
+
+.sourcePickerCount {
+  font-size: 9px;
+  font-weight: 600;
+  min-width: 14px;
+  height: 14px;
+  line-height: 14px;
+  text-align: center;
+  border-radius: 7px;
+  background: var(--accent);
+  color: white;
+}
+
+.sourcePickerDropdown {
+  position: fixed;
+  z-index: 200;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 0;
+  min-width: 220px;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+}
+
+.sourcePickerItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 100ms ease;
+}
+
+.sourcePickerItem:hover {
+  background: var(--bg-raised);
+}
+
+.sourcePickerItemActive {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.sourcePickerItemActive .sourcePickerName {
+  color: var(--accent);
+}
+
+.sourcePickerItemDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sourcePickerCheck {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.sourcePickerName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.sourcePickerMode {
+  font-size: 10px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 1px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.sourcePickerSearch {
+  padding: 4px 8px 4px;
+}
+
+.sourcePickerSearchInput {
+  width: 100%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--fg);
+  outline: none;
+}
+
+.sourcePickerSearchInput:focus {
+  border-color: var(--accent);
+}
+
+.sourcePickerMore {
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.sourcePickerClear {
+  appearance: none;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  text-align: left;
+  margin-top: 4px;
+}
+
+.sourcePickerClear:hover {
+  color: var(--fg);
+}
