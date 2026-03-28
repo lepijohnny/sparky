@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.44.0",
-    "@mariozechner/pi-ai": "^0.57.1",
+    "@mariozechner/pi-ai": "^0.63.1",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@mozilla/readability": "^0.6.0",
     "@sparky/auth-core": "workspace:*",
