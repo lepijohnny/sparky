@@ -66,7 +66,9 @@ const fns: Record<string, any> = {};
 
 async function loadFn(type: string): Promise<any> {
   if (fns[type]) return fns[type];
-  const modulePath = join(fnDir, `kt.worker.${type}.fn.ts`);
+  const tsPath = join(fnDir, `kt.worker.${type}.fn.ts`);
+  const mjsPath = join(fnDir, `kt.worker.${type}.fn.mjs`);
+  const modulePath = await import("node:fs").then((fs) => fs.existsSync(tsPath) ? tsPath : mjsPath);
   const mod = await import(modulePath);
   await mod.init(cacheDir);
   fns[type] = mod;

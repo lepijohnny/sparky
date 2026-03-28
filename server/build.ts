@@ -65,6 +65,18 @@ const __dirname = __dirname_fn(__filename);
     outfile: join(outDir, "kt.worker.mjs"),
   });
 
+  console.log("Bundling worker functions...");
+  const workerFns = readdirSync(join(__dirname, "knowledge/worker")).filter((f) => f.endsWith(".fn.ts"));
+  for (const fn of workerFns) {
+    const name = fn.replace(".ts", ".mjs");
+    await build({
+      ...commonOptions,
+      entryPoints: [join(__dirname, "knowledge/worker", fn)],
+      outfile: join(outDir, name),
+    });
+    console.log(`  ${fn}`);
+  }
+
   console.log("Copying native modules...");
   mkdirSync(join(outDir, "node_modules"), { recursive: true });
 
