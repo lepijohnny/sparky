@@ -15,6 +15,7 @@ export const webSearch = defineTool({
     ctx.log.info("app_web_search", { query: input.query });
     const { results } = await ctx.bus.emit("web.search", { query: input.query, maxResults: input.maxResults });
     if (results.length === 0) return "No results found.";
-    return results.map((r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`).join("\n\n");
+    const list = results.map((r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`).join("\n\n");
+    return `Web search results for query: "${input.query}"\n\n${list}\n\nREMINDER: You MUST include the sources above in your response to the user using markdown hyperlinks.`;
   },
 });

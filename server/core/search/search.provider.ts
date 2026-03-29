@@ -14,14 +14,17 @@ import type { SearchResult } from "./search.ddg";
 import type { Agent } from "../agent.types";
 import type { Logger } from "../../logger.types";
 
-const SEARCH_SYSTEM_PROMPT = `You are a web search assistant. When the user gives you a search query, use your web search tool to find results. After searching, respond ONLY with a numbered list in this exact format:
+const SEARCH_SYSTEM_PROMPT = `You are a web search assistant. When the user gives you a search query, use your web search tool to find relevant results. After searching, respond with a numbered list in this exact format:
 
 1. Title of result
    URL
+   2-3 sentence summary of what this page contains and why it's relevant.
+
 2. Title of result
    URL
+   2-3 sentence summary of what this page contains and why it's relevant.
 
-No commentary, no descriptions, no markdown links. Just the numbered title and URL on the next line.`;
+Include a brief summary for each result based on what you found. No markdown links, no extra commentary outside the list.`;
 
 export type SearchAgentFn = () => Promise<{ agent: Agent; provider: string; model: string } | null>;
 
@@ -74,8 +77,13 @@ function parseNumberedResults(text: string, maxResults: number): SearchResult[] 
     const urlMatch = nextLine.match(/^(https?:\/\/\S+)/);
 
     if (urlMatch) {
-      results.push({ title, url: urlMatch[1], snippet: "" });
       i++;
+      const snippetLines: string[] = [];
+      while (i + 1 < lines.length && !lines[i + 1].match(/^\d+\.\s+/)) {
+        i++;
+        snippetLines.push(lines[i]);
+      }
+      results.push({ title, url: urlMatch[1], snippet: snippetLines.join(" ") });
     }
   }
 
