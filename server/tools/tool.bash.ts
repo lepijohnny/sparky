@@ -78,6 +78,7 @@ export const bash = defineTool({
   trustScope: "bash",
   trustTarget: (input) => input.command,
   category: "execute",
+  outputLimit: MAX_OUTPUT,
   friendlyLabel: (input) => `$ ${trunc(input.command)}`,
   summarize: (input) => {
     return input.command.length > 60 ? `${input.command.slice(0, 57)}...` : input.command;

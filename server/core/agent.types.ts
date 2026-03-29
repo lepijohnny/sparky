@@ -55,6 +55,7 @@ export interface AgentToolDef {
   category?: string;
   summarize?: (input: unknown, output: string) => string;
   friendlyLabel?: (input: unknown) => string;
+  outputLimit?: number;
 }
 
 /** Events yielded by the agent stream */

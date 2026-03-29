@@ -37,7 +37,11 @@ export interface ToolDef<T extends z.ZodObject = z.ZodObject> {
   summarize?: (input: z.infer<T>, output: string) => string;
   /** Human-friendly label shown in the activity UI (e.g. `Reading package.json`). */
   friendlyLabel?: (input: z.infer<T>) => string;
+  /** Max output chars before saving to disk. Defaults to 32_000. */
+  outputLimit?: number;
 }
+
+export const DEFAULT_OUTPUT_LIMIT = 32_000;
 
 export function defineTool<T extends z.ZodObject>(def: ToolDef<T>): ToolDef<T> {
   return def;
@@ -74,6 +78,7 @@ export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
       friendlyLabel: t.friendlyLabel
         ? (input: unknown) => t.friendlyLabel!(t.schema.parse(input))
         : undefined,
+      outputLimit: t.outputLimit,
     };
   });
 
