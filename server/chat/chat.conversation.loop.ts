@@ -145,7 +145,8 @@ function toEntry(
       const summary = def?.summarize?.(event.input, "") || undefined;
       const label = def?.label;
       const icon = def?.icon;
-      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: cleanName, input: event.input, category, summary, label, icon } };
+      const friendly = def?.friendlyLabel?.(event.input) || undefined;
+      return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: cleanName, input: event.input, category, summary, label, icon, friendly } };
     }
     case "tool.result": {
       const pending = pendingTools?.get(event.id);

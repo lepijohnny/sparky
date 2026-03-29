@@ -7,9 +7,12 @@ const TITLES: Record<string, string> = {
   table: "Table",
   latex: "LaTeX",
   chart: "Chart",
+  activity: "Activity",
+  "activity-md": "Activity",
+  "activity-json": "Activity",
 };
 
-async function openExpandWindow(type: string, content: string) {
+export async function openExpandWindow(type: string, content: string) {
   if (!window.__TAURI_INTERNALS__) return;
   try {
     const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");

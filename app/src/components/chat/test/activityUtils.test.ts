@@ -141,11 +141,11 @@ describe("filterActivities", () => {
 
 describe("mergeToolActivities", () => {
   test("given start and result with same id, when merged, then produces single row", () => {
-    const start = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" }, label: "Managing" });
+    const start = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" }, label: "Managing", friendly: "List Chats" });
     const result = activity("agent.tool.result", { id: "c1", output: "{}", summary: "Listed chats, 5 found", category: "chat" });
     const merged = mergeToolActivities([start, result]);
     expect(merged).toHaveLength(1);
-    expect(merged[0].data.mergedLabel).toBe("Chat → Listed chats, 5 found");
+    expect(merged[0].data.mergedLabel).toBe("List Chats");
   });
 
   test("given start without matching result, when merged, then kept as-is", () => {
@@ -162,12 +162,12 @@ describe("mergeToolActivities", () => {
     expect(merged[0].type).toBe("agent.tool.result");
   });
 
-  test("given tool with label and icon, when merged, then icon propagates from start", () => {
-    const start = activity("agent.tool.start", { id: "c1", name: "app_read", input: { path: "foo.ts" }, label: "Reading", icon: "file-text" });
+  test("given tool with friendly label and icon, when merged, then icon propagates from start", () => {
+    const start = activity("agent.tool.start", { id: "c1", name: "app_read", input: { path: "foo.ts" }, label: "Reading", icon: "file-text", friendly: "Reading foo.ts" });
     const result = activity("agent.tool.result", { id: "c1", output: "content", summary: "Read foo.ts" });
     const merged = mergeToolActivities([start, result]);
     expect(merged).toHaveLength(1);
-    expect(merged[0].data.mergedLabel).toBe("Reading → Read foo.ts");  // result summary unchanged
+    expect(merged[0].data.mergedLabel).toBe("Reading foo.ts");
     expect(merged[0].data.icon).toBe("file-text");
   });
 
@@ -179,14 +179,14 @@ describe("mergeToolActivities", () => {
   });
 
   test("given multiple tool pairs, when merged, then each pair produces one row", () => {
-    const s1 = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" }, label: "Managing" });
+    const s1 = activity("agent.tool.start", { id: "c1", name: "app_bus_emit", input: { event: "chat.list" }, label: "Managing", friendly: "List Chats" });
     const r1 = activity("agent.tool.result", { id: "c1", output: "{}", summary: "5 chats" });
-    const s2 = activity("agent.tool.start", { id: "c2", name: "app_bus_emit", input: { event: "chat.create" }, label: "Managing" });
+    const s2 = activity("agent.tool.start", { id: "c2", name: "app_bus_emit", input: { event: "chat.create" }, label: "Managing", friendly: "Create Chat" });
     const r2 = activity("agent.tool.result", { id: "c2", output: "{}", summary: '"New Chat"' });
     const merged = mergeToolActivities([s1, r1, s2, r2]);
     expect(merged).toHaveLength(2);
-    expect(merged[0].data.mergedLabel).toBe("Chat → 5 chats");
-    expect(merged[1].data.mergedLabel).toBe('Chat → "New Chat"');
+    expect(merged[0].data.mergedLabel).toBe("List Chats");
+    expect(merged[1].data.mergedLabel).toBe("Create Chat");
   });
 });
 

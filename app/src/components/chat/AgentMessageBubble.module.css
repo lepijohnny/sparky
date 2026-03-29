@@ -226,7 +226,7 @@
   align-items: center;
   gap: 6px;
   padding: 5px 8px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--fg-muted);
   border-radius: 6px;
   cursor: pointer;
@@ -246,7 +246,7 @@
 }
 
 .activitiesBadge {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--fg-muted);
   background: var(--bg-overlay);
@@ -329,8 +329,9 @@
   align-items: flex-start;
   gap: 6px;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--fg-muted);
+  opacity: 0.6;
   border-radius: 4px;
   min-width: 0;
 }
@@ -347,10 +348,41 @@
   color: var(--accent);
 }
 
+.activityClickable {
+  cursor: pointer;
+}
+
+.activityClickable:hover {
+  opacity: 1;
+}
+
 .activityLabel {
   flex: 1;
   word-break: break-word;
   min-width: 0;
+}
+
+.activityDescription {
+  display: block;
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loadingDots::after {
+  content: "";
+  animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+  100% { content: ""; }
 }
 
 .bubbleError {

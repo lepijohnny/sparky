@@ -169,3 +169,61 @@
   width: 100%;
   height: calc(100vh - 64px);
 }
+
+.activity {
+  padding: 24px 32px;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+  font-family: "Geist", -apple-system, sans-serif;
+  max-width: 800px;
+  margin: 24px auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+}
+
+.activity h2 {
+  font-family: "Geist", -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: var(--fg);
+}
+
+.activity h3 {
+  font-family: "Geist", -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: var(--fg-muted);
+}
+
+.activity pre {
+  background: color-mix(in srgb, var(--bg-surface) 80%, white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 12px 12px 0;
+  margin: 4px 0 12px;
+  overflow-x: auto;
+  font-size: 12px;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  counter-reset: line;
+  line-height: 1.6;
+}
+
+.activity pre::before {
+  content: none;
+}
+
+.activity code {
+  counter-reset: line;
+}
+
+.activityLineNumbers {
+  display: block;
+  white-space: pre;
+}

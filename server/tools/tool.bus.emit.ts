@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { defineTool } from "./tool.registry";
+import { defineTool, trunc } from "./tool.registry";
 import { guide } from "../core/assistant/assistant.tools.guide";
 import { BUS_EVENTS } from "../core/bus";
 
@@ -12,6 +12,9 @@ function summarize(input: { event: string; params?: Record<string, unknown> }, o
 
   if (event === "svc.call" && input.params?.service) {
     const label = svcLabel(input.params.service as string);
+    const body = input.params.body as Record<string, unknown> | undefined;
+    const query = body?.q ?? body?.query ?? input.params.query;
+    if (query) return `${label}: ${String(query).slice(0, 48)}`;
     const action = input.params.action ? ` → ${input.params.action}` : "";
     return `${label}${action}`;
   }
@@ -80,6 +83,32 @@ export const busEmit = defineTool({
   trustScope: "bus",
   trustTarget: (input) => input.event,
   recovery: "Read the API docs first: app_read(\"api/<domain>.md\") to see available events and their expected params.",
+  friendlyLabel: (input) => {
+    const event = input.event;
+    const params = input.params as Record<string, unknown> | undefined;
+    if (event === "svc.call" && params?.service) {
+      const label = svcLabel(String(params.service));
+      const body = params.body as Record<string, unknown> | undefined;
+      const query = body?.q ?? body?.query ?? params.query;
+      if (query) return `${label}: ${trunc(String(query))}`;
+      return `Calling ${label}`;
+    }
+    if (event === "svc.describe") {
+      const service = params?.service;
+      return service ? `Exploring ${svcLabel(String(service))} API` : "Exploring service API";
+    }
+    if (event === "svc.register") {
+      const label = params?.label;
+      return label ? `Connecting ${String(label)}` : "Connecting service";
+    }
+    if (event === "svc.test") {
+      const service = params?.service;
+      return service ? `Testing ${svcLabel(String(service))}` : "Testing service";
+    }
+    if (event.startsWith("settings.")) return "Updating settings";
+    if (event.startsWith("kt.")) return "Knowledge base";
+    return event;
+  },
   summarize,
   async execute(input, ctx) {
     if (input.event.startsWith("app_")) {

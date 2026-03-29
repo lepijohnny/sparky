@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import { glob as globFn } from "node:fs/promises";
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import { defineTool } from "./tool.registry";
+import { defineTool, trunc } from "./tool.registry";
 import { home, requireDir } from "./tool.path";
 
 const MAX_ENTRIES = 500;
@@ -19,6 +19,7 @@ export const glob = defineTool({
   label: "Searching",
   icon: "search",
   category: "file",
+  friendlyLabel: (input) => `Finding files: ${trunc(input.pattern, 40)}`,
   summarize: (input) => input.pattern,
   async execute(input, ctx) {
     const cwd = input.cwd ? home(input.cwd, ctx.cwd) : (ctx.cwd ?? process.cwd());

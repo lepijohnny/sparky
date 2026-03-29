@@ -1,4 +1,6 @@
 import { Check, Download, ListTree, Minus, Plus } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MermaidBlock from "../components/chat/MermaidBlock";
 import ChartBlock from "../components/chat/ChartBlock";
@@ -205,6 +207,16 @@ export default function ExpandWindow({ storageKey }: ExpandWindowProps) {
       }
       case "chart":
         return null;
+      case "activity":
+        return <div className={styles.activity} dangerouslySetInnerHTML={{ __html: data.content }} />;
+      case "activity-md":
+        return (
+          <div className={styles.activity}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
+          </div>
+        );
+      case "activity-json":
+        return <div className={styles.activity}><pre>{data.content}</pre></div>;
       default:
         return <pre>{data.content}</pre>;
     }
@@ -212,7 +224,8 @@ export default function ExpandWindow({ storageKey }: ExpandWindowProps) {
 
   const isTable = data?.type === "table";
   const isChart = data?.type === "chart";
-  const isFullWidth = isTable || isChart;
+  const isActivity = data?.type === "activity" || data?.type === "activity-md" || data?.type === "activity-json";
+  const isFullWidth = isTable || isChart || isActivity;
   const hasPngSave = data?.type === "mermaid" || data?.type === "latex";
 
   return (

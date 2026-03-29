@@ -1,7 +1,7 @@
 import { z } from "zod/v4";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { defineTool } from "./tool.registry";
+import { defineTool, basename } from "./tool.registry";
 import { home, real, rejectDir } from "./tool.path";
 
 export const write = defineTool({
@@ -18,6 +18,7 @@ export const write = defineTool({
   trustScope: "write",
   trustTarget: (input) => real(home(input.path)),
   category: "file",
+  friendlyLabel: (input) => `Writing ${basename(input.path)}`,
   summarize: (input) => input.path,
   async execute(input, ctx) {
     const filePath = home(input.path, ctx.cwd);
