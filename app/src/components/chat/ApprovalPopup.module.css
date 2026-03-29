@@ -213,6 +213,18 @@
   color: #fff;
 }
 
+.approveChat {
+  background: transparent;
+  color: var(--fg-muted);
+  border-color: var(--border);
+}
+
+.approveChat:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .approveAlways {
   background: transparent;
   color: var(--accent);

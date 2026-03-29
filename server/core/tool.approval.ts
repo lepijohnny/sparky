@@ -34,6 +34,7 @@ export interface ApprovalField {
 export interface ApprovalContext {
   chatId: string;
   turnId?: string;
+  isChatAllowed(scope: string): boolean;
   requestApproval(tool: string, label: string, extra?: ApprovalExtra): Promise<boolean>;
 }
 
@@ -44,6 +45,7 @@ export interface ApprovalExtra {
   fields?: ApprovalField[];
   link?: string;
   timeoutMs?: number;
+  alwaysAsk?: boolean;
   oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string };
 }
 
@@ -51,6 +53,9 @@ export function createApprovalContext(approval: ToolApproval, role: string, chat
   return {
     chatId,
     turnId,
+    isChatAllowed(scope: string) {
+      return approval.isChatAllowed(chatId, scope);
+    },
     requestApproval(tool, label, extra?) {
       return approval.requestApproval(role, tool, label, { chatId, turnId }, extra);
     },
@@ -63,6 +68,7 @@ export interface PendingApprovalInfo {
   service?: string;
   message: string;
   canPersist: boolean;
+  alwaysAsk?: boolean;
   timeoutMs: number;
   remainingMs: number;
   description?: string;
@@ -76,6 +82,7 @@ interface PendingApproval {
   scope: string;
   tool: string;
   target: string;
+  alwaysAsk?: boolean;
   rule: ApprovalRule;
   resolve: (approved: boolean) => void;
   timer: ReturnType<typeof setTimeout>;
@@ -90,11 +97,27 @@ interface PendingApproval {
 export class ToolApproval {
   private rules: ApprovalRule[] = [];
   private pending = new Map<string, PendingApproval>();
+  private chatAllowed = new Map<string, Set<string>>();
 
   constructor(private bus: EventBus, private log: Logger) {
     bus.on("tool.approval.resolve", (data) => {
-      this.resolveApproval(data.requestId, data.approved, data.persist ?? false);
+      this.resolveApproval(data.requestId, data.approved, data.persist ?? false, data.chatLevel ?? false);
     });
+  }
+
+  isChatAllowed(chatId: string, scope: string): boolean {
+    return this.chatAllowed.get(chatId)?.has(scope) ?? false;
+  }
+
+  allowForChat(chatId: string, scope: string): void {
+    let set = this.chatAllowed.get(chatId);
+    if (!set) { set = new Set(); this.chatAllowed.set(chatId, set); }
+    set.add(scope);
+    this.log.info("Chat-level trust granted", { chatId, scope });
+  }
+
+  clearChat(chatId: string): void {
+    this.chatAllowed.delete(chatId);
   }
 
   register(rule: ApprovalRule): void {
@@ -111,7 +134,7 @@ export class ToolApproval {
       if (entry.chatId !== chatId) continue;
       const elapsed = now - entry.startedAt;
       const remaining = Math.max(0, TIMEOUT_MS - elapsed);
-      return { requestId, message: entry.rule.message, canPersist: !!entry.rule.persist, timeoutMs: TIMEOUT_MS, remainingMs: remaining };
+      return { requestId, message: entry.rule.message, canPersist: !!entry.rule.persist, alwaysAsk: entry.alwaysAsk, timeoutMs: TIMEOUT_MS, remainingMs: remaining };
     }
     return null;
   }
@@ -154,6 +177,7 @@ export class ToolApproval {
     fields?: ApprovalField[];
     link?: string;
     timeoutMs?: number;
+    alwaysAsk?: boolean;
     oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string };
   }): Promise<boolean> {
     const rule = this.findRule(scope, tool, target);
@@ -175,7 +199,7 @@ export class ToolApproval {
         resolve(false);
       }, timeout);
 
-      this.pending.set(requestId, { chatId: ctx.chatId, msgId, scope, tool, target, rule: rule ?? { scope, tool, message }, resolve, timer, startedAt: Date.now() });
+      this.pending.set(requestId, { chatId: ctx.chatId, msgId, scope, tool, target, alwaysAsk: extra?.alwaysAsk, rule: rule ?? { scope, tool, message }, resolve, timer, startedAt: Date.now() });
 
       this.bus.emit("tool.approval.request", {
         requestId,
@@ -192,13 +216,14 @@ export class ToolApproval {
         ...(extra?.description ? { description: extra.description } : {}),
         ...(extra?.fields ? { fields: extra.fields } : {}),
         ...(extra?.link ? { link: extra.link } : {}),
+        ...(extra?.alwaysAsk ? { alwaysAsk: true } : {}),
         ...(extra?.oauth ? { oauth: extra.oauth } : {}),
       });
       this.log.info("Tool approval requested", { requestId, scope, tool, target });
     });
   }
 
-  private async resolveApproval(requestId: string, approved: boolean, persist: boolean) {
+  private async resolveApproval(requestId: string, approved: boolean, persist: boolean, chatLevel: boolean = false) {
     const entry = this.pending.get(requestId);
     if (!entry) {
       this.log.warn("Tool approval resolve: unknown requestId", { requestId });
@@ -207,7 +232,9 @@ export class ToolApproval {
     clearTimeout(entry.timer);
     this.pending.delete(requestId);
 
-    if (approved && persist && entry.rule.persist) {
+    if (approved && chatLevel) {
+      this.allowForChat(entry.chatId, entry.scope);
+    } else if (approved && persist && entry.rule.persist) {
       try {
         await entry.rule.persist(entry.scope, entry.tool, entry.target);
         this.log.info("Tool approval persisted", { scope: entry.scope, tool: entry.tool, target: entry.target });
@@ -216,7 +243,7 @@ export class ToolApproval {
       }
     }
 
-    this.log.info("Tool approval resolved", { requestId, approved, persist });
+    this.log.info("Tool approval resolved", { requestId, approved, persist, chatLevel });
 
     const activityType = approved ? "agent.approval.approved" : "agent.approval.denied";
     this.emitActivity(entry.chatId, entry.msgId, activityType, { scope: entry.scope, tool: entry.tool, target: entry.target });

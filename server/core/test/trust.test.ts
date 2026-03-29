@@ -246,4 +246,55 @@ describe("TrustStore", () => {
     const rmRules = data.bash.ask.filter((r) => r.label === "rm");
     expect(rmRules).toHaveLength(1);
   });
+
+  test("given alwaysAsk rule added, when resolved, then alwaysAsk flag is preserved", () => {
+    trust.addRule("bus", "ask", { label: "Custom delete", pattern: "^custom\\.delete$", alwaysAsk: true });
+    const data = trust.data();
+    const rule = data.bus.ask.find((r) => r.label === "Custom delete");
+    expect(rule).toBeDefined();
+    expect(rule?.alwaysAsk).toBe(true);
+  });
+
+  test("given alwaysAsk rule, when resolving matching input, then rule with alwaysAsk is returned", () => {
+    trust.addRule("bus", "ask", { label: "Custom delete", pattern: "^custom\\.delete$", alwaysAsk: true });
+    const res = trust.resolve("bus", "custom.delete");
+    expect(res.decision).toBe("prompt");
+    expect(res.rule?.alwaysAsk).toBe(true);
+  });
+
+  test("given default bus ask rules, then delete rules have alwaysAsk", () => {
+    const data = trust.data();
+    const deleteChat = data.bus.ask.find((r) => r.label === "Delete chats");
+    expect(deleteChat?.alwaysAsk).toBe(true);
+    const deleteSvc = data.bus.ask.find((r) => r.label === "Delete connections");
+    expect(deleteSvc?.alwaysAsk).toBe(true);
+  });
+
+  test("given default bus ask rules, then service calls do not have alwaysAsk", () => {
+    const data = trust.data();
+    const svcCall = data.bus.ask.find((r) => r.label === "Service calls");
+    expect(svcCall?.alwaysAsk).toBeFalsy();
+  });
+
+  test("given generic ask rule and specific alwaysAsk rule, when both match, then alwaysAsk wins", () => {
+    trust.addRule("bus", "ask", { label: "All service calls", pattern: "^svc\\.call:" });
+    trust.addRule("bus", "ask", { label: "GitHub calls", pattern: "^svc\\.call:github", alwaysAsk: true });
+    const res = trust.resolve("bus", "svc.call:github");
+    expect(res.decision).toBe("prompt");
+    expect(res.rule?.alwaysAsk).toBe(true);
+    expect(res.rule?.label).toBe("GitHub calls");
+  });
+
+  test("given generic ask rule and specific alwaysAsk rule, when non-github matches, then generic wins", () => {
+    trust.addRule("bus", "ask", { label: "GitHub calls", pattern: "^svc\\.call:github", alwaysAsk: true });
+    const res = trust.resolve("bus", "svc.call:gmail");
+    expect(res.decision).toBe("prompt");
+    expect(res.rule?.alwaysAsk).toBeFalsy();
+  });
+
+  test("given default bash ask rules, then rm does not have alwaysAsk", () => {
+    const data = trust.data();
+    const rm = data.bash.ask.find((r) => r.label === "rm");
+    expect(rm?.alwaysAsk).toBeFalsy();
+  });
 });

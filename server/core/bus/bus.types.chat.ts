@@ -40,7 +40,7 @@ export interface ChatEvents {
   "chat.event":               { req: ChatEvent; res: void };
 
   "tool.approval.pending":    { req: { chatId: string }; res: PendingApprovalInfo | null };
-  "tool.approval.request":    { req: { requestId: string; chatId: string; type: "confirm:yesno" | "input:credentials" | "input:oauth"; message: string; scope: string; tool: string; target: string; canPersist: boolean; timeoutMs: number; remainingMs: number; description?: string; fields?: { name: string; label: string; type: string }[]; link?: string; oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string } }; res: void };
-  "tool.approval.resolve":    { req: { requestId: string; approved: boolean; persist?: boolean }; res: void };
+  "tool.approval.request":    { req: { requestId: string; chatId: string; type: "confirm:yesno" | "input:credentials" | "input:oauth"; message: string; scope: string; tool: string; target: string; canPersist: boolean; alwaysAsk?: boolean; timeoutMs: number; remainingMs: number; description?: string; fields?: { name: string; label: string; type: string }[]; link?: string; oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string } }; res: void };
+  "tool.approval.resolve":    { req: { requestId: string; approved: boolean; persist?: boolean; chatLevel?: boolean }; res: void };
   "tool.approval.dismissed":  { req: { requestId: string; chatId: string }; res: void };
 }

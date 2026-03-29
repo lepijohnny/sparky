@@ -81,7 +81,11 @@ export const busEmit = defineTool({
     params: z.record(z.string(), z.unknown()).optional().describe("Event parameters as an object"),
   }),
   trustScope: "bus",
-  trustTarget: (input) => input.event,
+  trustTarget: (input) => {
+    const params = input.params as Record<string, unknown> | undefined;
+    if (input.event === "svc.call" && params?.service) return `svc.call:${params.service}`;
+    return input.event;
+  },
   recovery: "Read the API docs first: app_read(\"api/<domain>.md\") to see available events and their expected params.",
   friendlyLabel: (input) => {
     const event = input.event;

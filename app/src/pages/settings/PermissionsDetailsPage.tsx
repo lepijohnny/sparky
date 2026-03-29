@@ -29,6 +29,7 @@ interface FlatRule {
   list: RuleList;
   label: string;
   pattern: string;
+  alwaysAsk?: boolean;
 }
 
 const KIND_META: Record<RuleKind, { scopeLabel: string; listLabel: string; scopeClass: string; listClass: string }> = {
@@ -66,7 +67,7 @@ function flattenRules(trust: Record<Scope, ScopeRules>): FlatRule[] {
   for (const scope of ["read", "write", "bash", "bus"] as Scope[]) {
     for (const list of ["deny", "ask", "allow"] as RuleList[]) {
       for (const rule of trust[scope][list]) {
-        out.push({ kind: `${scope}-${list}`, scope, list, label: rule.label, pattern: rule.pattern });
+        out.push({ kind: `${scope}-${list}`, scope, list, label: rule.label, pattern: rule.pattern, alwaysAsk: rule.alwaysAsk });
       }
     }
   }
@@ -81,6 +82,7 @@ export default function PermissionsDetailsPage() {
   const [newLabel, setNewLabel] = useState("");
   const [newPattern, setNewPattern] = useState("");
   const [newKind, setNewKind] = useState<RuleKind>("bash-deny");
+  const [newAlwaysAsk, setNewAlwaysAsk] = useState(false);
   const [showAsk, setShowAsk] = useState(false);
   const [askPos, setAskPos] = useState<{ x: number; y: number }>({ x: 78, y: 30 });
 
@@ -96,9 +98,11 @@ export default function PermissionsDetailsPage() {
     if (!label || !pattern || !conn) return;
     try { new RegExp(pattern); } catch { return; }
     const [scope, list] = newKind.split("-") as [Scope, RuleList];
-    await conn.request("trust.rule.add", { scope, list, label, pattern });
+    const alwaysAsk = newAlwaysAsk && list === "ask";
+    await conn.request("trust.rule.add", { scope, list, label, pattern, ...(alwaysAsk ? { alwaysAsk: true } : {}) });
     setNewLabel("");
     setNewPattern("");
+    setNewAlwaysAsk(false);
   };
 
   const handleRemove = async (rule: FlatRule) => {
@@ -196,6 +200,7 @@ export default function PermissionsDetailsPage() {
                     <div className={styles.itemRight}>
                       <span className={`${styles.badge} ${styles.badgeScope} ${styles[meta.scopeClass]}`}>{meta.scopeLabel}</span>
                       <span className={`${styles.badge} ${styles.badgeList} ${styles[meta.listClass]}`}>{meta.listLabel}</span>
+                      {f.alwaysAsk && <span className={`${styles.badge} ${styles.badgeAlwaysAsk}`}>always ask</span>}
                       <button className={`${shared.btnDanger} ${styles.removeBtn}`} onClick={() => handleRemove(f)}>Remove</button>
                     </div>
                   </div>
@@ -229,6 +234,12 @@ export default function PermissionsDetailsPage() {
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
+            {newKind.endsWith("-ask") && (
+              <label className={styles.alwaysAskLabel}>
+                <input type="checkbox" checked={newAlwaysAsk} onChange={(e) => setNewAlwaysAsk(e.target.checked)} />
+                Always ask
+              </label>
+            )}
             <button className={shared.btn} onClick={handleAdd} disabled={!newLabel.trim() || !newPattern.trim()}>
               Add
             </button>

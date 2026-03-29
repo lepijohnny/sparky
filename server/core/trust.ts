@@ -19,6 +19,7 @@ export interface TrustRule {
   label: string;
   pattern: string;
   addedAt?: number;
+  alwaysAsk?: boolean;
 }
 
 export interface ScopeRules {
@@ -98,13 +99,14 @@ const DEFAULT_BUS_DENY: TrustRule[] = [
 ];
 
 const DEFAULT_BUS_ASK: TrustRule[] = [
-  { label: "Delete labels", pattern: "^settings\\.labels\\.delete$", addedAt: 0 },
-  { label: "Delete chats", pattern: "^chat\\.delete$", addedAt: 0 },
-  { label: "Delete sources", pattern: "^kt\\.sources\\.delete$", addedAt: 0 },
-  { label: "Delete connections", pattern: "^svc\\.delete$", addedAt: 0 },
+  { label: "Service calls", pattern: "^svc\\.call:", addedAt: 0 },
+  { label: "Delete labels", pattern: "^settings\\.labels\\.delete$", addedAt: 0, alwaysAsk: true },
+  { label: "Delete chats", pattern: "^chat\\.delete$", addedAt: 0, alwaysAsk: true },
+  { label: "Delete sources", pattern: "^kt\\.sources\\.delete$", addedAt: 0, alwaysAsk: true },
+  { label: "Delete connections", pattern: "^svc\\.delete$", addedAt: 0, alwaysAsk: true },
   { label: "Rename chats", pattern: "^chat\\.rename$", addedAt: 0 },
   { label: "Archive chats", pattern: "^chat\\.archive$", addedAt: 0 },
-  { label: "Remove from allowlist", pattern: "^settings\\.sandbox\\.allowlist\\.remove$", addedAt: 0 },
+  { label: "Remove from allowlist", pattern: "^settings\\.sandbox\\.allowlist\\.remove$", addedAt: 0, alwaysAsk: true },
 ];
 
 function emptyScope(): ScopeRules {
@@ -122,12 +124,16 @@ function defaults(): TrustData {
 }
 
 function matchesAny(rules: TrustRule[], value: string): TrustRule | null {
+  let first: TrustRule | null = null;
   for (const rule of rules) {
     try {
-      if (new RegExp(rule.pattern).test(value)) return rule;
+      if (new RegExp(rule.pattern).test(value)) {
+        if (rule.alwaysAsk) return rule;
+        if (!first) first = rule;
+      }
     } catch {}
   }
-  return null;
+  return first;
 }
 
 export function createTrustStore(log: Logger, basePath: string, keychain: KeychainProvider): TrustStore {
