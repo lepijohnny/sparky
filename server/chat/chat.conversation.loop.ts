@@ -4,7 +4,21 @@
 import type { Agent, AgentEvent, AgentMessage, AgentTools } from "../core/agent.types";
 import type { ChatEntry } from "./chat.types";
 
-type TerminalReason = "done" | "stopped" | "error";
+type TerminalReason = "done" | "stopped" | "error" | "overflow";
+
+/** Drop ~30% of the oldest conversation turns to recover from context overflow. */
+function dropOldestTurns(messages: AgentMessage[]): AgentMessage[] {
+  if (messages.length <= 2) return messages;
+  const toDrop = Math.max(2, Math.ceil(messages.length * 0.3));
+  let dropped = 0;
+  let i = 0;
+  while (i < messages.length && dropped < toDrop) {
+    if (messages[i].role === "user") dropped++;
+    i++;
+    while (i < messages.length && messages[i].role !== "user") i++;
+  }
+  return messages.slice(i > 0 ? i : toDrop);
+}
 
 type EmitFn = (chatId: string, entry: ChatEntry) => Promise<void>;
 type EmitActivityFn = (chatId: string, turnId: string, type: string, data?: any) => Promise<void>;
@@ -78,17 +92,29 @@ export function agentStream(opts: AgentStreamOpts) {
 
     async retry(times: number): Promise<TerminalReason> {
       let messages = opts.messages;
+      let overflowed = false;
       for (let attempt = 0; attempt <= times; attempt++) {
         const result = await execute(messages);
-        if (result.reason !== "error" || result.errors.length === 0 || opts.signal.aborted) return result.reason;
-        if (attempt === times) return result.reason;
+        if (result.reason !== "error" || result.errors.length === 0 || opts.signal.aborted) {
+          return overflowed && result.reason === "done" ? "overflow" : result.reason;
+        }
+        if (attempt === times) return overflowed ? "overflow" : result.reason;
+
+        const isOverflow = result.errors.some((e) => /prompt is too long|max.*token|context.*length/i.test(e));
+        if (isOverflow) {
+          overflowed = true;
+          messages = dropOldestTurns(messages);
+          if (messages.length >= opts.messages.length) return "overflow";
+          continue;
+        }
+
         messages = [
           ...opts.messages,
           { role: "assistant", content: `Error: ${result.errors.join("; ")}` },
           { role: "user", content: "The previous attempt failed. Please try again." },
         ];
       }
-      return "error";
+      return overflowed ? "overflow" : "error";
     },
   };
 }
