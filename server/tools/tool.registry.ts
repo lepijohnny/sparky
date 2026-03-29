@@ -35,10 +35,21 @@ export interface ToolDef<T extends z.ZodObject = z.ZodObject> {
   recovery?: string;
   execute: (input: z.infer<T>, ctx: ToolContext) => Promise<string | ToolAttachment>;
   summarize?: (input: z.infer<T>, output: string) => string;
+  /** Human-friendly label shown in the activity UI (e.g. `Reading package.json`). */
+  friendlyLabel?: (input: z.infer<T>) => string;
 }
 
 export function defineTool<T extends z.ZodObject>(def: ToolDef<T>): ToolDef<T> {
   return def;
+}
+
+export function trunc(s: string, max = 48): string {
+  return s.length > max ? s.slice(0, max) + "…" : s;
+}
+
+export function basename(path: string): string {
+  const parts = path.split("/");
+  return parts[parts.length - 1] ?? path;
 }
 
 export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
@@ -59,6 +70,9 @@ export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
       category: t.category,
       summarize: t.summarize
         ? (input: unknown, output: string) => t.summarize!(t.schema.parse(input), output)
+        : undefined,
+      friendlyLabel: t.friendlyLabel
+        ? (input: unknown) => t.friendlyLabel!(t.schema.parse(input))
         : undefined,
     };
   });

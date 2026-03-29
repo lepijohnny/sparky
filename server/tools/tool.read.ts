@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileTypeFromFile } from "file-type";
-import { defineTool } from "./tool.registry";
+import { defineTool, basename } from "./tool.registry";
 import { promptsDir } from "../prompts/prompt.role";
 import { home, real, requireFile } from "./tool.path";
 
@@ -59,6 +59,7 @@ export const read = defineTool({
   trustScope: "read",
   trustTarget: (input) => real(resolvePath(input.path)),
   category: "file",
+  friendlyLabel: (input) => `Reading ${basename(input.path)}`,
   summarize: (input) => input.path,
   async execute(input, ctx) {
     if (/^https?:\/\//i.test(input.path)) {

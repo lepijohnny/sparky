@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { readFileSync, writeFileSync } from "node:fs";
-import { defineTool } from "./tool.registry";
+import { defineTool, basename } from "./tool.registry";
 import { home, real, requireFile } from "./tool.path";
 
 export const edit = defineTool({
@@ -18,6 +18,7 @@ export const edit = defineTool({
   trustScope: "write",
   trustTarget: (input) => real(home(input.path)),
   category: "file",
+  friendlyLabel: (input) => `Editing ${basename(input.path)}`,
   summarize: (input) => input.path,
   async execute(input, ctx) {
     const filePath = home(input.path, ctx.cwd);

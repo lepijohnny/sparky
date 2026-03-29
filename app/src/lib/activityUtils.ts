@@ -1,5 +1,144 @@
 import type { ChatActivity } from "../types/chat";
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function tryParseJson(text: string): unknown | null {
+  try {
+    return JSON.parse(text) ?? null;
+  } catch { /* */ }
+  return null;
+}
+
+function renderResultList(items: any[]): string {
+  const parts: string[] = [];
+  parts.push(`<ol style="list-style:decimal;padding-left:24px;margin:0">`);
+  for (const r of items) {
+    const title = r.title ?? r.question ?? r.name ?? "";
+    const url = r.url ?? r.link ?? "";
+    const desc = r.description ?? r.answer ?? r.snippet ?? "";
+    const age = r.age ?? "";
+    const stripped = desc.replace(/<[^>]*>/g, "");
+
+    parts.push(`<li style="padding:8px 0;border-bottom:1px solid rgba(128,128,128,0.1)">`);
+    parts.push(`<div style="font-weight:600">${escapeHtml(title)}</div>`);
+    if (url) parts.push(`<div style="font-size:11px;opacity:0.4;margin:2px 0">${escapeHtml(url)}</div>`);
+    if (stripped) parts.push(`<div style="margin-top:4px;opacity:0.8">${escapeHtml(stripped)}</div>`);
+    if (age) parts.push(`<div style="font-size:11px;opacity:0.35;margin-top:4px">${escapeHtml(age)}</div>`);
+    parts.push(`</li>`);
+  }
+  parts.push(`</ol>`);
+  return parts.join("\n");
+}
+
+function renderSearchResults(data: any): string | null {
+  const sections: { label: string; items: any[] }[] = [];
+
+  const web = data?.web?.results;
+  if (Array.isArray(web) && web.length > 0) sections.push({ label: "Web Results", items: web });
+
+  const news = data?.news?.results;
+  if (Array.isArray(news) && news.length > 0) sections.push({ label: "News", items: news });
+
+  const faq = data?.faq?.results;
+  if (Array.isArray(faq) && faq.length > 0) sections.push({ label: "FAQ", items: faq });
+
+  const flat = data?.results;
+  if (Array.isArray(flat) && flat.length > 0 && sections.length === 0) sections.push({ label: "Results", items: flat });
+
+  if (sections.length === 0) return null;
+
+  const query = data?.query?.original ?? data?.query?.altered ?? "";
+  const parts: string[] = [];
+
+  if (query) parts.push(`<h2 style="margin:0 0 12px">${escapeHtml(query)}</h2>`);
+
+  for (const s of sections) {
+    if (sections.length > 1) {
+      parts.push(`<div style="font-weight:600;margin:16px 0 8px;opacity:0.6;font-size:12px;text-transform:uppercase">${escapeHtml(s.label)} (${s.items.length})</div>`);
+    }
+    parts.push(renderResultList(s.items));
+  }
+
+  return parts.join("\n");
+}
+
+function jsonToLineNumberedHtml(json: string): string {
+  const lines = json.split("\n");
+  const gutterWidth = String(lines.length).length;
+  const rows = lines.map((line, i) => {
+    const num = String(i + 1).padStart(gutterWidth, " ");
+    return `<div style="display:flex"><span style="user-select:none;opacity:0.3;min-width:${gutterWidth + 1}ch;text-align:right;padding-right:12px">${num}</span><span>${escapeHtml(line)}</span></div>`;
+  });
+  return `<pre style="padding:12px 0">${rows.join("")}</pre>`;
+}
+
+function highlightLine(line: string): string {
+  const e = escapeHtml(line);
+  return e
+    .replace(/^(#{1,4}\s.*)$/, '<span style="color:var(--accent);font-weight:600">$1</span>')
+    .replace(/(\*\*(.+?)\*\*)/g, '<span style="font-weight:600">$1</span>')
+    .replace(/(`[^`]+`)/g, '<span style="color:#e06c75">$1</span>')
+    .replace(/(https?:\/\/\S+)/g, '<span style="color:var(--accent);opacity:0.8">$1</span>')
+    .replace(/^(\s*- )/, '<span style="opacity:0.4">$1</span>')
+    .replace(/^(```\w*)$/, '<span style="opacity:0.4">$1</span>');
+}
+
+function textToLineNumberedHtml(text: string): string {
+  const lines = text.split("\n");
+  const gutterWidth = String(lines.length).length;
+  const rows = lines.map((line, i) => {
+    const num = String(i + 1).padStart(gutterWidth, " ");
+    return `<div style="display:flex"><span style="user-select:none;opacity:0.3;min-width:${gutterWidth + 1}ch;text-align:right;padding-right:12px">${num}</span><span>${highlightLine(line)}</span></div>`;
+  });
+  return `<pre style="padding:12px 0">${rows.join("")}</pre>`;
+}
+
+function deepParseJson(text: string): unknown | null {
+  let parsed = tryParseJson(text);
+  while (typeof parsed === "string") {
+    parsed = tryParseJson(parsed);
+  }
+  return typeof parsed === "object" ? parsed : null;
+}
+
+export function formatActivityContent(activity: ChatActivity): { content: string; format: "html" } {
+  const d = activity.data ?? {};
+  const name = d.mergedLabel ?? d.name ?? activity.type;
+  const output = d.output;
+  const outputStr = typeof output === "string" ? output : output != null ? JSON.stringify(output) : "";
+
+  const parsed = outputStr ? deepParseJson(outputStr) : null;
+
+  const parts: string[] = [];
+
+  parts.push(`<div style="opacity:0.5;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Action</div>`);
+  parts.push(`<h2 style="margin:0 0 16px">${escapeHtml(String(name))}</h2>`);
+
+  if (d.input) {
+    parts.push(`<div style="opacity:0.5;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Input</div>`);
+    parts.push(jsonToLineNumberedHtml(JSON.stringify(d.input, null, 2)));
+  }
+
+  if (outputStr) {
+    parts.push(`<div style="opacity:0.5;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 4px">Output</div>`);
+
+    if (parsed) {
+      const search = renderSearchResults(parsed);
+      if (search) {
+        parts.push(search);
+      } else {
+        parts.push(jsonToLineNumberedHtml(JSON.stringify(parsed, null, 2)));
+      }
+    } else {
+      parts.push(textToLineNumberedHtml(outputStr));
+    }
+  }
+
+  return { content: parts.join("\n"), format: "html" };
+}
+
 export function truncate(s: string, max = 64): string {
   return s.length > max ? s.slice(0, max) + "…" : s;
 }
@@ -97,10 +236,41 @@ export function getActivityLabel(activity: ChatActivity): string | null {
   }
 }
 
-/**
- * Merge consecutive tool.start + tool.result pairs into a single display row.
- * The merged row uses the result's type/data (has summary + category) with the start's name.
- */
+
+
+function extractDescription(name: string, output: unknown): string | null {
+  if (!output) return null;
+  const text = String(output);
+
+  if (name === "app_web_search") {
+    const links = text.match(/\*\*(.+?)\*\*/g);
+    if (links && links.length > 0) {
+      const titles = links.slice(0, 3).map((l) => l.replace(/\*\*/g, ""));
+      const more = links.length > 3 ? ` +${links.length - 3} more` : "";
+      return truncate(`${titles.join(", ")}${more}`, 80);
+    }
+    return null;
+  }
+
+  if (name === "app_web_read") {
+    const first = text.split("\n").find((l) => l.trim().length > 20);
+    return first ? truncate(first.trim(), 72) : null;
+  }
+
+  if (name === "app_bus_emit") {
+    if (text.length > 10 && text.length < 200) return truncate(text, 72);
+    return null;
+  }
+
+  if (name === "app_read" || name === "app_grep" || name === "app_glob") {
+    const lines = text.split("\n").filter((l) => l.trim());
+    if (lines.length > 0) return truncate(`${lines.length} lines`, 40);
+    return null;
+  }
+
+  return null;
+}
+
 export function mergeToolActivities(activities: ChatActivity[]): ChatActivity[] {
   const merged: ChatActivity[] = [];
   const resultById = new Map<string, ChatActivity>();
@@ -112,14 +282,22 @@ export function mergeToolActivities(activities: ChatActivity[]): ChatActivity[] 
   }
 
   for (const a of activities) {
-    if (a.type === "agent.tool.start" && a.data?.id && resultById.has(a.data.id)) {
-      const result = resultById.get(a.data.id)!;
-      const displayLabel = toolLabel(a.data.name, a.data.input, a.data.label);
-      const summary = result.data?.summary ?? truncate(String(result.data?.output));
-      merged.push({
-        ...result,
-        data: { ...result.data, icon: a.data.icon, mergedLabel: `${displayLabel} → ${summary}` },
-      });
+    if (a.type === "agent.tool.start" && a.data?.id) {
+      const result = resultById.get(a.data.id);
+      if (result) {
+        const label = a.data.friendly ?? a.data.label ?? a.data.name;
+        const description = extractDescription(a.data.name, result.data?.output);
+        merged.push({
+          ...result,
+          data: { ...result.data, icon: a.data.icon, mergedLabel: label, description },
+        });
+      } else {
+        const label = a.data.friendly ?? a.data.label ?? a.data.name;
+        merged.push({
+          ...a,
+          data: { ...a.data, mergedLabel: label, pending: true },
+        });
+      }
       continue;
     }
     if (a.type === "agent.tool.result" && a.data?.id) {

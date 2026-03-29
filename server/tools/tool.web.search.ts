@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { defineTool } from "./tool.registry";
+import { defineTool, trunc } from "./tool.registry";
 
 export const webSearch = defineTool({
   name: "app_web_search",
@@ -10,6 +10,7 @@ export const webSearch = defineTool({
     query: z.string().describe("Search query, e.g. 'todoist REST API v1 documentation'"),
     maxResults: z.number().optional().default(10).describe("Max results to return (default 10)"),
   }),
+  friendlyLabel: (input) => `Searched "${trunc(input.query)}"`,
   summarize: (input) => input.query,
   async execute(input, ctx) {
     ctx.log.info("app_web_search", { query: input.query });

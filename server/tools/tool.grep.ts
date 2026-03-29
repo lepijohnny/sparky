@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { execFile } from "node:child_process";
-import { defineTool } from "./tool.registry";
+import { defineTool, trunc } from "./tool.registry";
 import { home, requirePath } from "./tool.path";
 
 const MAX_MATCHES = 100;
@@ -47,6 +47,7 @@ export const grep = defineTool({
   label: "Matching",
   icon: "search",
   category: "file",
+  friendlyLabel: (input) => `Searching code: ${trunc(input.pattern, 40)}`,
   summarize: (input) => input.pattern,
   async execute(input, ctx) {
     const searchPath = input.path ? home(input.path, ctx.cwd) : (ctx.cwd ?? process.cwd());

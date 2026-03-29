@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { exec } from "node:child_process";
-import { defineTool } from "./tool.registry";
+import { defineTool, trunc } from "./tool.registry";
 
 const MAX_OUTPUT = 50 * 1024;
 const MAX_LINES = 2000;
@@ -78,6 +78,7 @@ export const bash = defineTool({
   trustScope: "bash",
   trustTarget: (input) => input.command,
   category: "execute",
+  friendlyLabel: (input) => `$ ${trunc(input.command)}`,
   summarize: (input) => {
     return input.command.length > 60 ? `${input.command.slice(0, 57)}...` : input.command;
   },

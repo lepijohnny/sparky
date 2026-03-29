@@ -10,6 +10,9 @@ export const webRead = defineTool({
     url: z.url().describe("URL to fetch and read, e.g. https://developer.todoist.com/api/v1/"),
   }),
   recovery: 'Use app_web_search first to find the correct URL.',
+  friendlyLabel: (input) => {
+    try { return `Fetching ${new URL(input.url).hostname}`; } catch { return "Fetching page"; }
+  },
   summarize: (input) => {
     try { return `${new URL(input.url).hostname}${new URL(input.url).pathname}`; } catch { return input.url; }
   },

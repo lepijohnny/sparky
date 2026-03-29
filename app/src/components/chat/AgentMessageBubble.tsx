@@ -35,9 +35,11 @@ import type { ChatActivity } from "../../types/chat";
 import {
   expandedGroups,
   filterActivities,
+  formatActivityContent,
   getActivityLabel,
   mergeToolActivities,
 } from "../../lib/activityUtils";
+import { openExpandWindow } from "../shared/ExpandableBlock";
 
 function isIncompleteBlock(pending: string): boolean {
   const t = pending.trimStart();
@@ -214,19 +216,30 @@ function ActivitiesGroup({ messageId, activities: raw }: ActivitiesGroupProps): 
       {count > 0 && (
         <div className={`${styles.activitiesListWrap} ${!expanded ? styles.activitiesListWrapOut : ""}`}>
           <div className={styles.activitiesList}>
-            {activities.map((a, i) => (
-              <div
-                key={`${a.type}-${i}`}
-                className={`${styles.activityRow}${
-                  a.type === "agent.error" || a.type === "agent.approval.denied" || a.type === "agent.trust.denied" ? ` ${styles.activityError}` :
-                  a.type === "agent.approval.approved" ? ` ${styles.activityApproved}` :
-                  a.type === "agent.approval.requested" ? ` ${styles.activityPending}` : ""
-                }`}
-              >
-                {getActivityIcon(a)}
-                <span className={styles.activityLabel}>{a.data?.mergedLabel ?? getActivityLabel(a)}</span>
-              </div>
-            ))}
+            {activities.map((a, i) => {
+              const hasOutput = a.data?.output !== undefined || a.data?.input !== undefined;
+              return (
+                <div
+                  key={`${a.type}-${i}`}
+                  className={`${styles.activityRow}${
+                    a.type === "agent.error" || a.type === "agent.approval.denied" || a.type === "agent.trust.denied" ? ` ${styles.activityError}` :
+                    a.type === "agent.approval.approved" ? ` ${styles.activityApproved}` :
+                    a.type === "agent.approval.requested" ? ` ${styles.activityPending}` : ""
+                  }${hasOutput ? ` ${styles.activityClickable}` : ""}`}
+                  onClick={hasOutput ? () => {
+                    const { content } = formatActivityContent(a);
+                    openExpandWindow("activity", content);
+                  } : undefined}
+                >
+                  {getActivityIcon(a)}
+                  <span className={styles.activityLabel}>
+                    {a.data?.mergedLabel ?? getActivityLabel(a)}
+                    {a.data?.pending && <span className={styles.loadingDots} />}
+                    {a.data?.description && <span className={styles.activityDescription}>{a.data.description}</span>}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
