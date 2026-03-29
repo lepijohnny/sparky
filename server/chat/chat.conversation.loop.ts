@@ -1,7 +1,10 @@
 /**
  * Agent streaming loop — processes agent events and maps them to chat entries.
  */
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Agent, AgentEvent, AgentMessage, AgentTools } from "../core/agent.types";
+import { DEFAULT_OUTPUT_LIMIT } from "../tools/tool.registry";
 import type { ChatEntry } from "./chat.types";
 
 type TerminalReason = "done" | "stopped" | "error" | "overflow";
@@ -33,17 +36,33 @@ export function runAgentLoop(
   emit: EmitFn,
   emitActivity: EmitActivityFn,
   tools?: AgentTools,
+  toolOutputDir?: string,
 ): Promise<TerminalReason> {
   return agentStream({
     run: (msgs) => agent.stream({ system, messages: msgs, cancellation: signal, tools }),
     messages,
     signal,
     onEvent: async (event, pendingTools) => {
+      if (event.type === "tool.result" && toolOutputDir) {
+        const pending = pendingTools.get(event.id);
+        const toolName = pending ? stripToolPrefix(pending.name) : "";
+        const def = tools?.defs.find((d) => d.name === toolName);
+        const limit = def?.outputLimit ?? DEFAULT_OUTPUT_LIMIT;
+        saveLargeOutput(toolOutputDir, event.id, String(event.output), limit);
+      }
       const entry = toEntry(event, turnId, tools, pendingTools);
       if (entry) await emit(chatId, entry);
     },
     onError: (msg) => emitActivity(chatId, turnId, "agent.error", { message: msg }),
   }).retry(3);
+}
+
+function saveLargeOutput(dir: string, toolCallId: string, output: string, limit: number): void {
+  if (output.length < limit) return;
+  try {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, `${toolCallId}.txt`), output, "utf-8");
+  } catch { /* best-effort */ }
 }
 
 export interface AgentStreamOpts {

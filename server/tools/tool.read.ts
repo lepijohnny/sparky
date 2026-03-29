@@ -59,6 +59,7 @@ export const read = defineTool({
   trustScope: "read",
   trustTarget: (input) => real(resolvePath(input.path)),
   category: "file",
+  outputLimit: MAX_BYTES,
   friendlyLabel: (input) => `Reading ${basename(input.path)}`,
   summarize: (input) => input.path,
   async execute(input, ctx) {

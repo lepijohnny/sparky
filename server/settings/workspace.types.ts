@@ -12,5 +12,6 @@ export interface WorkspaceSpace {
   knowledge: number;
   attachments: number;
   cwd: number;
+  tools: number;
   total: number;
 }

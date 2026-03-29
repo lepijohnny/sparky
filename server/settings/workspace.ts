@@ -42,8 +42,9 @@ export class WorkspaceSettings {
     const knowledge = fileSize(ktDbPath);
     const attachments = chatSubdirSize(chatsRoot, "attachments");
     const cwd = chatSubdirSize(chatsRoot, "cwd");
+    const tools = chatSubdirSize(chatsRoot, "tools");
 
-    return { conversations, knowledge, attachments, cwd, total: conversations + knowledge + attachments + cwd };
+    return { conversations, knowledge, attachments, cwd, tools, total: conversations + knowledge + attachments + cwd + tools };
   }
 
   private readWorkspaces(): Workspace[] {

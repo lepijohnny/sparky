@@ -9,7 +9,10 @@
  *     .conversation(fetcher)
  *     .build();
  */
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { AgentMessage, AgentToolDef } from "../core/agent.types";
+import { DEFAULT_OUTPUT_LIMIT } from "../tools/tool.registry";
 import { estimateTokens } from "../tokens";
 import type { AttachmentMeta, ChatEntry } from "./chat.types";
 
@@ -106,6 +109,7 @@ export class ContextBuilder {
   private skillsBlock = "";
   private skillsTokens = 0;
   private entryFetcher: EntryFetcher | null = null;
+  private toolOutputPath: string | null = null;
 
   constructor(contextWindow?: number) {
     this.total = contextWindow ?? DEFAULT_CONTEXT_WINDOW;
@@ -207,6 +211,11 @@ export class ContextBuilder {
     return this;
   }
 
+  toolOutputDir(dir: string): this {
+    this.toolOutputPath = dir;
+    return this;
+  }
+
   build(): ContextResult {
     let fullSystem = this.systemPrompt;
     if (this.servicesBlock) {
@@ -233,7 +242,7 @@ export class ContextBuilder {
     let messages: AgentMessage[] = [];
 
     if (this.entryFetcher && this.remaining > 0) {
-      const conv = buildConversation(this.entryFetcher, this.remaining);
+      const conv = buildConversation(this.entryFetcher, this.remaining, this.toolOutputPath);
       messages = conv.messages;
       conversationTokens = conv.tokensUsed;
       includedTurns = conv.includedTurns;
@@ -270,6 +279,7 @@ export class ContextBuilder {
 function buildConversation(
   fetcher: EntryFetcher,
   available: number,
+  toolOutputDir: string | null = null,
 ): { messages: AgentMessage[]; tokensUsed: number; includedTurns: number; skippedTurns: number; hasSkippedEntries: boolean; lastKnownMemoryId: number | null } {
   let allEntries: ChatEntry[] = [];
   let cursor: number | undefined;
@@ -304,7 +314,7 @@ function buildConversation(
   const oldestRowid = oldestIncluded?.userMessage?.rowid ?? oldestIncluded?.assistantMessage?.rowid ?? null;
 
   return {
-    messages: flattenTurns(included),
+    messages: flattenTurns(included, toolOutputDir),
     tokensUsed,
     includedTurns: included.length,
     skippedTurns,
@@ -366,12 +376,11 @@ function groupByTurn(entries: ChatEntry[]): Turn[] {
   return turns;
 }
 
-const MAX_OLD_MEMORY_TOOL_OUTPUT = 4_000;
-const MAX_RECENT_MEMORY_TOOL_OUTPUT = 32_000;
+const MAX_OLD_TURN_OUTPUT = 4_000;
 
 function estimateTurnTokens(turn: Turn, isLatest = false): number {
   let tokens = 0;
-  const outputCap = isLatest ? MAX_RECENT_MEMORY_TOOL_OUTPUT : MAX_OLD_MEMORY_TOOL_OUTPUT;
+  const outputCap = isLatest ? DEFAULT_OUTPUT_LIMIT : MAX_OLD_TURN_OUTPUT;
   if (turn.userMessage?.kind === "message") {
     tokens += estimateTokens(turn.userMessage.content) + MESSAGE_OVERHEAD;
   }
@@ -390,19 +399,32 @@ function estimateTurnTokens(turn: Turn, isLatest = false): number {
   return tokens;
 }
 
-function capToolOutput(raw: string, limit: number): string {
+function cacheLargeToolOutput(raw: string, limit: number, toolCallId?: string, toolOutputDir?: string | null): string {
   if (raw.length <= limit) return raw;
+  if (toolOutputDir && toolCallId) {
+    const filePath = join(toolOutputDir, `${toolCallId}.txt`);
+    if (!existsSync(filePath)) {
+      try {
+        mkdirSync(toolOutputDir, { recursive: true });
+        writeFileSync(filePath, raw, "utf-8");
+      } catch { /* best-effort */ }
+    }
+    if (existsSync(filePath)) {
+      const preview = raw.slice(0, 400).replace(/\n/g, " ").trim();
+      return `[Large result (${Math.round(raw.length / 1024)}KB) saved to ${filePath}]\nPreview: ${preview}…\nUse app_read with offset/limit or app_grep to inspect the full output.`;
+    }
+  }
   return raw.slice(0, limit) + "\n...(truncated)";
 }
 
-function flattenTurns(turns: Turn[]): AgentMessage[] {
+function flattenTurns(turns: Turn[], toolOutputDir: string | null = null): AgentMessage[] {
   const messages: AgentMessage[] = [];
   const lastTurnIndex = turns.length - 1;
 
   for (let ti = 0; ti < turns.length; ti++) {
     const turn = turns[ti];
     const isLatest = ti === lastTurnIndex;
-    const outputCap = isLatest ? MAX_RECENT_MEMORY_TOOL_OUTPUT : MAX_OLD_MEMORY_TOOL_OUTPUT;
+    const outputCap = isLatest ? DEFAULT_OUTPUT_LIMIT : MAX_OLD_TURN_OUTPUT;
 
     if (turn.userMessage?.kind === "message") {
       const text = attachmentAnnotation(turn.userMessage.content, turn.userMessage.attachments);
@@ -422,11 +444,12 @@ function flattenTurns(turns: Turn[]): AgentMessage[] {
 
       for (const tc of turn.toolCalls) {
         if (tc.result?.kind === "activity") {
+          const toolCallId = (tc.start as any).data?.id ?? "";
           const raw = JSON.stringify((tc.result as any).data?.output ?? "");
           messages.push({
             role: "tool",
-            toolCallId: (tc.start as any).data?.id ?? "",
-            content: capToolOutput(raw, outputCap),
+            toolCallId,
+            content: cacheLargeToolOutput(raw, outputCap, toolCallId, toolOutputDir),
           });
         }
       }

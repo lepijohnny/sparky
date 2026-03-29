@@ -217,6 +217,7 @@ export class ChatConversation {
         .anchors(anchoredEntries)
         .summary(existingSummary?.content ?? "")
         .knowledge(knowledgeResults)
+        .toolOutputDir(join(this.wsDir, "chats", data.chatId, "tools"))
         .conversation(fetcherFn)
         .build();
 
@@ -320,7 +321,8 @@ export class ChatConversation {
     const messages = currentTurnContent
       ? injectCurrentTurnContent(ctx.messages, currentTurnContent)
       : ctx.messages;
-    return runAgentLoop(agent, chatId, turnId, ctx.system, messages, signal, this.emit.bind(this), this.emitActivity.bind(this), tools);
+    const toolOutputDir = join(this.wsDir, "chats", chatId, "tools");
+    return runAgentLoop(agent, chatId, turnId, ctx.system, messages, signal, this.emit.bind(this), this.emitActivity.bind(this), tools, toolOutputDir);
   }
 
   private async renameAgentLoop(

@@ -1,3 +1,6 @@
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { describe, expect, test } from "vitest";
 import { buildContext, contextBuilder, type EntryFetcher } from "../chat.context";
 import type { AttachmentMeta, ChatEntry } from "../chat.types";
@@ -450,5 +453,89 @@ describe("contextBuilder — attachments", () => {
 
     expect(ctx.system).not.toContain("<active-skills>");
     expect(ctx.budget.skillsTokens).toBe(0);
+  });
+});
+
+describe("contextBuilder — large tool output caching", () => {
+  function makeTmpDir(): string {
+    const dir = join(tmpdir(), `sparky-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    return dir;
+  }
+
+  test("given large tool output, when building context, then saves to file and returns pointer", () => {
+    const toolOutputDir = makeTmpDir();
+    const toolId = "tc_large";
+    const msgId = "a_large";
+    const largeOutput = "x".repeat(50_000);
+    const entries = [
+      userMsg("Do something big"),
+      toolStart("app_bash", msgId, toolId),
+      toolResult(msgId, toolId, largeOutput),
+      assistantMsg("Done", msgId),
+    ];
+
+    const ctx = contextBuilder(200_000)
+      .system("Sys")
+      .toolOutputDir(toolOutputDir)
+      .conversation(arrayFetcher(entries))
+      .build();
+
+    const toolMsg = ctx.messages.find((m) => m.role === "tool");
+    expect(toolMsg).toBeDefined();
+    expect(toolMsg!.content).toContain("app_read");
+    expect(toolMsg!.content).toContain("app_grep");
+
+    const savedFile = join(toolOutputDir, `${toolId}.txt`);
+    expect(existsSync(savedFile)).toBe(true);
+
+    rmSync(toolOutputDir, { recursive: true, force: true });
+  });
+
+  test("given tool output under threshold, when building context, then keeps inline", () => {
+    const toolOutputDir = makeTmpDir();
+    const toolId = "tc_small";
+    const msgId = "a_small";
+    const smallOutput = "short result";
+    const entries = [
+      userMsg("Do something"),
+      toolStart("app_bash", msgId, toolId),
+      toolResult(msgId, toolId, smallOutput),
+      assistantMsg("Done", msgId),
+    ];
+
+    const ctx = contextBuilder(200_000)
+      .system("Sys")
+      .toolOutputDir(toolOutputDir)
+      .conversation(arrayFetcher(entries))
+      .build();
+
+    const toolMsg = ctx.messages.find((m) => m.role === "tool");
+    expect(toolMsg).toBeDefined();
+    expect(toolMsg!.content).toContain("short result");
+    expect(toolMsg!.content).not.toContain("app_read");
+
+    rmSync(toolOutputDir, { recursive: true, force: true });
+  });
+
+  test("given no toolOutputDir, when tool output is large, then falls back to truncation", () => {
+    const toolId = "tc_nodir";
+    const msgId = "a_nodir";
+    const largeOutput = "y".repeat(50_000);
+    const entries = [
+      userMsg("Go"),
+      toolStart("app_bash", msgId, toolId),
+      toolResult(msgId, toolId, largeOutput),
+      assistantMsg("Done", msgId),
+    ];
+
+    const ctx = contextBuilder(200_000)
+      .system("Sys")
+      .conversation(arrayFetcher(entries))
+      .build();
+
+    const toolMsg = ctx.messages.find((m) => m.role === "tool");
+    expect(toolMsg).toBeDefined();
+    expect(toolMsg!.content).toContain("...(truncated)");
+    expect(toolMsg!.content).not.toContain("app_read");
   });
 });

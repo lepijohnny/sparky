@@ -284,6 +284,13 @@ export default function WorkspaceDetailsPage() {
                   title={`Working files: ${formatSize(workspaceSpace.cwd)}`}
                 />
               )}
+              {workspaceSpace.tools > 0 && (
+                <div
+                  className={styles.spaceSegTools}
+                  style={{ flex: workspaceSpace.tools }}
+                  title={`Tool outputs: ${formatSize(workspaceSpace.tools)}`}
+                />
+              )}
             </div>
             <div className={styles.spaceLegend}>
               <span className={styles.spaceLegendItem}>
@@ -304,6 +311,12 @@ export default function WorkspaceDetailsPage() {
                 <span className={styles.spaceLegendItem}>
                   <span className={`${styles.spaceDot} ${styles.spaceDotCwd}`} />
                   Working files {formatSize(workspaceSpace.cwd)}
+                </span>
+              )}
+              {workspaceSpace.tools > 0 && (
+                <span className={styles.spaceLegendItem}>
+                  <span className={`${styles.spaceDot} ${styles.spaceDotTools}`} />
+                  Tool outputs {formatSize(workspaceSpace.tools)}
                 </span>
               )}
             </div>
