@@ -32,7 +32,7 @@
 }
 
 .bubble {
-  padding: 12px 16px;
+  padding: 14px 18px;
   font-size: 13px;
   line-height: 1.6;
   word-break: break-word;
@@ -62,7 +62,7 @@
 }
 
 .bubble p {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
 }
 
 .bubble p:last-child {
