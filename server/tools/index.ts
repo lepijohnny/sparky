@@ -28,8 +28,6 @@ const ALL_TOOLS: Record<string, ToolDef> = {
   app_web_read: webRead,
 };
 
-const WEB_SEARCH_TOOLS = new Set(["app_web_search"]);
-
 const MODE_TOOLS: Record<PermissionMode, Set<string>> = {
   read: new Set(["app_read", "app_glob", "app_grep", "app_bus_emit", "app_web_search", "app_web_read"]),
   write: new Set(["app_read", "app_glob", "app_grep", "app_write", "app_edit", "app_bus_emit", "app_web_search", "app_web_read"]),
@@ -43,7 +41,7 @@ export function createRoleToolSet(role: RoleDef, ctx: ToolContext, options?: { w
   const tools = role.meta.tools
     .filter((name) => {
       if (!allowed.has(name)) return false;
-      if (WEB_SEARCH_TOOLS.has(name)) return options?.webSearch === "local";
+
       return true;
     })
     .map((name) => ALL_TOOLS[name])

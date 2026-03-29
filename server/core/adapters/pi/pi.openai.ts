@@ -28,6 +28,7 @@ export function createPiOpenAIApiAdapter(
   return {
     id: "openai-api",
     name: "OpenAI",
+    searchModel: "gpt-4o-mini",
 
     async dispose() {
       log.info("Disposing pi-ai OpenAI API adapter");
@@ -61,7 +62,7 @@ export function createPiOpenAIApiAdapter(
       return !!token;
     },
 
-    createAgent(conn: LlmConnection): Agent {
+    createAgent(conn: LlmConnection, agentOpts?: { webSearch?: boolean }): Agent {
       const modelId = conn.model ?? getModels("openai").filter((m) => isUsableApiModel(m.id))[0]?.id ?? "gpt-4o";
       const thinkingLevel = conn.thinking ?? 0;
 
@@ -72,7 +73,16 @@ export function createPiOpenAIApiAdapter(
         const model = getModel("openai", modelId as any);
         if (!model) throw new Error(`Unknown OpenAI model: ${modelId}`);
 
-        return createPiAgent({ model, apiKey: token, thinkingLevel, log });
+        const onPayload = agentOpts?.webSearch
+          ? (payload: unknown) => {
+              const p = payload as any;
+              if (!p.tools) p.tools = [];
+              p.tools.push({ type: "web_search" });
+              return p;
+            }
+          : undefined;
+
+        return createPiAgent({ model, apiKey: token, thinkingLevel, log, onPayload });
       };
 
       const inner: Agent = {

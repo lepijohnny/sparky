@@ -16,6 +16,8 @@ export interface ModelDefinition {
 export interface ProviderAdapter {
   readonly id: string;
   readonly name: string;
+  /** Cheapest model id for web search side-calls, or undefined if provider has no native search */
+  readonly searchModel?: string;
   models(conn?: LlmConnection): Promise<ModelDefinition[]>;
   createAgent(conn: LlmConnection, options?: { webSearch?: boolean }): Agent;
   validate(conn?: LlmConnection): Promise<boolean>;
