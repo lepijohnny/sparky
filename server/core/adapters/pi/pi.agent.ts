@@ -178,6 +178,14 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
           const results = [];
           for (const tc of pendingCalls) {
             if (turn.cancellation.aborted) break;
+
+            const steerBefore = turn.steering?.();
+            if (steerBefore) {
+              opts.log.info("Steering message injected (before tool)", { length: steerBefore.length });
+              addToolResultsToContext(context, results.splice(0));
+              context.push({ role: "user", content: steerBefore });
+            }
+
             const output = await turn.tools!.execute(tc.name, tc.arguments).then((r) => typeof r === "string" ? r : r.text);
             if (turn.cancellation.aborted) break;
             yield { type: "tool.result" as const, id: tc.id, output };

@@ -37,9 +37,10 @@ export function runAgentLoop(
   emitActivity: EmitActivityFn,
   tools?: AgentTools,
   toolOutputDir?: string,
+  steering?: () => string | null,
 ): Promise<TerminalReason> {
   return agentStream({
-    run: (msgs) => agent.stream({ system, messages: msgs, cancellation: signal, tools }),
+    run: (msgs) => agent.stream({ system, messages: msgs, cancellation: signal, tools, steering }),
     messages,
     signal,
     onEvent: async (event, pendingTools) => {

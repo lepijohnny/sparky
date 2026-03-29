@@ -32,6 +32,7 @@ const DEFAULT_PREFERENCES = "";
 
 export class ChatConversation {
   private activeChats = new Map<string, AbortController>();
+  private steeringQueue = new Map<string, string[]>();
   private recording = false;
   wsDir = "";
 
@@ -60,6 +61,24 @@ export class ChatConversation {
 
   isStreaming(chatId: string): boolean {
     return this.activeChats.has(chatId);
+  }
+
+  steer(chatId: string, content: string): boolean {
+    if (!this.activeChats.has(chatId)) return false;
+    let queue = this.steeringQueue.get(chatId);
+    if (!queue) { queue = []; this.steeringQueue.set(chatId, queue); }
+    queue.push(content);
+    this.log.info("Steering message queued", { chatId, queueSize: queue.length });
+    return true;
+  }
+
+  private drainSteering(chatId: string): () => string | null {
+    return () => {
+      const queue = this.steeringQueue.get(chatId);
+      if (!queue || queue.length === 0) return null;
+      const combined = queue.splice(0).join("\n\n");
+      return `[USER STEERING MESSAGE — the user sent this while you were working. Acknowledge it and adjust your approach accordingly.]\n\n${combined}`;
+    };
   }
 
 
@@ -107,6 +126,19 @@ export class ChatConversation {
   async ask(data: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[]; mode?: PermissionMode; knowledgeFilters?: string[] }): Promise<{ ok: boolean }> {
 
     if (this.activeChats.has(data.chatId)) {
+      if (data.content.trim()) {
+        const steerEntry: ChatEntry = {
+          kind: "message",
+          id: randomUUIDv7(),
+          role: "user",
+          content: data.content,
+          timestamp: new Date().toISOString(),
+        };
+        this.db.addEntry(data.chatId, steerEntry);
+        await this.emit(data.chatId, steerEntry);
+        this.steer(data.chatId, data.content);
+        return { ok: true };
+      }
       throw new Error("Chat is busy — wait for the current response to finish");
     }
 
@@ -276,6 +308,7 @@ export class ChatConversation {
       throw err;
     } finally {
       this.activeChats.delete(data.chatId);
+      this.steeringQueue.delete(data.chatId);
     }
   }
 
@@ -322,7 +355,7 @@ export class ChatConversation {
       ? injectCurrentTurnContent(ctx.messages, currentTurnContent)
       : ctx.messages;
     const toolOutputDir = join(this.wsDir, "chats", chatId, "tools");
-    return runAgentLoop(agent, chatId, turnId, ctx.system, messages, signal, this.emit.bind(this), this.emitActivity.bind(this), tools, toolOutputDir);
+    return runAgentLoop(agent, chatId, turnId, ctx.system, messages, signal, this.emit.bind(this), this.emitActivity.bind(this), tools, toolOutputDir, this.drainSteering(chatId));
   }
 
   private async renameAgentLoop(
