@@ -13,23 +13,44 @@ function tryParseJson(text: string): unknown | null {
 
 function renderResultList(items: any[]): string {
   const parts: string[] = [];
-  parts.push(`<ol style="list-style:decimal;padding-left:24px;margin:0">`);
-  for (const r of items) {
+  parts.push(`<div style="margin:0;padding:0">`);
+  for (let i = 0; i < items.length; i++) {
+    const r = items[i];
     const title = r.title ?? r.question ?? r.name ?? "";
     const url = r.url ?? r.link ?? "";
     const desc = r.description ?? r.answer ?? r.snippet ?? "";
     const age = r.age ?? "";
     const stripped = desc.replace(/<[^>]*>/g, "");
+    const isLast = i === items.length - 1;
 
-    parts.push(`<li style="padding:8px 0;border-bottom:1px solid rgba(128,128,128,0.1)">`);
+    parts.push(`<div style="display:flex;gap:12px;padding:0 0 ${isLast ? "0" : "10px"} 0">`);
+    parts.push(`<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:24px">`);
+    parts.push(`<span style="color:var(--accent);font-weight:700;font-size:12px;line-height:20px">${i + 1}</span>`);
+    if (!isLast) parts.push(`<div style="flex:1;width:1px;background:color-mix(in srgb, var(--fg-muted) 12%, transparent);margin-top:4px"></div>`);
+    parts.push(`</div>`);
+    parts.push(`<div style="min-width:0;padding-bottom:${isLast ? "0" : "10px"};${isLast ? "" : "border-bottom:1px solid rgba(128,128,128,0.06);"}">`);
     parts.push(`<div style="font-weight:600">${escapeHtml(title)}</div>`);
-    if (url) parts.push(`<div style="font-size:11px;opacity:0.4;margin:2px 0">${escapeHtml(url)}</div>`);
+    if (url) parts.push(`<div style="font-size:11px;opacity:0.4;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(url)}</div>`);
     if (stripped) parts.push(`<div style="margin-top:4px;opacity:0.8">${escapeHtml(stripped)}</div>`);
     if (age) parts.push(`<div style="font-size:11px;opacity:0.35;margin-top:4px">${escapeHtml(age)}</div>`);
-    parts.push(`</li>`);
+    parts.push(`</div>`);
+    parts.push(`</div>`);
   }
-  parts.push(`</ol>`);
+  parts.push(`</div>`);
   return parts.join("\n");
+}
+
+function parseTextSearchResults(text: string): { query: string; items: any[] } | null {
+  const headerMatch = text.match(/^Web search results for query: "(.+?)"\s*\n/);
+  if (!headerMatch) return null;
+  const query = headerMatch[1];
+  const items: any[] = [];
+  const entryRegex = /^\d+\.\s+\*\*(.+?)\*\*\n\s+(\S+)\n\s+([\s\S]*?)(?=\n\n\d+\.\s+\*\*|\nREMINDER:|$)/gm;
+  let m;
+  while ((m = entryRegex.exec(text)) !== null) {
+    items.push({ title: m[1], url: m[2], description: m[3].trim() });
+  }
+  return items.length > 0 ? { query, items } : null;
 }
 
 function renderSearchResults(data: any): string | null {
@@ -64,12 +85,17 @@ function renderSearchResults(data: any): string | null {
   return parts.join("\n");
 }
 
+function gutterHtml(num: string, gutterWidth: number): string {
+  return `<span style="user-select:none;color:var(--accent);opacity:0.5;min-width:${gutterWidth + 1}ch;text-align:right;padding:0 12px;flex-shrink:0">${num}</span>`
+    + `<span style="width:1px;flex-shrink:0;background:color-mix(in srgb, var(--accent) 35%, transparent)"></span>`;
+}
+
 function jsonToLineNumberedHtml(json: string): string {
   const lines = json.split("\n");
-  const gutterWidth = String(lines.length).length;
+  const gw = String(lines.length).length;
   const rows = lines.map((line, i) => {
-    const num = String(i + 1).padStart(gutterWidth, " ");
-    return `<div style="display:flex"><span style="user-select:none;opacity:0.3;min-width:${gutterWidth + 1}ch;text-align:right;padding-right:12px">${num}</span><span>${escapeHtml(line)}</span></div>`;
+    const num = String(i + 1).padStart(gw, " ");
+    return `<div style="display:flex">${gutterHtml(num, gw)}<span style="padding-left:14px">${escapeHtml(line)}</span></div>`;
   });
   return `<pre style="padding:12px 0">${rows.join("")}</pre>`;
 }
@@ -87,10 +113,10 @@ function highlightLine(line: string): string {
 
 function textToLineNumberedHtml(text: string): string {
   const lines = text.split("\n");
-  const gutterWidth = String(lines.length).length;
+  const gw = String(lines.length).length;
   const rows = lines.map((line, i) => {
-    const num = String(i + 1).padStart(gutterWidth, " ");
-    return `<div style="display:flex"><span style="user-select:none;opacity:0.3;min-width:${gutterWidth + 1}ch;text-align:right;padding-right:12px">${num}</span><span>${highlightLine(line)}</span></div>`;
+    const num = String(i + 1).padStart(gw, " ");
+    return `<div style="display:flex">${gutterHtml(num, gw)}<span style="padding-left:14px">${highlightLine(line)}</span></div>`;
   });
   return `<pre style="padding:12px 0">${rows.join("")}</pre>`;
 }
