@@ -22,6 +22,7 @@ export function createPiGoogleAdapter(
   return {
     id: "google",
     name: "Google Gemini",
+    searchModel: "gemini-2.5-flash",
 
     async dispose() {
       log.info("Disposing pi-ai Google adapter");

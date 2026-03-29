@@ -30,6 +30,7 @@ export function createPiAnthropicAdapter(
   return {
     id,
     name,
+    searchModel: "claude-haiku-4-5",
 
     async dispose() {
       log.info("Disposing pi-ai Anthropic adapter", { id });
@@ -79,23 +80,25 @@ export function createPiAnthropicAdapter(
           ? (payload: unknown) => {
               const p = payload as any;
               if (!p.tools) p.tools = [];
-              p.tools.push({ type: "web_search_20250305", name: "web_search", max_uses: 3 });
+              p.tools.push({ type: "web_search_20250305", name: "web_search", max_uses: 1 });
               return p;
             }
           : undefined;
 
-        const onContentBlock: ContentBlockHandler = (block) => {
-          const b = block as Record<string, unknown>;
-          const events: ContentBlockEvent[] = [];
-          if (b.type === "server_tool_use") {
-            events.push({ type: "server_tool.start", id: b.id as string, name: b.name as string, input: (b.input ?? {}) as Record<string, unknown> });
-          } else if (b.type === "web_search_tool_result") {
-            const results = ((b.content as unknown[]) || []).filter((r: any) => r.type === "web_search_result");
-            const citations = results.map((r: any) => `- [${r.title}](${r.url})`).join("\n");
-            if (citations) events.push({ type: "citations", text: citations });
-          }
-          return events.length > 0 ? events : undefined;
-        };
+        const onContentBlock: ContentBlockHandler | undefined = agentOpts?.webSearch
+          ? (block) => {
+              const b = block as Record<string, unknown>;
+              const events: ContentBlockEvent[] = [];
+              if (b.type === "server_tool_use") {
+                events.push({ type: "server_tool.start", id: b.id as string, name: b.name as string, input: (b.input ?? {}) as Record<string, unknown> });
+              } else if (b.type === "web_search_tool_result") {
+                const results = ((b.content as unknown[]) || []).filter((r: any) => r.type === "web_search_result");
+                const citations = results.map((r: any) => `- [${r.title}](${r.url})`).join("\n");
+                if (citations) events.push({ type: "citations", text: citations });
+              }
+              return events.length > 0 ? events : undefined;
+            }
+          : undefined;
 
         return createPiAgent({ model, apiKey: token, thinkingLevel, log, onPayload, onContentBlock });
       };

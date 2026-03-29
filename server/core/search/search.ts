@@ -4,6 +4,7 @@ import type { EventBus } from "../bus";
 import type { Logger } from "../../logger.types";
 import { createWebSearch, type WebSearch } from "./search.ddg";
 import { createWebReader, type WebReader } from "./search.read";
+import { createAgentSearchProvider, type SearchAgentFn, type SearchProvider } from "./search.provider";
 
 declare const SPARKY_VERSION: string | undefined;
 
@@ -17,13 +18,30 @@ export interface SearchService {
   reader: WebReader;
 }
 
-export function createSearchService(bus: EventBus, log: Logger): SearchService {
-  const search = createWebSearch(headers);
+export function createSearchService(bus: EventBus, log: Logger, searchAgentFn?: SearchAgentFn): SearchService {
+  const ddgSearch = createWebSearch(headers);
   const reader = createWebReader(headers);
+  const provider: SearchProvider | null = searchAgentFn
+    ? createAgentSearchProvider(searchAgentFn, log)
+    : null;
 
   bus.on("web.search", async (data) => {
     log.info("Web search", { query: data.query, max: data.maxResults });
-    const results = await search.search(data.query, data.maxResults);
+
+    if (provider) {
+      try {
+        const results = await provider.search(data.query, data.maxResults ?? 10);
+        if (results.length > 0) {
+          log.info("Web search via", { provider: provider.name, results: results.length });
+          return { results };
+        }
+        log.warn("Provider returned 0 results, falling back to DDG");
+      } catch (err) {
+        log.warn("Provider search failed, falling back to DDG", { error: String(err) });
+      }
+    }
+
+    const results = await ddgSearch.search(data.query, data.maxResults);
     return { results };
   });
 
@@ -33,5 +51,5 @@ export function createSearchService(bus: EventBus, log: Logger): SearchService {
     return { content };
   });
 
-  return { search, reader };
+  return { search: ddgSearch, reader };
 }

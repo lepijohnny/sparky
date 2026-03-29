@@ -71,7 +71,7 @@ export function createSparky(): Sparky {
   createRegistryCrud(bus, config, registry);
   createSvcCrud(bus, config, logger.createLogger("service"), cred, storage);
   createSettingsCrud(bus, storage, config, cred, logger);
-  createSearchService(bus, logger.createLogger("search"));
+  createSearchService(bus, logger.createLogger("search"), searchAgentFn);
   createTrustCrud(bus, trustStore, broadcast);
   createSkillsCrud(bus, logger.createLogger("skills"), storage, (skillId?: string) => skillId ? cred.getEnvVarsForSkill(skillId) : cred.getEnvVars(), broadcast);
 
@@ -110,7 +110,7 @@ export function createSparky(): Sparky {
     }
 
     return {
-      agent: adapter.createAgent({ ...conn, model: modelId, thinking }, { webSearch: true }),
+      agent: adapter.createAgent({ ...conn, model: modelId, thinking }),
       contextWindow: modelDef?.contextWindow,
       webSearch: modelDef?.webSearch,
     };
@@ -128,6 +128,43 @@ export function createSparky(): Sparky {
     return {
       agent: adapter.createAgent({ ...conn, thinking: 0 }),
     };
+  }
+
+  async function searchAgentFn(): Promise<{ agent: Agent; provider: string; model: string } | null> {
+    const conns = config.get("llms") ?? [];
+    const defaultId = config.get("llmDefault")?.id;
+
+    const defaultConn = conns.find((c) => c.id === defaultId);
+    if (defaultConn) {
+      const adapter = registry.get(defaultConn.provider);
+      if (adapter?.searchModel) {
+        const valid = await adapter.validate(defaultConn);
+        if (valid) {
+          return {
+            agent: adapter.createAgent({ ...defaultConn, model: adapter.searchModel, thinking: 0 }, { webSearch: true }),
+            provider: adapter.name,
+            model: adapter.searchModel,
+          };
+        }
+      }
+    }
+
+    for (const conn of conns) {
+      if (conn.id === defaultId) continue;
+      const adapter = registry.get(conn.provider);
+      if (!adapter?.searchModel) continue;
+
+      const valid = await adapter.validate(conn);
+      if (!valid) continue;
+
+      return {
+        agent: adapter.createAgent({ ...conn, model: adapter.searchModel, thinking: 0 }, { webSearch: true }),
+        provider: adapter.name,
+        model: adapter.searchModel,
+      };
+    }
+
+    return null;
   }
 
   function broadcast(route: string, data: any) {

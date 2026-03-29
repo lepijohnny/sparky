@@ -1,39 +1,51 @@
 ---
 sidebar_position: 3
 sidebar_label: Web Search
-description: "Web search in Sparky — native and Brave Search integration across all LLM providers."
+description: "Web search in Sparky — multi-provider search with automatic fallback to DuckDuckGo."
 ---
 
 # Web Search
 
-Sparky supports web search across all LLM providers, but how it works depends on which provider you use.
+Sparky provides web search across all LLM providers through a lightweight **side-call architecture**. When the model needs to search, a cheap, fast model performs the search and returns only titles and URLs — keeping context usage minimal and predictable.
 
-## Native Search (Anthropic)
+## How It Works
 
-When using **Anthropic** models (Claude), Sparky uses Anthropic's built-in server-side web search tool (`web_search_20250305`). The model decides when to search, the API executes the search internally, and results are woven into the response.
+When the model calls the `app_web_search` tool, Sparky:
 
-You will see a **search activity** indicator in the chat, and **citations** with source links appear at the bottom of the response.
+1. **Picks a search provider** — a cheap LLM with built-in web search capability
+2. **Runs a side-call** — sends the query to the search model, which performs the search and returns a list of titles and URLs
+3. **Returns results** — the main model receives the search results and can then use `app_web_read` to fetch specific pages
 
-This is the fastest and most seamless experience. The model has full control over when and how to search.
+This design keeps the main conversation context clean. Only titles and URLs are injected (~50 tokens per result), not raw page content. The model decides which pages to read in full.
 
-## Grounded Search (Google Gemini)
+## Provider Priority
 
-**Google Gemini** models use Google's grounding feature (`google_search`). When enabled, the model's response is automatically grounded with real-time web data.
+Sparky automatically selects the best available search provider:
 
-After the response, you will see **search activities** showing the queries Google used, along with **links** to the source domains at the bottom.
+1. **Default connection** — if your default LLM connection supports search, it's used first
+2. **Other connections** — falls through remaining connections in order
+3. **DuckDuckGo** — fallback when no LLM search provider is available
 
-Google grounding is fast and produces well-sourced responses, though the source links point to domain-level URLs rather than specific pages.
+| Provider | Search Model | Search Method |
+| :--- | :--- | :--- |
+| **Anthropic** | `claude-haiku-4-5` | Native web search tool |
+| **Google Gemini** | `gemini-2.5-flash` | Google Search grounding |
+| **OpenAI** (API key) | `gpt-4o-mini` | Web search tool |
+| **DuckDuckGo** | — | DDG Lite (fallback) |
 
-## DDG Search (Copilot, Mistral, Ollama)
+The search model is always the cheapest available option — it only needs to perform a search and list results. Your main conversation uses whatever model you've selected.
 
-**GitHub Copilot**, **Mistral**, and **Ollama** models do not have native search capabilities. For these providers, Sparky uses a built-in DuckDuckGo (DDG) search tool.
+## Search Availability
 
-The model calls the `app_web_search` tool like any other function call. Sparky executes the search via DDG Lite, fetches results, and returns them to the model. A second tool (`app_web_read`) lets the model read specific pages from the results.
+The `app_web_search` tool is always available regardless of your provider or permission mode. Any model can decide to search when it needs current information.
 
-This approach works but comes with limitations:
-- DDG Lite has **heavy rate limiting**. Frequent searches may be throttled.
-- The search happens as a tool call round-trip, so it is slower than native search.
-- Results depend on DDG Lite's coverage and ranking.
+## DuckDuckGo Fallback
+
+When no LLM provider with search capability is connected (e.g., only Ollama or Mistral), Sparky falls back to **DuckDuckGo Lite**. This works but has limitations:
+
+- **Rate limiting** — DDG Lite throttles frequent searches
+- **Slower** — no grounding or native search integration
+- **Coverage** — results depend on DDG Lite's index
 
 ## Custom Search via Connected Services
 
@@ -45,11 +57,12 @@ Once connected, the model can call the search service via `svc.describe` and `sv
 
 ## Summary
 
-| Provider | Search Type | Speed | Citations | Cost |
-| :--- | :--- | :--- | :--- | :--- |
-| **Anthropic** | Native (server-side) | Fast | Yes, with URLs | Free |
-| **Google Gemini** | Grounding | Fast | Domain links | Free |
-| **GitHub Copilot** | DDG tool | Slower | Via tool results | Free |
-| **Mistral** | DDG tool | Slower | Via tool results | Free |
-| **Ollama** | DDG tool | Slower | Via tool results | Free |
-| **Any (via service)** | Connected API | Fast | Via tool results | Paid |
+| Provider | Search Model | Fallback | Cost |
+| :--- | :--- | :--- | :--- |
+| **Anthropic** | Haiku 4.5 | DDG | Low (Haiku pricing) |
+| **Google Gemini** | Flash | DDG | Free |
+| **OpenAI** (API) | GPT-4o Mini | DDG | Low |
+| **GitHub Copilot** | — | DDG | Free |
+| **Mistral** | — | DDG | Free |
+| **Ollama** | — | DDG | Free |
+| **Any (via service)** | — | Connected API | Paid |
