@@ -226,12 +226,14 @@
   align-items: center;
   gap: 6px;
   padding: 5px 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--fg-muted);
   border-radius: 6px;
   cursor: pointer;
   transition: background 100ms ease;
 }
+
+
 
 .activitiesTogglePassive {
   cursor: default;
@@ -329,7 +331,7 @@
   align-items: flex-start;
   gap: 6px;
   padding: 3px 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--fg-muted);
   opacity: 0.6;
   border-radius: 4px;
