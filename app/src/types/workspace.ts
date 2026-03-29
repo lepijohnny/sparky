@@ -3,6 +3,7 @@ export interface WorkspaceSpace {
   conversations: number;
   cwd: number;
   knowledge: number;
+  tools: number;
   total: number;
 }
 
