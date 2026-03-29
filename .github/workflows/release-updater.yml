@@ -20,26 +20,25 @@ jobs:
         id: tag
         run: |
           TAG="${{ github.event.workflow_run.head_branch }}"
+          if [[ ! "$TAG" =~ ^v[0-9] ]]; then
+            echo "Not a version tag: $TAG"
+            exit 0
+          fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Tag: $TAG"
 
       - name: Check both builds succeeded
+        if: steps.tag.outputs.tag
         id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.tag.outputs.tag }}"
-
           MACOS_OK=$(gh run list --workflow=release-macos.yml --branch="$TAG" --status=success --limit=1 --json conclusion -q '.[0].conclusion' 2>/dev/null || true)
           WINDOWS_OK=$(gh run list --workflow=release-windows.yml --branch="$TAG" --status=success --limit=1 --json conclusion -q '.[0].conclusion' 2>/dev/null || true)
-
-          echo "macOS: $MACOS_OK"
-          echo "Windows: $WINDOWS_OK"
-
+          echo "macOS: $MACOS_OK, Windows: $WINDOWS_OK"
           if [ "$MACOS_OK" = "success" ] && [ "$WINDOWS_OK" = "success" ]; then
             echo "both=true" >> "$GITHUB_OUTPUT"
           else
-            echo "both=false" >> "$GITHUB_OUTPUT"
             echo "Waiting for both builds to complete"
           fi
 
@@ -51,7 +50,6 @@ jobs:
           TAG="${{ steps.tag.outputs.tag }}"
           mkdir -p assets
           gh release download "$TAG" --dir assets --pattern "*.tar.gz" --pattern "*.tar.gz.sig" --pattern "*.exe" --pattern "*.exe.sig"
-          echo "=== Downloaded ==="
           ls -la assets/
 
       - name: Generate release notes
@@ -67,14 +65,19 @@ jobs:
         run: |
           TAG="${{ steps.tag.outputs.tag }}"
           DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
           NOTES=$(cat release-notes.md | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))" | sed 's/^"//;s/"$//')
 
           MAC_TAR_PATH=$(ls assets/*.app.tar.gz 2>/dev/null | head -1)
+          WIN_EXE_PATH=$(ls assets/*.exe 2>/dev/null | head -1)
+
+          if [ -z "$MAC_TAR_PATH" ] || [ -z "$WIN_EXE_PATH" ]; then
+            echo "Missing assets:"
+            ls -la assets/
+            exit 1
+          fi
+
           MAC_TAR=$(basename "$MAC_TAR_PATH")
           MAC_SIG=$(cat "${MAC_TAR_PATH}.sig")
-
-          WIN_EXE_PATH=$(ls assets/*.exe 2>/dev/null | head -1)
           WIN_EXE=$(basename "$WIN_EXE_PATH")
           WIN_SIG=$(cat "${WIN_EXE_PATH}.sig")
 
@@ -86,11 +89,11 @@ jobs:
             "platforms": {
               "darwin-aarch64": {
                 "signature": "${MAC_SIG}",
-                "url": "https://github.com/lepijohnny/sparky/releases/download/${TAG}/${MAC_TAR}"
+                "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/${MAC_TAR}"
               },
               "windows-x86_64": {
                 "signature": "${WIN_SIG}",
-                "url": "https://github.com/lepijohnny/sparky/releases/download/${TAG}/${WIN_EXE}"
+                "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/${WIN_EXE}"
               }
             }
           }
