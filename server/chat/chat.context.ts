@@ -410,7 +410,8 @@ function cacheLargeToolOutput(raw: string, limit: number, toolCallId?: string, t
       } catch { /* best-effort */ }
     }
     if (existsSync(filePath)) {
-      return `[Large result saved to ${filePath}]\nUse app_read with offset/limit or app_grep to inspect specific sections.`;
+      const preview = raw.slice(0, 400).replace(/\n/g, " ").trim();
+      return `[Large result (${Math.round(raw.length / 1024)}KB) saved to ${filePath}]\nPreview: ${preview}…\nUse app_read with offset/limit or app_grep to inspect the full output.`;
     }
   }
   return raw.slice(0, limit) + "\n...(truncated)";
