@@ -18,6 +18,7 @@ export async function openExpandWindow(type: string, content: string) {
     const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
     const key = `expand-${Date.now()}`;
     localStorage.setItem(key, JSON.stringify({ type, content }));
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#1e1e1e";
     const webview = new WebviewWindow(`expand-${Date.now()}`, {
       url: `/?expand=${key}`,
       title: TITLES[type] ?? type,
@@ -28,6 +29,11 @@ export async function openExpandWindow(type: string, content: string) {
       decorations: true,
       titleBarStyle: "overlay",
       hiddenTitle: true,
+      visible: false,
+      backgroundColor: bg,
+    });
+    webview.once("tauri://webview-created", () => {
+      setTimeout(() => webview.show(), 150);
     });
     webview.once("tauri://error", (e) => {
       console.error("Expand window error:", e);

@@ -157,8 +157,15 @@ function GroupByMenu({ headers, groupCol, onGroup }: {
   );
 }
 
+function readStorage(key: string): { type: string; content: string } | null {
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  localStorage.removeItem(key);
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
 export default function ExpandWindow({ storageKey }: ExpandWindowProps) {
-  const [data, setData] = useState<{ type: string; content: string } | null>(null);
+  const [data] = useState(() => readStorage(storageKey));
   const [zoom, setZoom] = useState(100);
   const [groupCol, setGroupCol] = useState<number | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -167,14 +174,6 @@ export default function ExpandWindow({ storageKey }: ExpandWindowProps) {
     if (data?.type !== "table") return [];
     return parseTable(data.content).headers;
   }, [data]);
-
-  useEffect(() => {
-    const raw = localStorage.getItem(storageKey);
-    if (raw) {
-      try { setData(JSON.parse(raw)); } catch { /* ignore */ }
-      localStorage.removeItem(storageKey);
-    }
-  }, [storageKey]);
 
   const handleSavePng = useCallback(async () => {
     if (!contentRef.current || !data) return;
