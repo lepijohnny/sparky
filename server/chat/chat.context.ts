@@ -292,7 +292,8 @@ function buildConversation(
 
   for (let i = turns.length - 1; i >= 0; i--) {
     const turn = turns[i];
-    const turnTokens = estimateTurnTokens(turn);
+    const isLatest = i === turns.length - 1;
+    const turnTokens = estimateTurnTokens(turn, isLatest);
     if (tokensUsed + turnTokens > available && included.length > 0) break;
     included.unshift(turn);
     tokensUsed += turnTokens;
@@ -365,8 +366,12 @@ function groupByTurn(entries: ChatEntry[]): Turn[] {
   return turns;
 }
 
-function estimateTurnTokens(turn: Turn): number {
+const MAX_OLD_MEMORY_TOOL_OUTPUT = 4_000;
+const MAX_RECENT_MEMORY_TOOL_OUTPUT = 32_000;
+
+function estimateTurnTokens(turn: Turn, isLatest = false): number {
   let tokens = 0;
+  const outputCap = isLatest ? MAX_RECENT_MEMORY_TOOL_OUTPUT : MAX_OLD_MEMORY_TOOL_OUTPUT;
   if (turn.userMessage?.kind === "message") {
     tokens += estimateTokens(turn.userMessage.content) + MESSAGE_OVERHEAD;
   }
@@ -378,16 +383,27 @@ function estimateTurnTokens(turn: Turn): number {
       tokens += estimateTokens(JSON.stringify(tc.start.data ?? {})) + MESSAGE_OVERHEAD;
     }
     if (tc.result?.kind === "activity") {
-      tokens += estimateTokens(JSON.stringify(tc.result.data ?? {})) + MESSAGE_OVERHEAD;
+      const raw = JSON.stringify(tc.result.data ?? {});
+      tokens += estimateTokens(raw.length > outputCap ? raw.slice(0, outputCap) : raw) + MESSAGE_OVERHEAD;
     }
   }
   return tokens;
 }
 
+function capToolOutput(raw: string, limit: number): string {
+  if (raw.length <= limit) return raw;
+  return raw.slice(0, limit) + "\n...(truncated)";
+}
+
 function flattenTurns(turns: Turn[]): AgentMessage[] {
   const messages: AgentMessage[] = [];
+  const lastTurnIndex = turns.length - 1;
 
-  for (const turn of turns) {
+  for (let ti = 0; ti < turns.length; ti++) {
+    const turn = turns[ti];
+    const isLatest = ti === lastTurnIndex;
+    const outputCap = isLatest ? MAX_RECENT_MEMORY_TOOL_OUTPUT : MAX_OLD_MEMORY_TOOL_OUTPUT;
+
     if (turn.userMessage?.kind === "message") {
       const text = attachmentAnnotation(turn.userMessage.content, turn.userMessage.attachments);
       messages.push({ role: "user", content: text });
@@ -406,10 +422,11 @@ function flattenTurns(turns: Turn[]): AgentMessage[] {
 
       for (const tc of turn.toolCalls) {
         if (tc.result?.kind === "activity") {
+          const raw = JSON.stringify((tc.result as any).data?.output ?? "");
           messages.push({
             role: "tool",
             toolCallId: (tc.start as any).data?.id ?? "",
-            content: JSON.stringify((tc.result as any).data?.output ?? ""),
+            content: capToolOutput(raw, outputCap),
           });
         }
       }

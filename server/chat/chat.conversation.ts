@@ -253,13 +253,14 @@ export class ChatConversation {
       // Release before terminal emit so subscribers see the chat as idle
       this.activeChats.delete(data.chatId);
       const durationMs = Date.now() - startTime;
-      await this.emitActivity(data.chatId, turnId, `agent.${answer}`, {
+      const terminalType = answer === "overflow" ? "done" : answer;
+      await this.emitActivity(data.chatId, turnId, `agent.${terminalType}`, {
         conversationTokens: ctx.budget.total - ctx.budget.remaining,
         contextWindow: ctx.budget.total,
         durationMs,
       });
 
-      if (!isSystemRole && answer === "done") {
+      if (!isSystemRole && (answer === "done" || answer === "overflow")) {
         this.maybeSummarize(data.chatId, ctx).catch((err) =>
           this.log.error("Background summarization failed", { chatId: data.chatId, error: String(err) })
         );
