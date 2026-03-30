@@ -247,7 +247,7 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
           {skill.description && <p className={styles.description}>{skill.description}</p>}
           <div className={styles.metaRow}>
             <span className={styles.skillId}>{skill.id}</span>
-            {skill.author && <><span className={styles.metaDot}>·</span><span>{skill.author}</span></>}
+            {skill.author && <><span className={styles.metaDot}>·</span><span>by {skill.author}</span></>}
             {skill.version && <><span className={styles.metaDot}>·</span><span>v{skill.version}</span></>}
             {skill.license && <><span className={styles.metaDot}>·</span><span>{skill.license}</span></>}
             {skill.source && <><span className={styles.metaDot}>·</span><span>{skill.source}</span></>}
