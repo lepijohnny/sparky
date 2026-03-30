@@ -462,10 +462,8 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
         if (lastIdx === -1) return prev;
         const last = prev[lastIdx];
         if (last.kind !== "message") return prev;
-        const updated = { ...last, content: last.content + "\n" + text };
-        return [...prev.slice(0, lastIdx), updated, ...prev.slice(lastIdx + 1)];
+        return prev.map((e, i) => i === lastIdx ? { ...last, content: last.content + "\n" + text } : e);
       });
-
       try {
         await conn.request("chat.ask", {
           chatId: chat.id,

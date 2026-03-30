@@ -20,6 +20,7 @@ export interface Chat {
   labels?: string[];
   createdAt: string;
   updatedAt: string;
+  sizeBytes?: number;
 }
 
 /** A single entry in the database */

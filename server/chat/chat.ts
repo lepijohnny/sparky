@@ -58,6 +58,7 @@ export function createChatWorkspace(
 
   const conversation = new ChatConversation(bus, db, log, agentFactory, defaultAgentFactory, approval, trust, knowledge, getSystemPromptPreferences, getEnvVars, config);
   conversation.wsDir = currentWorkspacePath;
+  db.wsDir = currentWorkspacePath;
 
   bus.on("tool.approval.pending", (data) => approval.getPending(data.chatId));
 
@@ -161,6 +162,7 @@ export function createChatWorkspace(
     setWorkspacePath(path) {
       currentWorkspacePath = path;
       conversation.wsDir = path;
+      db.wsDir = path;
       crud.workspacePath = path;
     },
 

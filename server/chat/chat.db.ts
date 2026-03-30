@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Logger } from "../logger.types";
 import type { Chat, ChatSummary } from "./chat.types";
@@ -163,6 +164,7 @@ export class ChatDatabase {
   private sql: ReturnType<typeof prepare>;
   private vecEnabled = false;
   readonly path: string;
+  wsDir = "";
 
   constructor(dbPath: string, private log: Logger) {
     this.path = dbPath;
@@ -214,7 +216,8 @@ export class ChatDatabase {
 
   getChat(id: string): Chat | null {
     const row = this.sql.getChat.get({ id: id }) as ChatRow | undefined;
-    return row ? this.toChat(row) : null;
+    if (!row) return null;
+    return this.withSize(this.toChat(row));
   }
 
   updateChat(id: string, fields: Partial<Pick<Chat, "name" | "provider" | "model" | "connectionId" | "thinking" | "knowledge" | "mode" | "flagged" | "archived" | "unread" | "labels" | "updatedAt">>): Chat | null {
@@ -246,7 +249,8 @@ export class ChatDatabase {
     });
     txn();
 
-    return this.getChat(id);
+    const result = this.getChat(id);
+    return result;
   }
 
   deleteChat(id: string): boolean {
@@ -259,18 +263,23 @@ export class ChatDatabase {
   }
 
   getChats(filter?: { archived?: boolean; flagged?: boolean; labelId?: string }): Chat[] {
-    let sql = "SELECT * FROM chats";
+    let sql = `SELECT chats.*, COALESCE(s.size_bytes, 0) AS size_bytes
+      FROM chats
+      LEFT JOIN (
+        SELECT chat_id, SUM(COALESCE(LENGTH(content), 0) + COALESCE(LENGTH(metadata), 0)) AS size_bytes
+        FROM entries GROUP BY chat_id
+      ) s ON s.chat_id = chats.id`;
     const conditions: string[] = [];
     const params: Record<string, any> = {};
 
     if (filter?.archived === true) {
-      conditions.push("archived = 1");
+      conditions.push("chats.archived = 1");
     } else if (filter?.archived === false) {
-      conditions.push("archived = 0");
+      conditions.push("chats.archived = 0");
     }
 
     if (filter?.flagged === true) {
-      conditions.push("flagged = 1");
+      conditions.push("chats.flagged = 1");
     }
 
     if (filter?.labelId) {
@@ -282,10 +291,22 @@ export class ChatDatabase {
       sql += " WHERE " + conditions.join(" AND ");
     }
 
-    sql += " ORDER BY updated_at DESC";
+    sql += " ORDER BY chats.updated_at DESC";
 
-    const rows = this.db.prepare(sql).all(params) as ChatRow[];
-    return rows.map((r) => this.toChat(r));
+    const rows = this.db.prepare(sql).all(params) as (ChatRow & { size_bytes: number })[];
+    return rows.map((r) => ({ ...this.toChat(r), sizeBytes: r.size_bytes + this.toolsDirSize(r.id) }));
+  }
+
+  withSize(chat: Chat): Chat {
+    const row = this.db.prepare("SELECT COALESCE(SUM(COALESCE(LENGTH(content), 0) + COALESCE(LENGTH(metadata), 0)), 0) AS size_bytes FROM entries WHERE chat_id = ?").get(chat.id) as { size_bytes: number };
+    return { ...chat, sizeBytes: (row?.size_bytes ?? 0) + this.toolsDirSize(chat.id) };
+  }
+
+  private toolsDirSize(chatId: string): number {
+    try {
+      const dir = join(this.wsDir, "chats", chatId, "tools");
+      return readdirSync(dir).reduce((sum, f) => sum + statSync(join(dir, f)).size, 0);
+    } catch { return 0; }
   }
 
   getCounts(): { chats: number; flagged: number; archived: number; labeled: number; labels: Record<string, number> } {
@@ -536,6 +557,17 @@ export class ChatDatabase {
     ).get({ chat_id: chatId }) as EntryRow | undefined;
     if (!row) return null;
     return this.toEntry(row) as ChatMessage;
+  }
+
+  appendSteering(chatId: string, turnId: string, content: string, activity: ChatEntry): void {
+    const txn = this.db.transaction(() => {
+      const userMsg = this.getLastUserEntry(chatId);
+      if (userMsg) {
+        this.updateMessageContent(chatId, userMsg.id, userMsg.content + "\n" + content);
+      }
+      this.addEntry(chatId, activity);
+    });
+    txn();
   }
 
   updateMessageContent(chatId: string, turnId: string, content: string): void {

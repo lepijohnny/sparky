@@ -80,6 +80,7 @@ interface PendingApproval {
   chatId: string;
   msgId: string;
   scope: string;
+  trustScope?: string;
   tool: string;
   target: string;
   alwaysAsk?: boolean;
@@ -178,6 +179,7 @@ export class ToolApproval {
     link?: string;
     timeoutMs?: number;
     alwaysAsk?: boolean;
+    trustScope?: string;
     oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string };
   }): Promise<boolean> {
     const rule = this.findRule(scope, tool, target);
@@ -199,7 +201,7 @@ export class ToolApproval {
         resolve(false);
       }, timeout);
 
-      this.pending.set(requestId, { chatId: ctx.chatId, msgId, scope, tool, target, alwaysAsk: extra?.alwaysAsk, rule: rule ?? { scope, tool, message }, resolve, timer, startedAt: Date.now() });
+      this.pending.set(requestId, { chatId: ctx.chatId, msgId, scope, trustScope: extra?.trustScope, tool, target, alwaysAsk: extra?.alwaysAsk, rule: rule ?? { scope, tool, message }, resolve, timer, startedAt: Date.now() });
 
       this.bus.emit("tool.approval.request", {
         requestId,
@@ -233,7 +235,7 @@ export class ToolApproval {
     this.pending.delete(requestId);
 
     if (approved && chatLevel) {
-      this.allowForChat(entry.chatId, entry.scope);
+      this.allowForChat(entry.chatId, entry.trustScope ?? entry.scope);
     } else if (approved && persist && entry.rule.persist) {
       try {
         await entry.rule.persist(entry.scope, entry.tool, entry.target);

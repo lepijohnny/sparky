@@ -116,7 +116,7 @@ export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
         if (decision === "prompt" && !(ctx.skillApproved && !rule)) {
           const chatAllowed = !rule?.alwaysAsk && ctx.approvalCtx.isChatAllowed(tool.trustScope);
           if (!chatAllowed) {
-            const ok = await ctx.approvalCtx.requestApproval(name, target, { type: "confirm:yesno", alwaysAsk: rule?.alwaysAsk });
+            const ok = await ctx.approvalCtx.requestApproval(name, target, { type: "confirm:yesno", alwaysAsk: rule?.alwaysAsk, trustScope: tool.trustScope });
             if (!ok) {
               const hint = rule?.alwaysAsk
                 ? " This action requires approval every time — it cannot be auto-approved."

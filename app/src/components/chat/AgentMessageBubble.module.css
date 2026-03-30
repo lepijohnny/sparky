@@ -350,6 +350,11 @@
   color: var(--accent);
 }
 
+.activitySteering {
+  color: var(--accent);
+  font-style: italic;
+}
+
 .activityClickable {
   cursor: pointer;
 }

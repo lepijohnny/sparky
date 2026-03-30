@@ -114,6 +114,7 @@ function getActivityIcon(activity: ChatActivity): ReactElement {
   if (type === "agent.tool.start" || type === "agent.tool.result") return getToolIcon(data?.icon, data?.category);
   if (type === "agent.error") return <AlertCircle size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.stopped") return <Square size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
+  if (type === "user.steering") return <MessageSquare size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   return <ChevronRight size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
 }
 
@@ -224,7 +225,8 @@ function ActivitiesGroup({ messageId, activities: raw }: ActivitiesGroupProps): 
                   className={`${styles.activityRow}${
                     a.type === "agent.error" || a.type === "agent.approval.denied" || a.type === "agent.trust.denied" ? ` ${styles.activityError}` :
                     a.type === "agent.approval.approved" ? ` ${styles.activityApproved}` :
-                    a.type === "agent.approval.requested" ? ` ${styles.activityPending}` : ""
+                    a.type === "agent.approval.requested" ? ` ${styles.activityPending}` :
+                    a.type === "user.steering" ? ` ${styles.activitySteering}` : ""
                   }${hasOutput ? ` ${styles.activityClickable}` : ""}`}
                   onClick={hasOutput ? () => {
                     const { content } = formatActivityContent(a);

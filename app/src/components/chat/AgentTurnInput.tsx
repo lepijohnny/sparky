@@ -207,9 +207,9 @@ export default memo(function ChatInput({
     const currentAttachments = streaming ? [] : [...attachments];
     handle.clear();
     setHasContent(false);
+    drafts.delete(chat.id);
     if (!streaming) {
       setAttachments([]);
-      drafts.delete(chat.id);
       setSending(true);
       if (sendingTimer.current) clearTimeout(sendingTimer.current);
       sendingTimer.current = setTimeout(() => setSending(false), 5000);

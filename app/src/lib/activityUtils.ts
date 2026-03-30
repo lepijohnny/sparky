@@ -257,6 +257,9 @@ export function getActivityLabel(activity: ChatActivity): string | null {
     case "agent.error":
       return `Error: ${activity.data.message}`;
 
+    case "user.steering":
+      return `Steer: ${activity.data?.content ?? "Steering message"}`;
+
     default:
       return `${activity.source}:${activity.type}`;
   }
