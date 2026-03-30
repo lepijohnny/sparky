@@ -37,7 +37,7 @@ Each scope has three lists: `deny`, `ask`, `allow`. The `list` parameter in bus 
 - **read** — file paths the assistant reads. Patterns match against absolute paths.
 - **write** — file paths the assistant writes/edits. Patterns match against absolute paths.
 - **bash** — shell commands. Patterns match against the full command string.
-- **bus** — app operations (delete labels, rename chats, etc.). Patterns match against event names like `settings.labels.delete`, `chat.rename`, `chat.archive`.
+- **bus** — app operations (delete labels, rename chats, service calls, etc.). Patterns match against event names like `settings.labels.delete`, `chat.rename`, `chat.archive`. **Service calls** use the format `svc.call:<service-id>`, e.g. `svc.call:github`, `svc.call:gmail`, `svc.call:slack`.
 
 ### Rule model (EBNF)
 
@@ -52,7 +52,7 @@ pattern     = '"pattern":' , regex ;
 read_target  = absolute_path ;                  (* e.g. /Users/me/.env *)
 write_target = absolute_path ;                  (* e.g. /etc/hosts *)
 bash_target  = command_string ;                 (* e.g. git push --force *)
-bus_target   = event_name ;                     (* e.g. chat.delete *)
+bus_target   = event_name ;                     (* e.g. chat.delete, svc.call:github *)
 
 (* pattern conventions *)
 regex        = anchored_regex ;
@@ -67,6 +67,11 @@ regex        = anchored_regex ;
 **Add a rule:**
 ```
 app_bus_emit("trust.rule.add", { "scope": "read", "list": "deny", "label": "Block secrets", "pattern": "\\.enc$" })
+```
+
+**Add an always-ask rule** (cannot be auto-approved per chat):
+```
+app_bus_emit("trust.rule.add", { "scope": "bus", "list": "ask", "label": "Always ask GitHub", "pattern": "^svc\\.call:github", "alwaysAsk": true })
 ```
 
 **Remove a rule:**
@@ -147,6 +152,21 @@ When a user describes an intention, create rules with clear labels and precise r
 → Bus deny rules:
 - `^svc\\.delete$`
 - `^svc\\.register$`
+
+**User:** "Always ask before calling GitHub"
+→ Bus ask rule: `^svc\\.call:github` — matches all GitHub service calls
+
+**User:** "Ask before any service call"
+→ Bus ask rule: `^svc\\.call:` — matches all service calls (any provider)
+
+**User:** "Block all Slack access"
+→ Bus deny rule: `^svc\\.call:slack` — blocks all Slack service calls
+
+**User:** "Always ask before deleting anything (no auto-approve)"
+→ Bus ask rules with `alwaysAsk: true`:
+- `^chat\\.delete$` — always ask before deleting chats
+- `^kt\\.sources\\.delete$` — always ask before deleting sources
+When `alwaysAsk` is true, the user cannot skip future prompts with "Approve all" — every single operation requires confirmation.
 
 **User:** "Allow managing labels without asking"
 → Bus allow rules:

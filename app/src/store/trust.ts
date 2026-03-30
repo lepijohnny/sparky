@@ -7,6 +7,7 @@ export type RuleList = "allow" | "deny" | "ask";
 export interface TrustRule {
   label: string;
   pattern: string;
+  alwaysAsk?: boolean;
 }
 
 export interface ScopeRules {

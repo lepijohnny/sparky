@@ -114,8 +114,16 @@ export function createToolSet(tools: ToolDef[], baseCtx: ToolContext): ToolSet {
           return `Blocked by trust rules: ${rule?.label ?? target}`;
         }
         if (decision === "prompt" && !(ctx.skillApproved && !rule)) {
-          const ok = await ctx.approvalCtx.requestApproval(name, target, { type: "confirm:yesno" });
-          if (!ok) return "Denied by the user.";
+          const chatAllowed = !rule?.alwaysAsk && ctx.approvalCtx.isChatAllowed(tool.trustScope);
+          if (!chatAllowed) {
+            const ok = await ctx.approvalCtx.requestApproval(name, target, { type: "confirm:yesno", alwaysAsk: rule?.alwaysAsk });
+            if (!ok) {
+              const hint = rule?.alwaysAsk
+                ? " This action requires approval every time — it cannot be auto-approved."
+                : " The user may choose 'Approve all' next time to skip future prompts.";
+              return `Denied by the user.${hint}`;
+            }
+          }
         }
       }
 

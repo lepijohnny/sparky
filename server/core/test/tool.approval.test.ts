@@ -433,6 +433,126 @@ describe("ToolApproval", () => {
     });
   });
 
+  describe("per-chat allowed", () => {
+    test("given no chat-level approval, when checking isChatAllowed, then returns false", () => {
+      const { approval } = setup();
+      expect(approval.isChatAllowed("c1", "bash")).toBe(false);
+    });
+
+    test("given chat-level approval granted, when checking same chat and scope, then returns true", () => {
+      const { approval } = setup();
+      approval.allowForChat("c1", "bash");
+      expect(approval.isChatAllowed("c1", "bash")).toBe(true);
+    });
+
+    test("given chat-level approval granted, when checking different chat, then returns false", () => {
+      const { approval } = setup();
+      approval.allowForChat("c1", "bash");
+      expect(approval.isChatAllowed("c2", "bash")).toBe(false);
+    });
+
+    test("given chat-level approval granted, when checking different scope, then returns false", () => {
+      const { approval } = setup();
+      approval.allowForChat("c1", "bash");
+      expect(approval.isChatAllowed("c1", "bus")).toBe(false);
+    });
+
+    test("given chat-level approval granted, when clearChat called, then returns false", () => {
+      const { approval } = setup();
+      approval.allowForChat("c1", "bash");
+      approval.clearChat("c1");
+      expect(approval.isChatAllowed("c1", "bash")).toBe(false);
+    });
+
+    test("given approval resolved with chatLevel=true, when checking isChatAllowed, then scope is allowed", async () => {
+      const { bus, approval } = setup();
+      approval.register({ scope: "assistant", tool: "app_bus_emit", message: "Service call" });
+
+      let requestId = "";
+      bus.on("tool.approval.request", (data) => { requestId = data.requestId; });
+
+      const promise = approval.requestApproval("assistant", "app_bus_emit", "svc.call:gmail", { chatId: "c1" });
+      bus.emit("tool.approval.resolve", { requestId, approved: true, chatLevel: true });
+      await promise;
+
+      expect(approval.isChatAllowed("c1", "assistant")).toBe(true);
+    });
+
+    test("given approval resolved with chatLevel=true, when checking different chat, then not allowed", async () => {
+      const { bus, approval } = setup();
+      approval.register({ scope: "assistant", tool: "app_bus_emit", message: "Service call" });
+
+      let requestId = "";
+      bus.on("tool.approval.request", (data) => { requestId = data.requestId; });
+
+      const promise = approval.requestApproval("assistant", "app_bus_emit", "svc.call:gmail", { chatId: "c1" });
+      bus.emit("tool.approval.resolve", { requestId, approved: true, chatLevel: true });
+      await promise;
+
+      expect(approval.isChatAllowed("c2", "assistant")).toBe(false);
+    });
+
+    test("given chatLevel=true on denied approval, when checking, then scope is not allowed", async () => {
+      const { bus, approval } = setup();
+      approval.register({ scope: "assistant", tool: "app_bus_emit", message: "Service call" });
+
+      let requestId = "";
+      bus.on("tool.approval.request", (data) => { requestId = data.requestId; });
+
+      const promise = approval.requestApproval("assistant", "app_bus_emit", "svc.call:gmail", { chatId: "c1" });
+      bus.emit("tool.approval.resolve", { requestId, approved: false, chatLevel: true });
+      await promise;
+
+      expect(approval.isChatAllowed("c1", "assistant")).toBe(false);
+    });
+  });
+
+  describe("alwaysAsk", () => {
+    test("given alwaysAsk extra, when emitting request, then alwaysAsk is included", async () => {
+      const { bus, approval } = setup();
+      approval.register({ scope: "assistant", tool: "app_bus_emit", message: "Delete", match: (t) => t === "chat.delete" });
+
+      let requestEvent: any = null;
+      bus.on("tool.approval.request", (data) => { requestEvent = data; });
+
+      const promise = approval.requestApproval("assistant", "app_bus_emit", "chat.delete", { chatId: "c1" }, { alwaysAsk: true });
+      expect(requestEvent.alwaysAsk).toBe(true);
+
+      bus.emit("tool.approval.resolve", { requestId: requestEvent.requestId, approved: true });
+      await promise;
+    });
+
+    test("given no alwaysAsk extra, when emitting request, then alwaysAsk is absent", async () => {
+      const { bus, approval } = setup();
+      approval.register({ scope: "assistant", tool: "app_bus_emit", message: "Service call" });
+
+      let requestEvent: any = null;
+      bus.on("tool.approval.request", (data) => { requestEvent = data; });
+
+      const promise = approval.requestApproval("assistant", "app_bus_emit", "svc.call:gmail", { chatId: "c1" });
+      expect(requestEvent.alwaysAsk).toBeUndefined();
+
+      bus.emit("tool.approval.resolve", { requestId: requestEvent.requestId, approved: true });
+      await promise;
+    });
+
+    test("given alwaysAsk pending, when getPending called, then alwaysAsk is returned", async () => {
+      const { bus, approval } = setup();
+      approval.register({ scope: "assistant", tool: "app_bus_emit", message: "Delete", match: (t) => t === "chat.delete" });
+
+      let requestId = "";
+      bus.on("tool.approval.request", (data) => { requestId = data.requestId; });
+
+      const promise = approval.requestApproval("assistant", "app_bus_emit", "chat.delete", { chatId: "c1" }, { alwaysAsk: true });
+
+      const pending = approval.getPending("c1");
+      expect(pending!.alwaysAsk).toBe(true);
+
+      bus.emit("tool.approval.resolve", { requestId, approved: true });
+      await promise;
+    });
+  });
+
   describe("turnId fallback", () => {
     test("uses requestId as messageId when turnId is not provided", async () => {
       const { bus, approval } = setup();

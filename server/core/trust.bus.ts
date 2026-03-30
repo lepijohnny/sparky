@@ -11,6 +11,7 @@ const RuleAddSchema = z.object({
   list: TrustList,
   label: z.string().min(1).describe("Human-readable description of what this rule does, e.g. 'Block .env files'"),
   pattern: z.string().min(1).describe("Regex pattern matched against the target — file paths for read/write, command strings for bash, event names for bus"),
+  alwaysAsk: z.boolean().optional().describe("If true on an 'ask' rule, the user is always prompted — cannot be auto-approved per chat"),
 }).describe("Add a trust rule to control what the agent can access");
 
 const RuleRemoveSchema = z.object({
@@ -38,8 +39,9 @@ export function registerTrustBus(bus: EventBus, trust: TrustStore, broadcast: (r
   });
 
   bus.on("trust.rule.add", (data) => {
-    const { scope, list, label, pattern } = RuleAddSchema.parse(data);
-    trust.addRule(scope, list, { label, pattern, addedAt: Date.now() });
+    const { scope, list, label, pattern, alwaysAsk } = RuleAddSchema.parse(data);
+    const isAlwaysAsk = alwaysAsk || (list === "ask" && /always\s*ask/i.test(label));
+    trust.addRule(scope, list, { label, pattern, addedAt: Date.now(), ...(isAlwaysAsk ? { alwaysAsk: true } : {}) });
     changed();
     broadcast("trust.rule.added", { scope, list, label, pattern });
     return { ok: true };

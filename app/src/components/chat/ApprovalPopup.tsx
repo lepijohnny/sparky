@@ -28,6 +28,7 @@ interface ApprovalRequest {
   target?: string;
   message: string;
   canPersist: boolean;
+  alwaysAsk?: boolean;
   timeoutMs: number;
   remainingMs: number;
   description?: string;
@@ -44,7 +45,7 @@ function ApprovalItem({
 }: {
   request: ApprovalRequest;
   conn: import("../../lib/ws").WsConnection | null;
-  onResolve: (requestId: string, approved: boolean, persist: boolean) => void;
+  onResolve: (requestId: string, approved: boolean, persist: boolean, chatLevel?: boolean) => void;
   onExpired: () => void;
 }) {
   const totalS = Math.ceil(request.timeoutMs / 1000);
@@ -125,7 +126,7 @@ function ApprovalItem({
     }
   }, [request.oauth, request.fields, request.service, request.requestId, values, fieldsFilled, hasFields, conn, svcPrefix, onResolve]);
 
-  const handleResolve = useCallback(async (approved: boolean, persist: boolean) => {
+  const handleResolve = useCallback(async (approved: boolean, persist: boolean, chatLevel?: boolean) => {
     if (resolvedRef.current) return;
 
     if (approved && isConnection && conn) {
@@ -145,7 +146,7 @@ function ApprovalItem({
     }
 
     resolvedRef.current = true;
-    onResolve(request.requestId, approved, persist);
+    onResolve(request.requestId, approved, persist, chatLevel);
   }, [request.requestId, request.type, request.fields, values, isConnection, conn, onResolve]);
 
   useEffect(() => {
@@ -259,14 +260,14 @@ function ApprovalItem({
           onClick={() => handleResolve(true, false)}
           disabled={!allFilled || submitting}
         >
-          {isConnection ? (submitting ? "Saving…" : "Submit") : "Approve"}
+          {isConnection ? (submitting ? "Saving…" : "Submit") : "Approve once"}
         </button>
-        {request.canPersist && !isConnection && (
+        {!isConnection && !request.alwaysAsk && (
           <button
-            className={`${styles.btn} ${styles.approveAlways}`}
-            onClick={() => handleResolve(true, true)}
+            className={`${styles.btn} ${styles.approveChat}`}
+            onClick={() => handleResolve(true, false, true)}
           >
-            Always
+            Approve all
           </button>
         )}
         <button
@@ -355,9 +356,9 @@ export default function ApprovalPopup({ chatId }: { chatId: string }) {
   });
 
   const resolve = useCallback(
-    (requestId: string, approved: boolean, persist: boolean) => {
+    (requestId: string, approved: boolean, persist: boolean, chatLevel?: boolean) => {
       setRequest(null);
-      conn?.request("tool.approval.resolve", { requestId, approved, persist }).catch(() => {});
+      conn?.request("tool.approval.resolve", { requestId, approved, persist, chatLevel }).catch(() => {});
     },
     [conn],
   );
