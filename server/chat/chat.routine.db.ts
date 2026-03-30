@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
-import { RoutineActionSchema } from "./routine.types";
-import type { Routine, RoutineRun } from "./routine.types";
+import { RoutineActionSchema } from "../routines/routine.types";
+import type { Routine, RoutineRun } from "../routines/routine.types";
 
 interface RoutineRow {
   id: string;
@@ -56,19 +56,19 @@ function toRun(row: RunRow): RoutineRun {
   };
 }
 
-export interface RoutineDatabase {
-  list(): Routine[];
-  get(id: string): Routine | null;
-  create(routine: Routine): void;
-  update(id: string, fields: Partial<Pick<Routine, "name" | "description" | "cron" | "once" | "action" | "enabled" | "lastRun" | "nextRun">>): Routine | null;
-  delete(id: string): boolean;
-  getEnabled(): Routine[];
-  addRun(run: RoutineRun): void;
-  updateRun(id: string, fields: Partial<Pick<RoutineRun, "status" | "error" | "chatId" | "finishedAt" | "durationMs">>): void;
-  getRuns(routineId: string, limit?: number): RoutineRun[];
+export interface RoutineDb {
+  listRoutines(): Routine[];
+  getRoutine(id: string): Routine | null;
+  createRoutine(routine: Routine): void;
+  updateRoutine(id: string, fields: Partial<Pick<Routine, "name" | "description" | "cron" | "once" | "action" | "enabled" | "lastRun" | "nextRun">>): Routine | null;
+  deleteRoutine(id: string): boolean;
+  getEnabledRoutines(): Routine[];
+  addRoutineRun(run: RoutineRun): void;
+  updateRoutineRun(id: string, fields: Partial<Pick<RoutineRun, "status" | "error" | "chatId" | "finishedAt" | "durationMs">>): void;
+  getRoutineRuns(routineId: string, limit?: number): RoutineRun[];
 }
 
-export function createRoutineDatabase(db: Database.Database): RoutineDatabase {
+export function createRoutineDb(db: Database.Database): RoutineDb {
   const sql = {
     list: db.prepare("SELECT * FROM routines ORDER BY created_at DESC"),
     get: db.prepare("SELECT * FROM routines WHERE id = :id"),
@@ -95,16 +95,16 @@ export function createRoutineDatabase(db: Database.Database): RoutineDatabase {
   };
 
   return {
-    list() {
+    listRoutines() {
       return (sql.list.all() as RoutineRow[]).map(toRoutine);
     },
 
-    get(id) {
+    getRoutine(id) {
       const row = sql.get.get({ id }) as RoutineRow | undefined;
       return row ? toRoutine(row) : null;
     },
 
-    create(routine) {
+    createRoutine(routine) {
       sql.create.run({
         id: routine.id,
         name: routine.name,
@@ -120,8 +120,8 @@ export function createRoutineDatabase(db: Database.Database): RoutineDatabase {
       });
     },
 
-    update(id, fields) {
-      const existing = this.get(id);
+    updateRoutine(id, fields) {
+      const existing = this.getRoutine(id);
       if (!existing) return null;
       const merged = { ...existing, ...fields };
       sql.update.run({
@@ -136,18 +136,18 @@ export function createRoutineDatabase(db: Database.Database): RoutineDatabase {
         next_run: merged.nextRun ?? null,
         updated_at: new Date().toISOString(),
       });
-      return this.get(id);
+      return this.getRoutine(id);
     },
 
-    delete(id) {
+    deleteRoutine(id) {
       return sql.delete.run({ id }).changes > 0;
     },
 
-    getEnabled() {
+    getEnabledRoutines() {
       return (sql.getEnabled.all() as RoutineRow[]).map(toRoutine);
     },
 
-    addRun(run) {
+    addRoutineRun(run) {
       sql.addRun.run({
         id: run.id,
         routine_id: run.routineId,
@@ -160,7 +160,7 @@ export function createRoutineDatabase(db: Database.Database): RoutineDatabase {
       });
     },
 
-    updateRun(id, fields) {
+    updateRoutineRun(id, fields) {
       const row = db.prepare("SELECT * FROM routine_runs WHERE id = :id").get({ id }) as RunRow | undefined;
       if (!row) return;
       sql.updateRun.run({
@@ -173,7 +173,7 @@ export function createRoutineDatabase(db: Database.Database): RoutineDatabase {
       });
     },
 
-    getRuns(routineId, limit = 20) {
+    getRoutineRuns(routineId, limit = 20) {
       return (sql.getRuns.all({ routine_id: routineId, limit }) as RunRow[]).map(toRun);
     },
   };

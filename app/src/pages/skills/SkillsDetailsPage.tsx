@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { getSkillIcon } from "./skillIcons";
 import ReactMarkdown from "react-markdown";
@@ -7,17 +7,13 @@ import { useConnection } from "../../context/ConnectionContext";
 import { useToasts } from "../../context/ToastContext";
 import { useStore } from "../../store";
 import type { Skill, SkillState } from "../../types/skill";
+import type { SkillFileData } from "../../store/skills";
 import CodeBlock from "../../components/chat/CodeBlock";
 import shared from "../../styles/shared.module.css";
 import styles from "./SkillsDetailsPage.module.css";
 
 interface SkillsDetailsPageProps {
   skillId: string;
-}
-
-interface SkillFileData {
-  name: string;
-  content: string;
 }
 
 interface StepDef {
@@ -181,30 +177,16 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
   const { addToast } = useToasts();
   const skills = useStore((s) => s.skills);
   const skill = skills.find((s) => s.id === skillId);
-  const setSkills = useStore((s) => s.setSkills);
-  const [files, setFiles] = useState<SkillFileData[]>([]);
   const [activeTab, setActiveTab] = useState(0);
+  const files = useStore((s) => s.skillFiles[skillId] ?? []);
 
-  const loadSkill = useCallback(async () => {
-    if (!conn || !skillId) return;
-    try {
-      const res = await conn.request<{ skill: Skill; files: SkillFileData[] }>("skills.get", { id: skillId });
-      setFiles(res.files);
-      setActiveTab(0);
-      const current = useStore.getState().skills;
-      setSkills(current.map((s) => s.id === skillId ? res.skill : s));
-    } catch {
-      setFiles([]);
-    }
-  }, [conn, skillId, setSkills]);
+  const prevSkillRef = useRef(skillId);
+  if (prevSkillRef.current !== skillId) {
+    prevSkillRef.current = skillId;
+    setActiveTab(0);
+  }
 
-  useEffect(() => { loadSkill(); }, [loadSkill]);
-
-  useEffect(() => {
-    const onFocus = () => { loadSkill(); };
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [loadSkill]);
+  
 
   if (!skill) {
     return (
@@ -275,20 +257,20 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
       </div>
 
       {/* Files tabbed card */}
-      {files.length > 0 && (
-        <div className={styles.filesCard}>
-          <div className={styles.tabBar}>
-            {files.map((f, idx) => (
-              <button
-                key={f.name}
-                className={`${styles.tab} ${idx === activeTab ? styles.tabActive : ""}`}
-                onClick={() => setActiveTab(idx)}
-              >
-                {f.name}
-              </button>
-            ))}
-          </div>
-          <div className={styles.fileContent}>
+      <div className={styles.filesCard} style={{ visibility: files.length > 0 ? "visible" : "hidden" }}>
+        <div className={styles.tabBar}>
+          {files.map((f, idx) => (
+            <button
+              key={f.name}
+              className={`${styles.tab} ${idx === activeTab ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab(idx)}
+            >
+              {f.name}
+            </button>
+          ))}
+        </div>
+        <div className={styles.fileContent}>
+          <div key={`${skillId}-${activeTab}`} className={styles.fileInner}>
             {activeFile && isSkillFile ? (
               <div className={styles.skillDoc}>
                 <h1 className={styles.skillTitle}>{skill.name}</h1>
@@ -310,7 +292,7 @@ export default function SkillsDetailsPage({ skillId }: SkillsDetailsPageProps) {
             ) : null}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

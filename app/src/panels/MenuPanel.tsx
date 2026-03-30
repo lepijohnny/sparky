@@ -18,6 +18,7 @@ import {
   FileText,
   Unplug,
   Puzzle,
+  Timer,
 } from "lucide-react";
 import {
   type ReactNode,
@@ -52,6 +53,10 @@ const NAV_AFTER_LABELS: { id: Section; label: string; icon: ReactNode }[] = [
   { id: "sources",      label: "Knowledge",    icon: <BookOpen size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "connections",  label: "Connections",  icon: <Blocks size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { id: "skills",       label: "Skills",       icon: <Puzzle size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
+];
+
+const NAV_ROUTINES: { id: Section; label: string; icon: ReactNode }[] = [
+  { id: "routines",     label: "Routines",     icon: <Timer size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
 ];
 
 const SECRET_CLICKS = 7;
@@ -196,6 +201,18 @@ export default function MenuPanel({
             icon={item.icon}
             label={item.label}
             count={item.id === "sources" ? sourceCount : undefined}
+            active={section === item.id}
+            onClick={() => onSectionChange(item.id)}
+          />
+        ))}
+
+        <div className={styles.navDivider} />
+
+        {NAV_ROUTINES.map((item) => (
+          <NavItem
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
             active={section === item.id}
             onClick={() => onSectionChange(item.id)}
           />

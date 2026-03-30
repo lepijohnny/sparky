@@ -9,6 +9,7 @@ export default defineConfig({
       "knowledge/**/*.test.ts",
       "tools/**/*.test.ts",
       "skills/**/*.test.ts",
+      "routines/**/*.test.ts",
       "test/**/*.test.ts",
     ],
   },

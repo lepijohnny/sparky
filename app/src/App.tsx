@@ -46,6 +46,8 @@ import ConnectionsListPage from "./pages/connections/ConnectionsListPage";
 import ConnectionsDetailsPage from "./pages/connections/ConnectionsDetailsPage";
 import SkillsListPage from "./pages/skills/SkillsListPage";
 import SkillsDetailsPage from "./pages/skills/SkillsDetailsPage";
+import RoutinesListPage from "./pages/routines/RoutinesListPage";
+import RoutinesDetailsPage from "./pages/routines/RoutinesDetailsPage";
 import ContextPanel from "./panels/ContextPanel";
 import DetailsPanel from "./panels/DetailsPanel";
 import MenuPanel, { type Section } from "./panels/MenuPanel";
@@ -91,6 +93,7 @@ const SECTION_LABELS: Record<Section, string> = {
   sources: "Sources",
   connections: "Connections",
   skills: "Skills",
+  routines: "Routines",
   settings: "Settings",
 };
 
@@ -132,6 +135,7 @@ export default function App() {
     isSourceMulti, sourceSelectedIds, selectedSources,
     selectedConnectionId, selectConnection,
     selectedSkillId, selectSkill,
+    selectedRoutineId, selectRoutine,
   } = useStore((s) => s);
 
   const llmConnections = useStore((s) => s.llmConnections);
@@ -160,6 +164,9 @@ export default function App() {
   const connectionPlusRef = useRef<HTMLButtonElement>(null);
   const [skillsAskPos, setSkillsAskPos] = useState({ x: 0, y: 0 });
   const skillsPlusRef = useRef<HTMLButtonElement>(null);
+  const [showRoutinesAsk, setShowRoutinesAsk] = useState(false);
+  const [routinesAskPos, setRoutinesAskPos] = useState({ x: 0, y: 0 });
+  const routinesPlusRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!conn) return;
@@ -327,6 +334,19 @@ export default function App() {
     }
   }, [conn, selectChat, section, router.handleSectionChange]);
 
+  const handleRoutinesAsk = useCallback(async (content: string) => {
+    if (!conn) return;
+    try {
+      const res = await conn.request<{ chatId: string }>("chat.system.ask", { content, kind: "routines" });
+      if (section !== "chats") router.handleSectionChange("chats");
+      conn.request<{ chat: Chat }>("chat.get.id", { id: res.chatId }).then((r) => {
+        if (r?.chat) selectChat(r.chat);
+      }).catch(() => {});
+    } catch (err) {
+      console.error("Routines ask failed:", err);
+    }
+  }, [conn, selectChat, section, router.handleSectionChange]);
+
   const handleImportSkill = useCallback(async () => {
     if (!conn) return;
     try {
@@ -428,6 +448,13 @@ export default function App() {
         onSelectSkill={selectSkill}
       />
     );
+  } else if (section === "routines") {
+    contextContent = (
+      <RoutinesListPage
+        selectedId={selectedRoutineId}
+        onSelect={selectRoutine}
+      />
+    );
   } else {
     contextContent = <Empty message="Nothing here yet." />;
   }
@@ -457,6 +484,37 @@ export default function App() {
     const skill = useStore.getState().skills.find((s) => s.id === selectedSkillId);
     detailsTitle = skill?.name ?? selectedSkillId;
     detailsContent = <SkillsDetailsPage key={selectedSkillId} skillId={selectedSkillId} />;
+  } else if (section === "routines" && selectedRoutineId) {
+    detailsTitle = "Routine";
+    detailsContent = <RoutinesDetailsPage routineId={selectedRoutineId}
+      onOpenChat={(chatId) => {
+        conn?.request<{ chat: Chat }>("chat.get.id", { id: chatId }).then((r) => {
+          if (r?.chat) { selectChat(r.chat); router.handleSectionChange("chats"); }
+        }).catch(() => {});
+      }}
+      onEditAssistant={(routine) => {
+        if (!conn) return;
+        conn.request<{ chatId: string }>("chat.system.ask", {
+          content: `I want to edit the routine "${routine.name}" (id: ${routine.id}).`,
+          kind: "routines",
+        }).then((res) => {
+          if (section !== "chats") router.handleSectionChange("chats");
+          conn.request<{ chat: Chat }>("chat.get.id", { id: res.chatId }).then((r) => {
+            if (r?.chat) selectChat(r.chat);
+          }).catch(() => {});
+        }).catch(() => {});
+      }}
+      onDeleted={() => selectRoutine(null)}
+    />;
+  } else if (section === "routines") {
+    detailsTitle = "";
+    detailsContent = (
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
+        <span style={{ color: "var(--fg-muted)", fontSize: 13, fontStyle: "italic", lineHeight: 1.6, maxWidth: 320 }}>
+          Routines run tasks automatically on a schedule. Create one to get started.
+        </span>
+      </div>
+    );
   } else if (section === "skills") {
     detailsTitle = "";
     detailsContent = (
@@ -539,6 +597,19 @@ export default function App() {
               >
                 <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
               </button>
+            ) : section === "routines" ? (
+              <button
+                ref={routinesPlusRef}
+                className={styles.searchBtn}
+                onClick={() => {
+                  const rect = routinesPlusRef.current?.getBoundingClientRect();
+                  if (rect) setRoutinesAskPos({ x: rect.left - 320, y: rect.bottom + 8 });
+                  setShowRoutinesAsk(true);
+                }}
+                title="Create or manage routines"
+              >
+                <Sparkles size={14} strokeWidth={1.5} className={shared.sparkle} />
+              </button>
             ) : section === "skills" ? (
               <>
                 <button
@@ -577,7 +648,7 @@ export default function App() {
         details={
           <DetailsPanel
             title={detailsTitle}
-            contentKey={section === "settings" ? settingsSub : section === "sources" ? (selectedSource?.id ?? "none") : section === "connections" ? "connections" : section === "skills" ? (selectedSkillId ?? "skills") : "chat"}
+            contentKey={section === "settings" ? settingsSub : section}
           >
             {detailsContent}
           </DetailsPanel>
@@ -609,6 +680,15 @@ export default function App() {
           hint="The assistant can create, review, and manage skills. Ask it to create a new skill or review an imported one."
           placeholder="Create a code review skill..."
           initialPos={skillsAskPos}
+        />
+      )}
+      {showRoutinesAsk && (
+        <AssistantAsk
+          onSubmit={handleRoutinesAsk}
+          onClose={() => setShowRoutinesAsk(false)}
+          hint="The assistant will walk you through creating a routine — scheduled tasks that run automatically."
+          placeholder="Summarize unread emails every morning..."
+          initialPos={routinesAskPos}
         />
       )}
     </>

@@ -82,6 +82,26 @@ function getThemeOverrides(): Record<string, unknown> {
   };
 }
 
+function stripJsFunctions(src: string): string {
+  const re = /:\s*function\s*\([^)]*\)\s*\{/g;
+  let result = src;
+  let match;
+  while ((match = re.exec(result)) !== null) {
+    const start = match.index;
+    const braceStart = result.indexOf("{", start + match[0].indexOf("function"));
+    let depth = 1;
+    let i = braceStart + 1;
+    while (i < result.length && depth > 0) {
+      if (result[i] === "{") depth++;
+      else if (result[i] === "}") depth--;
+      i++;
+    }
+    result = result.slice(0, start) + ": null" + result.slice(i);
+    re.lastIndex = start + 6;
+  }
+  return result;
+}
+
 const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; onError?: () => void }) {
   const eager = usePrintMode();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -109,7 +129,8 @@ const ChartBlock = memo(function ChartBlock({ code, onError }: { code: string; o
 
     let option: Record<string, unknown>;
     try {
-      const parsed = JSON.parse(code);
+      const cleaned = stripJsFunctions(code);
+      const parsed = JSON.parse(cleaned);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         onError?.();
         return;
