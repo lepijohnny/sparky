@@ -32,7 +32,7 @@
   <img alt="SQLite" src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" />
 </p>
 
-<p align="center"><img src="docs/assets/screenshot.png" width="800" alt="Sparky screenshot" /></p>
+<p align="center"><img src="docs/assets/screenshot.png?v=2" width="800" alt="Sparky screenshot" /></p>
 
 ## Features
 
