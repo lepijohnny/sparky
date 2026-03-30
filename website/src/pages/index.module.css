@@ -81,17 +81,25 @@
   border: 1px solid var(--ifm-color-emphasis-300);
 }
 
-/* ─── Screenshot ─── */
+/* ─── Screenshots ─── */
 
-.screenshotWrap {
-  display: flex;
-  justify-content: center;
+.screenshots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 1080px;
+  margin: 0 auto;
   padding: 0 24px 64px;
+}
+
+@media (max-width: 768px) {
+  .screenshots {
+    grid-template-columns: 1fr;
+  }
 }
 
 .screenshot {
   width: 100%;
-  max-width: 860px;
   border-radius: 12px;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--ifm-color-emphasis-300);

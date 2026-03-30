@@ -1,6 +1,7 @@
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {useColorMode} from '@docusaurus/theme-common';
 import {Brain, Plug, Palette, ShieldCheck, Tags, Zap} from 'lucide-react';
 import styles from './index.module.css';
 
@@ -37,10 +38,30 @@ const features = [
   },
 ];
 
+function Screenshots() {
+  const {colorMode} = useColorMode();
+  const b = useBaseUrl;
+  const suffix = colorMode === 'dark' ? 'dark' : 'light';
+  return (
+    <div className={styles.screenshots}>
+      <img
+        src={b(`/img/screenshot-chat-${suffix}.png`)}
+        alt="Sparky chat interface with agent-generated release notes"
+        className={styles.screenshot}
+      />
+      <img
+        src={b(`/img/screenshot-connections-${suffix}.png`)}
+        alt="Sparky service connections with Gmail, GitHub, Todoist"
+        className={styles.screenshot}
+      />
+    </div>
+  );
+}
+
 export default function Home() {
   const b = useBaseUrl;
   return (
-    <Layout title="Private AI Assistant" description="A private, local-first desktop AI assistant with multi-provider LLM support, built-in knowledge base, and service integrations.">
+    <Layout title="Private AI Assistant" description="Your personal AI workbench — local, private, and connected to everything you use.">
       <section className={styles.hero}>
         <img
           src={b('/img/sparky-logo.png')}
@@ -49,7 +70,7 @@ export default function Home() {
         />
         <h1 className={styles.title}>Sparky</h1>
         <p className={styles.tagline}>
-          Sparky is a desktop app that turns AI automation into a conversation. Connect agents, query your local documents, and integrate external services — all from a single, intuitive chat interface. Instead of stitching together pipelines and tools, you describe what you want and your agent handles the rest.
+          Your personal AI workbench — local, private, and connected to everything you use. Connect services, query your documents, and let agents handle the rest. No cloud, no telemetry, fully yours.
         </p>
         <div className={styles.badges}>
           <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue" />
@@ -57,7 +78,10 @@ export default function Home() {
           <img alt="Version" src="https://img.shields.io/github/v/release/lepijohnny/sparky?color=orange" />
         </div>
         <div className={styles.actions}>
-          <Link to="/docs/getting-started/introduction" className={styles.primaryBtn}>
+          <Link to="https://github.com/lepijohnny/sparky/releases/latest" className={styles.primaryBtn}>
+            Download
+          </Link>
+          <Link to="/docs/getting-started/introduction" className={styles.secondaryBtn}>
             Get Started
           </Link>
           <Link to="https://github.com/lepijohnny/sparky" className={styles.secondaryBtn}>
@@ -66,13 +90,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className={styles.screenshotWrap}>
-        <video
-          src={b('/docs/assets/anchors-labels.mp4')}
-          autoPlay muted loop playsInline
-          className={styles.screenshot}
-        />
-      </div>
+      <Screenshots />
 
       <section className={styles.features}>
         {features.map((f) => (
@@ -98,13 +116,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={styles.cta}>
-        <h2 className={styles.ctaTitle}>Ready to try Sparky?</h2>
-        <p className={styles.ctaDesc}>Check the docs for build instructions and setup guide.</p>
-        <Link to="/docs/getting-started/installation" className={styles.primaryBtn}>
-          Installation Guide
-        </Link>
-      </section>
+
     </Layout>
   );
 }
