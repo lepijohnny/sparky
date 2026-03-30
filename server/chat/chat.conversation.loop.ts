@@ -1,11 +1,13 @@
 /**
  * Agent streaming loop — processes agent events and maps them to chat entries.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Agent, AgentEvent, AgentMessage, AgentTools } from "../core/agent.types";
+import type { Logger } from "../logger.types";
 import { DEFAULT_OUTPUT_LIMIT } from "../tools/tool.registry";
 import type { ChatEntry } from "./chat.types";
+import { computeSimilaritySignature, compareSimilaritySignatures, serializeSignature, deserializeSignature } from "../tools/tool.minhash";
 
 type TerminalReason = "done" | "stopped" | "error" | "overflow";
 
@@ -38,6 +40,7 @@ export function runAgentLoop(
   tools?: AgentTools,
   toolOutputDir?: string,
   steering?: () => string | null,
+  log?: Logger,
 ): Promise<TerminalReason> {
   return agentStream({
     run: (msgs) => agent.stream({ system, messages: msgs, cancellation: signal, tools, steering }),
@@ -49,7 +52,11 @@ export function runAgentLoop(
         const toolName = pending ? stripToolPrefix(pending.name) : "";
         const def = tools?.defs.find((d) => d.name === toolName);
         const limit = def?.outputLimit ?? DEFAULT_OUTPUT_LIMIT;
-        saveLargeOutput(toolOutputDir, event.id, String(event.output), limit);
+        const similarPath = saveLargeOutput(toolOutputDir, event.id, String(event.output), limit);
+        if (similarPath) {
+          log?.info("Dedup: similar tool output found", { toolCallId: event.id, similarTo: similarPath });
+          (event as any).output = `[Similar result already available at ${similarPath}. Use app_read with offset/limit to inspect it.]`;
+        }
       }
       const entry = toEntry(event, turnId, tools, pendingTools);
       if (entry) await emit(chatId, entry);
@@ -58,12 +65,37 @@ export function runAgentLoop(
   }).retry(3);
 }
 
-function saveLargeOutput(dir: string, toolCallId: string, output: string, limit: number): void {
-  if (output.length < limit) return;
+const SIMILARITY_THRESHOLD = 0.85;
+
+function findSimilarFile(dir: string, output: string): string | null {
+  try {
+    const files = readdirSync(dir).filter((f) => f.endsWith(".sig"));
+    if (files.length === 0) return null;
+
+    const sig = computeSimilaritySignature(output);
+    for (const sigFile of files) {
+      const buf = readFileSync(join(dir, sigFile));
+      const existing = deserializeSignature(buf);
+      if (compareSimilaritySignatures(sig, existing) >= SIMILARITY_THRESHOLD) {
+        return join(dir, sigFile.replace(/\.sig$/, ".txt"));
+      }
+    }
+  } catch { /* best-effort */ }
+  return null;
+}
+
+function saveLargeOutput(dir: string, toolCallId: string, output: string, limit: number): string | null {
+  if (output.length < limit) return null;
   try {
     mkdirSync(dir, { recursive: true });
+
+    const similar = findSimilarFile(dir, output);
+    if (similar) return similar;
+
     writeFileSync(join(dir, `${toolCallId}.txt`), output, "utf-8");
+    writeFileSync(join(dir, `${toolCallId}.sig`), serializeSignature(computeSimilaritySignature(output)));
   } catch { /* best-effort */ }
+  return null;
 }
 
 export interface AgentStreamOpts {

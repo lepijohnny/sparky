@@ -353,7 +353,7 @@ export class ChatConversation {
       ? injectCurrentTurnContent(ctx.messages, currentTurnContent)
       : ctx.messages;
     const toolOutputDir = join(this.wsDir, "chats", chatId, "tools");
-    return runAgentLoop(agent, chatId, turnId, ctx.system, messages, signal, this.emit.bind(this), this.emitActivity.bind(this), tools, toolOutputDir, this.drainSteering(chatId));
+    return runAgentLoop(agent, chatId, turnId, ctx.system, messages, signal, this.emit.bind(this), this.emitActivity.bind(this), tools, toolOutputDir, this.drainSteering(chatId), this.log);
   }
 
   private async renameAgentLoop(
