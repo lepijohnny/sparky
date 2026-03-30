@@ -117,6 +117,13 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
           pendingAttachmentsRef.current = null;
         }
         setEntries((prev) => prev.map((e) => e.kind === "message" && e.id === oid ? entry : e));
+      } else if (entry.role === "user") {
+        const updatedEntry = entry;
+        setEntries((prev) => {
+          const exists = prev.some((e) => e.kind === "message" && e.id === updatedEntry.id);
+          if (exists) return prev.map((e) => e.kind === "message" && e.id === updatedEntry.id ? updatedEntry : e);
+          return [...prev, updatedEntry];
+        });
       } else {
         setEntries((prev) => [...prev, entry]);
       }
@@ -446,6 +453,29 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
   const handleSend = useCallback(async (text: string, attachments: import("../../types/attachment").PendingAttachment[], knowledgeFilters?: string[]) => {
     if (!conn) return;
     scrollToBottom();
+
+    const isSteering = streamActiveRef.current;
+
+    if (isSteering) {
+      setEntries((prev) => {
+        const lastIdx = prev.findLastIndex((e) => e.kind === "message" && e.role === "user");
+        if (lastIdx === -1) return prev;
+        const last = prev[lastIdx];
+        if (last.kind !== "message") return prev;
+        const updated = { ...last, content: last.content + "\n" + text };
+        return [...prev.slice(0, lastIdx), updated, ...prev.slice(lastIdx + 1)];
+      });
+
+      try {
+        await conn.request("chat.ask", {
+          chatId: chat.id,
+          content: text,
+        });
+      } catch (err) {
+        console.error("Failed to send steering message:", err);
+      }
+      return;
+    }
 
     const atts = attachments.length > 0
       ? attachments.map((a) => ({ id: a.id, filename: a.filename, mimeType: a.mimeType, size: a.size, thumbnailUrl: a.thumbnailUrl ?? undefined, filePath: a.filePath }))

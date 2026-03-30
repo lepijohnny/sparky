@@ -38,7 +38,8 @@ export interface AgentTurn {
   messages: AgentMessage[];
   cancellation: AbortSignal;
   tools?: AgentTools;
-
+  /** Returns a queued steering message from the user, or null if none. Called between tool rounds. */
+  steering?: () => string | null;
 }
 
 /** Tool definition passed to the agent for function calling */

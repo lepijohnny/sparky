@@ -292,7 +292,7 @@ function ApprovalItem({
           ? <KeyRound size={14} strokeWidth={1.5} className={styles.icon} />
           : <ShieldAlert size={14} strokeWidth={1.5} className={styles.icon} />
         }
-        {isConnection ? request.message : "Approval Required"}
+        {isConnection ? request.message : humanizeToolTarget(request.tool, request.target) || "Approval Required"}
       </div>
       {request.description && <div className={styles.detail}>{request.description}</div>}
       {!isConnection && !request.description && request.tool === "app_bash" && (

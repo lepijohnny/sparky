@@ -23,6 +23,10 @@ function toolResult(messageId: string, toolId: string, output: string): ChatEntr
   return { kind: "activity", messageId, source: "agent", type: "agent.tool.result", timestamp: "2026-01-01T00:00:02Z", data: { id: toolId, output }, rowid: rowidCounter++ };
 }
 
+function steeringActivity(messageId: string, content: string): ChatEntry {
+  return { kind: "activity", messageId, source: "user", type: "user.steering", timestamp: "2026-01-01T00:00:01Z", data: { content }, rowid: rowidCounter++ };
+}
+
 const emptyFetcher: EntryFetcher = () => ({ entries: [], hasMore: false });
 
 function arrayFetcher(entries: ChatEntry[]): EntryFetcher {
@@ -537,5 +541,69 @@ describe("contextBuilder — large tool output caching", () => {
     expect(toolMsg).toBeDefined();
     expect(toolMsg!.content).toContain("...(truncated)");
     expect(toolMsg!.content).not.toContain("app_read");
+  });
+});
+
+describe("steering activities", () => {
+  test("given steering activity between tool calls, when building context, then does not split the turn", () => {
+    const turnId = "t1";
+    const entries = [
+      userMsg("Do something", turnId),
+      toolStart("app_read", turnId, "tc1"),
+      toolResult(turnId, "tc1", "file contents"),
+      steeringActivity(turnId, "also check the other file"),
+      toolStart("app_read", turnId, "tc2"),
+      toolResult(turnId, "tc2", "other contents"),
+      assistantMsg("Here are the results", turnId),
+    ];
+
+    const ctx = contextBuilder(200_000)
+      .system("Sys")
+      .conversation(arrayFetcher(entries))
+      .build();
+
+    expect(ctx.includedTurns).toBe(1);
+    expect(ctx.messages[0].role).toBe("user");
+    expect(ctx.messages[ctx.messages.length - 1].role).toBe("tool");
+    const assistantMsgs = ctx.messages.filter((m) => m.role === "assistant");
+    expect(assistantMsgs).toHaveLength(1);
+  });
+
+  test("given steering activity after assistant response, when building context, then assistant message is not reordered", () => {
+    const turnId = "t1";
+    const entries = [
+      userMsg("Hello", turnId),
+      toolStart("app_read", turnId, "tc1"),
+      toolResult(turnId, "tc1", "data"),
+      assistantMsg("Here is the answer", turnId),
+      steeringActivity(turnId, "wait, also do this"),
+    ];
+
+    const ctx = contextBuilder(200_000)
+      .system("Sys")
+      .conversation(arrayFetcher(entries))
+      .build();
+
+    expect(ctx.includedTurns).toBe(1);
+    const roles = ctx.messages.map((m) => m.role);
+    const assistantIdx = roles.indexOf("assistant");
+    const userIdx = roles.indexOf("user");
+    expect(assistantIdx).toBeGreaterThan(userIdx);
+  });
+
+  test("given steering activity mid-turn, when building context, then user message content is preserved", () => {
+    const turnId = "t1";
+    const entries = [
+      userMsg("Original question", turnId),
+      steeringActivity(turnId, "additional context"),
+      assistantMsg("Response", turnId),
+    ];
+
+    const ctx = contextBuilder(200_000)
+      .system("Sys")
+      .conversation(arrayFetcher(entries))
+      .build();
+
+    expect(ctx.messages[0].content).toBe("Original question");
   });
 });

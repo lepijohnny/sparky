@@ -1,8 +1,19 @@
 import { readFileSync as readFileSyncFn } from "node:fs";
-import type { Model, Api, Context, Tool, AssistantMessageEvent, UserMessage, AssistantMessage, ToolResultMessage, Message, ToolCall, SimpleStreamOptions } from "@mariozechner/pi-ai";
+import type { 
+  Model, 
+  Api, 
+  Context, 
+  Tool, 
+  AssistantMessageEvent, 
+  UserMessage, 
+  AssistantMessage, 
+  ToolResultMessage, 
+  Message, 
+  ToolCall, 
+  SimpleStreamOptions} from "@mariozechner/pi-ai";
 import { streamSimple } from "@mariozechner/pi-ai";
-import type { Agent, AgentEvent, AgentTurn, AgentToolDef, MessageContent } from "../../agent.types";
-import { getPrompt, encodeBase64 } from "../adapter.encode64";
+import type { Agent, AgentEvent, AgentTurn, MessageContent } from "../../agent.types";
+import { encodeBase64 } from "../adapter.encode64";
 import type { Logger } from "../../../logger.types";
 
 const THINKING_LEVELS: Record<number, "minimal" | "low" | "medium" | "high"> = { 1: "minimal", 2: "low", 3: "medium", 4: "high" };
@@ -85,7 +96,9 @@ export interface PendingToolCall {
   arguments: Record<string, unknown>;
 }
 
-type MappedEvent = AgentEvent | { type: "tool.pending"; call: PendingToolCall } | { type: "citations"; text: string };
+type MappedEvent = AgentEvent | { type: "tool.pending"; call: PendingToolCall } | {
+  label: string; type: "citations"; text: string 
+};
 
 function* mapEvent(event: AssistantMessageEvent, textAccumulator: string[], onContentBlock?: ContentBlockHandler): Generator<MappedEvent> {
   switch (event.type) {
@@ -120,6 +133,16 @@ function* mapEvent(event: AssistantMessageEvent, textAccumulator: string[], onCo
   }
 }
 
+function steerNoneAborted(turn: AgentTurn, context: Context, log: Logger, beforeHook?: () => void): boolean {
+  if (turn.cancellation.aborted) return false;
+  const content = turn.steering?.();
+  if (!content) return false;
+  beforeHook?.();
+  log.info("Steer message passed to the agent:", { length: content.length });
+  context.messages.push(from(PiSdkUserMessagePrototype, { content }));
+  return true;
+}
+
 function addToolResultsToContext(context: Context, results: { id: string; name: string; arguments: Record<string, unknown>; output: string }[]): void {
   context.messages.push(from(PiSdkAssistantMessagePrototype, {
     content: results.map((r): ToolCall => ({ type: "toolCall", id: r.id, name: r.name, arguments: r.arguments })),
@@ -143,50 +166,62 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
 
       try {
         let pendingCalls: PendingToolCall[] = [];
+        let keepGoing = true;
 
         let round = 0;
-        do {
-          round++;
-          opts.log.info("Tool loop", { round, pending: pendingCalls.length });
-          if (turn.cancellation.aborted) break;
-          pendingCalls = [];
-          const textParts: string[] = [];
-          const citationParts: { text: string; label: string }[] = [];
+        while (keepGoing) {
+          keepGoing = false;
 
-          for await (const piEvent of abortable(streamSimple(opts.model, context, streamOpts), turn.cancellation)) {
+          do {
+            round++;
+            opts.log.info("Tool loop", { round, pending: pendingCalls.length });
             if (turn.cancellation.aborted) break;
-            for (const event of mapEvent(piEvent, textParts, opts.onContentBlock)) {
-              if (event.type === "tool.pending") {
-                pendingCalls.push(event.call);
-              } else if (event.type === "citations") {
-                citationParts.push({ text: event.text, label: event.label ?? "Citations" });
-              } else {
-                yield event;
+            pendingCalls = [];
+            const textParts: string[] = [];
+            const citationParts: { text: string; label: string }[] = [];
+
+            for await (const piEvent of abortable(streamSimple(opts.model, context, streamOpts), turn.cancellation)) {
+              if (turn.cancellation.aborted) break;
+              for (const event of mapEvent(piEvent, textParts, opts.onContentBlock)) {
+                if (event.type === "tool.pending") {
+                  pendingCalls.push(event.call);
+                } else if (event.type === "citations") {
+                  citationParts.push({ text: event.text, label: event.label ?? "Citations" });
+                } else {
+                  yield event;
+                }
               }
             }
-          }
 
-          if ((textParts.length > 0 || citationParts.length > 0) && !turn.cancellation.aborted) {
-            const label = citationParts[0]?.label ?? "Citations";
-            const uniqueCitations = [...new Set(citationParts.flatMap((c) => c.text.split("\n")))].join("\n");
-            const sources = uniqueCitations ? `\n\n---\n**${label}:**\n` + uniqueCitations : "";
-            yield { type: "text.done", content: textParts.join("") + sources };
-          }
+            if ((textParts.length > 0 || citationParts.length > 0) && !turn.cancellation.aborted) {
+              const label = citationParts[0]?.label ?? "Citations";
+              const uniqueCitations = [...new Set(citationParts.flatMap((c) => c.text.split("\n")))].join("\n");
+              const sources = uniqueCitations ? `\n\n---\n**${label}:**\n` + uniqueCitations : "";
+              yield { type: "text.done", content: textParts.join("") + sources };
+            }
 
-          if (pendingCalls.length === 0 || !turn.tools) break;
+            if (pendingCalls.length === 0 || !turn.tools) break;
 
-          const results = [];
-          for (const tc of pendingCalls) {
+            const results: { id: string; name: string; arguments: Record<string, unknown>; output: string; }[] = [];
+            for (const tc of pendingCalls) {
+              if (turn.cancellation.aborted) break;
+
+              steerNoneAborted(turn, context, opts.log, () => addToolResultsToContext(context, results.splice(0)));
+
+              const output = await turn.tools!.execute(tc.name, tc.arguments).then((r) => typeof r === "string" ? r : r.text);
+              if (turn.cancellation.aborted) break;
+              yield { type: "tool.result" as const, id: tc.id, output };
+              results.push({ ...tc, output });
+            }
+
             if (turn.cancellation.aborted) break;
-            const output = await turn.tools!.execute(tc.name, tc.arguments).then((r) => typeof r === "string" ? r : r.text);
-            if (turn.cancellation.aborted) break;
-            yield { type: "tool.result" as const, id: tc.id, output };
-            results.push({ ...tc, output });
-          }
+            addToolResultsToContext(context, results);
+          } while (pendingCalls.length > 0);
 
-          if (turn.cancellation.aborted) break;
-          addToolResultsToContext(context, results);
-        } while (pendingCalls.length > 0);
+          if (steerNoneAborted(turn, context, opts.log)) {
+            keepGoing = true;
+          }
+        }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         if (turn.cancellation.aborted) {
