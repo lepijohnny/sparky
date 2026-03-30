@@ -200,21 +200,24 @@ export default memo(function ChatInput({
 
   const handleSend = useCallback(() => {
     const handle = inputRef.current;
-    if (!handle || handle.isEmpty() || sending) return;
+    if (!handle || handle.isEmpty()) return;
+    if (sending && !streaming) return;
     const text = handle.getText();
     if (!text.trim()) return;
-    const currentAttachments = [...attachments];
+    const currentAttachments = streaming ? [] : [...attachments];
     handle.clear();
     setHasContent(false);
-    setAttachments([]);
-    drafts.delete(chat.id);
-    setSending(true);
-    if (sendingTimer.current) clearTimeout(sendingTimer.current);
-    sendingTimer.current = setTimeout(() => setSending(false), 5000);
-    const filters = selectedSources.size > 0 ? [...selectedSources] : undefined;
+    if (!streaming) {
+      setAttachments([]);
+      drafts.delete(chat.id);
+      setSending(true);
+      if (sendingTimer.current) clearTimeout(sendingTimer.current);
+      sendingTimer.current = setTimeout(() => setSending(false), 5000);
+    }
+    const filters = !streaming && selectedSources.size > 0 ? [...selectedSources] : undefined;
     onSend(text.trim(), currentAttachments, filters);
     handle.focus();
-  }, [sending, chat.id, onSend, attachments]);
+  }, [sending, streaming, chat.id, onSend, attachments]);
 
   const handleTrigger = useCallback((info: TriggerInfo | null) => {
     setTrigger(info);

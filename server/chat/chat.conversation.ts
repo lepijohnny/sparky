@@ -127,15 +127,13 @@ export class ChatConversation {
 
     if (this.activeChats.has(data.chatId)) {
       if (data.content.trim()) {
-        const steerEntry: ChatEntry = {
-          kind: "message",
-          id: randomUUIDv7(),
-          role: "user",
-          content: data.content,
-          timestamp: new Date().toISOString(),
-        };
-        this.db.addEntry(data.chatId, steerEntry);
-        await this.emit(data.chatId, steerEntry);
+        const lastUser = this.db.getLastUserEntry(data.chatId);
+        if (lastUser) {
+          const updated = lastUser.content + "\n" + data.content;
+          this.db.updateMessageContent(data.chatId, lastUser.id, updated);
+          const updatedEntry: ChatEntry = { ...lastUser, content: updated };
+          await this.emit(data.chatId, updatedEntry);
+        }
         this.steer(data.chatId, data.content);
         return { ok: true };
       }

@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { join } from "node:path";
 import type { Logger } from "../logger.types";
 import type { Chat, ChatSummary } from "./chat.types";
-import type { ChatEntry } from "./chat.types";
+import type { ChatEntry, ChatMessage } from "./chat.types";
 import { migrate, vecSchema } from "../workspace.db.schema";
 
 interface ChatRow {
@@ -526,6 +526,22 @@ export class ChatDatabase {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };
+  }
+
+  getLastUserEntry(chatId: string): ChatMessage | null {
+    const row = this.db.prepare(
+      `SELECT rowid, * FROM entries
+       WHERE chat_id = :chat_id AND kind = 'message' AND role = 'user'
+       ORDER BY rowid DESC LIMIT 1`,
+    ).get({ chat_id: chatId }) as EntryRow | undefined;
+    if (!row) return null;
+    return this.toEntry(row) as ChatMessage;
+  }
+
+  updateMessageContent(chatId: string, turnId: string, content: string): void {
+    this.db.prepare(
+      `UPDATE entries SET content = :content WHERE chat_id = :chat_id AND turn_id = :turn_id AND kind = 'message'`,
+    ).run({ chat_id: chatId, turn_id: turnId, content });
   }
 
   getRecentUserMessages(chatId: string, limit = 3): string[] {
