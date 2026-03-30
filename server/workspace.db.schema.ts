@@ -95,6 +95,35 @@ const MIGRATIONS: Migration[] = [
   (db) => db.exec("ALTER TABLE chats ADD COLUMN mode TEXT"),
   /** v2: add unread flag */
   (db) => db.exec("ALTER TABLE chats ADD COLUMN unread INTEGER NOT NULL DEFAULT 0"),
+  /** v3: routines + run history */
+  (db) => db.exec(`
+    CREATE TABLE IF NOT EXISTS routines (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      cron TEXT NOT NULL,
+      once INTEGER NOT NULL DEFAULT 0,
+      action TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      last_run TEXT,
+      next_run TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS routine_runs (
+      id TEXT PRIMARY KEY,
+      routine_id TEXT NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+      chat_id TEXT,
+      status TEXT NOT NULL,
+      error TEXT,
+      started_at TEXT NOT NULL,
+      finished_at TEXT,
+      duration_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_routine_runs_routine ON routine_runs(routine_id, started_at DESC);
+  `),
 ];
 
 interface MigratableDb {
