@@ -43,6 +43,73 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
+const PIE_SEGMENTS: { key: keyof WorkspaceSpace; label: string; className: string }[] = [
+  { key: "conversations", label: "Conversations", className: "Conv" },
+  { key: "knowledge", label: "Knowledge", className: "Know" },
+  { key: "attachments", label: "Attachments", className: "Att" },
+  { key: "cwd", label: "Working Files", className: "Cwd" },
+  { key: "tools", label: "Tool Cache", className: "Tools" },
+];
+
+const PIE_RADIUS = 40;
+const PIE_STROKE = 16;
+const PIE_CIRCUMFERENCE = 2 * Math.PI * PIE_RADIUS;
+
+function DiskPieChart({ space }: { space: WorkspaceSpace }) {
+  const slices = PIE_SEGMENTS.filter((s) => space[s.key] > 0);
+  const [hovered, setHovered] = useState<string | null>(null);
+  let offset = 0;
+
+  return (
+    <div className={styles.pieLayout}>
+      <div className={styles.pieWrap}>
+        <svg viewBox="0 0 100 100" className={styles.pieSvg}>
+          {slices.map((s) => {
+            const fraction = space[s.key] / space.total;
+            const dash = fraction * PIE_CIRCUMFERENCE;
+            const gap = PIE_CIRCUMFERENCE - dash;
+            const currentOffset = offset;
+            offset += dash;
+            const isHovered = hovered === s.key;
+            return (
+              <circle
+                key={s.key}
+                className={styles[`pieSlice${s.className}`]}
+                cx="50" cy="50" r={PIE_RADIUS}
+                fill="none"
+                strokeWidth={isHovered ? PIE_STROKE + 4 : PIE_STROKE}
+                strokeDasharray={`${dash} ${gap}`}
+                strokeDashoffset={-currentOffset}
+                strokeLinecap="butt"
+                style={{ transition: "stroke-width 150ms ease" }}
+                onMouseEnter={() => setHovered(s.key)}
+                onMouseLeave={() => setHovered(null)}
+              />
+            );
+          })}
+        </svg>
+        <div className={styles.pieCenter}>
+          {hovered ? formatSize(space[hovered as keyof WorkspaceSpace]) : formatSize(space.total)}
+        </div>
+      </div>
+      <div className={styles.pieLegend}>
+        {slices.map((s) => (
+          <div
+            key={s.key}
+            className={`${styles.pieLegendItem} ${hovered === s.key ? styles.pieLegendItemActive : ""}`}
+            onMouseEnter={() => setHovered(s.key)}
+            onMouseLeave={() => setHovered(null)}
+          >
+            <span className={`${styles.spaceDot} ${styles[`spaceDot${s.className}`]}`} />
+            <span className={styles.pieLegendLabel}>{s.label}</span>
+            <span className={styles.pieLegendValue}>{formatSize(space[s.key])}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WorkspaceDetailsPage() {
   const { conn } = useConnection();
   const { addToast } = useToasts();
@@ -254,72 +321,7 @@ export default function WorkspaceDetailsPage() {
             Disk Usage
           </div>
           <div className={shared.cardBody}>
-            <div className={styles.spaceTotal}>{formatSize(workspaceSpace.total)}</div>
-            <div className={styles.spaceBar}>
-              {workspaceSpace.conversations > 0 && (
-                <div
-                  className={styles.spaceSegConv}
-                  style={{ flex: workspaceSpace.conversations }}
-                  title={`Conversations: ${formatSize(workspaceSpace.conversations)}`}
-                />
-              )}
-              {workspaceSpace.knowledge > 0 && (
-                <div
-                  className={styles.spaceSegKnow}
-                  style={{ flex: workspaceSpace.knowledge }}
-                  title={`Knowledge: ${formatSize(workspaceSpace.knowledge)}`}
-                />
-              )}
-              {workspaceSpace.attachments > 0 && (
-                <div
-                  className={styles.spaceSegAtt}
-                  style={{ flex: workspaceSpace.attachments }}
-                  title={`Attachments: ${formatSize(workspaceSpace.attachments)}`}
-                />
-              )}
-              {workspaceSpace.cwd > 0 && (
-                <div
-                  className={styles.spaceSegCwd}
-                  style={{ flex: workspaceSpace.cwd }}
-                  title={`Working files: ${formatSize(workspaceSpace.cwd)}`}
-                />
-              )}
-              {workspaceSpace.tools > 0 && (
-                <div
-                  className={styles.spaceSegTools}
-                  style={{ flex: workspaceSpace.tools }}
-                  title={`Tool outputs: ${formatSize(workspaceSpace.tools)}`}
-                />
-              )}
-            </div>
-            <div className={styles.spaceLegend}>
-              <span className={styles.spaceLegendItem}>
-                <span className={`${styles.spaceDot} ${styles.spaceDotConv}`} />
-                Conversations {formatSize(workspaceSpace.conversations)}
-              </span>
-              <span className={styles.spaceLegendItem}>
-                <span className={`${styles.spaceDot} ${styles.spaceDotKnow}`} />
-                Knowledge {formatSize(workspaceSpace.knowledge)}
-              </span>
-              {workspaceSpace.attachments > 0 && (
-                <span className={styles.spaceLegendItem}>
-                  <span className={`${styles.spaceDot} ${styles.spaceDotAtt}`} />
-                  Attachments {formatSize(workspaceSpace.attachments)}
-                </span>
-              )}
-              {workspaceSpace.cwd > 0 && (
-                <span className={styles.spaceLegendItem}>
-                  <span className={`${styles.spaceDot} ${styles.spaceDotCwd}`} />
-                  Working files {formatSize(workspaceSpace.cwd)}
-                </span>
-              )}
-              {workspaceSpace.tools > 0 && (
-                <span className={styles.spaceLegendItem}>
-                  <span className={`${styles.spaceDot} ${styles.spaceDotTools}`} />
-                  Tool outputs {formatSize(workspaceSpace.tools)}
-                </span>
-              )}
-            </div>
+            <DiskPieChart space={workspaceSpace} />
           </div>
         </div>
       )}
