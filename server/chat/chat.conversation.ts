@@ -32,6 +32,7 @@ const DEFAULT_PREFERENCES = "";
 
 export class ChatConversation {
   private activeChats = new Map<string, AbortController>();
+  private activeTurnIds = new Map<string, string>();
   private steeringQueue = new Map<string, string[]>();
   private recording = false;
   wsDir = "";
@@ -127,12 +128,18 @@ export class ChatConversation {
 
     if (this.activeChats.has(data.chatId)) {
       if (data.content.trim()) {
-        const lastUser = this.db.getLastUserEntry(data.chatId);
-        if (lastUser) {
-          const updated = lastUser.content + "\n" + data.content;
-          this.db.updateMessageContent(data.chatId, lastUser.id, updated);
-          const updatedEntry: ChatEntry = { ...lastUser, content: updated };
-          await this.emit(data.chatId, updatedEntry);
+        const turnId = this.activeTurnIds.get(data.chatId);
+        if (turnId) {
+          const steerEntry: ChatEntry = {
+            kind: "activity",
+            messageId: turnId,
+            source: "user",
+            type: "user.steering",
+            timestamp: new Date().toISOString(),
+            data: { content: data.content },
+          };
+          this.db.appendSteering(data.chatId, turnId, data.content, steerEntry);
+          await this.emit(data.chatId, steerEntry);
         }
         this.steer(data.chatId, data.content);
         return { ok: true };
@@ -150,6 +157,7 @@ export class ChatConversation {
     let turnId: string | undefined;
     try {
       turnId = randomUUIDv7();
+      this.activeTurnIds.set(data.chatId, turnId);
 
       const userEntry: ChatEntry = {
         kind: "message",
@@ -283,6 +291,7 @@ export class ChatConversation {
 
       // Release before terminal emit so subscribers see the chat as idle
       this.activeChats.delete(data.chatId);
+      this.activeTurnIds.delete(data.chatId);
       const durationMs = Date.now() - startTime;
       const terminalType = answer === "overflow" ? "done" : answer;
       await this.emitActivity(data.chatId, turnId, `agent.${terminalType}`, {
@@ -290,6 +299,11 @@ export class ChatConversation {
         contextWindow: ctx.budget.total,
         durationMs,
       });
+
+      if (!isSystemRole) {
+        const refreshed = this.db.getChat(data.chatId);
+        if (refreshed) this.bus.emit("chat.updated", { chat: refreshed });
+      }
 
       if (!isSystemRole && (answer === "done" || answer === "overflow")) {
         this.maybeSummarize(data.chatId, ctx).catch((err) =>
@@ -306,6 +320,7 @@ export class ChatConversation {
       throw err;
     } finally {
       this.activeChats.delete(data.chatId);
+      this.activeTurnIds.delete(data.chatId);
       this.steeringQueue.delete(data.chatId);
     }
   }

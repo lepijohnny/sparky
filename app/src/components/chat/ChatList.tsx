@@ -31,6 +31,12 @@ interface SearchResult {
   matchCount: number;
 }
 
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes}B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+}
+
 // Simple date formatter cache — avoids creating Date + toLocaleDateString per item per render
 const dateCache = new Map<string, string>();
 function formatDate(iso: string): string {
@@ -206,6 +212,9 @@ export default memo(function ChatList({
             </div>
           )}
           <span className={styles.itemDate}>
+            {chat.sizeBytes != null && chat.sizeBytes > 10240 && (
+              <span className={styles.itemSize}>{formatSize(chat.sizeBytes)}</span>
+            )}
             {formatDate(chat.updatedAt)}
           </span>
         </div>
