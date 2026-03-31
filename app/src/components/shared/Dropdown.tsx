@@ -18,9 +18,10 @@ interface Props {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  renderOption?: (option: Option) => React.ReactNode;
 }
 
-export default function Dropdown({ options, value, onChange, placeholder, disabled }: Props) {
+export default function Dropdown({ options, value, onChange, placeholder, disabled, renderOption }: Props) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<React.CSSProperties | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -110,7 +111,7 @@ export default function Dropdown({ options, value, onChange, placeholder, disabl
               className={`${styles.item} ${opt.value === value ? styles.itemSelected : ""}`}
               onClick={() => handleSelect(opt.value)}
             >
-              {opt.label}
+              {renderOption ? renderOption(opt) : opt.label}
             </div>
           ))}
 

@@ -43,24 +43,24 @@ const KIND_META: Record<RuleKind, { scopeLabel: string; listLabel: string; scope
   "bash-allow":  { scopeLabel: "bash",  listLabel: "allowed", scopeClass: "badgeExecute", listClass: "badgeAllow" },
   "bash-deny":   { scopeLabel: "bash",  listLabel: "denied",  scopeClass: "badgeExecute", listClass: "badgeDeny" },
   "bash-ask":    { scopeLabel: "bash",  listLabel: "ask",     scopeClass: "badgeExecute", listClass: "badgeAsk" },
-  "bus-allow":   { scopeLabel: "bus",   listLabel: "allowed", scopeClass: "badgeBus",     listClass: "badgeAllow" },
-  "bus-deny":    { scopeLabel: "bus",   listLabel: "denied",  scopeClass: "badgeBus",     listClass: "badgeDeny" },
-  "bus-ask":     { scopeLabel: "bus",   listLabel: "ask",     scopeClass: "badgeBus",     listClass: "badgeAsk" },
+  "bus-allow":   { scopeLabel: "app",   listLabel: "allowed", scopeClass: "badgeBus",     listClass: "badgeAllow" },
+  "bus-deny":    { scopeLabel: "app",   listLabel: "denied",  scopeClass: "badgeBus",     listClass: "badgeDeny" },
+  "bus-ask":     { scopeLabel: "app",   listLabel: "ask",     scopeClass: "badgeBus",     listClass: "badgeAsk" },
 };
 
 const KIND_OPTIONS: { value: RuleKind; label: string }[] = [
-  { value: "read-allow",  label: "Read — Allowed" },
   { value: "read-deny",   label: "Read — Denied" },
   { value: "read-ask",    label: "Read — Ask" },
-  { value: "write-allow", label: "Write — Allowed" },
+  { value: "read-allow",  label: "Read — Allowed" },
   { value: "write-deny",  label: "Write — Denied" },
   { value: "write-ask",   label: "Write — Ask" },
+  { value: "write-allow", label: "Write — Allowed" },
   { value: "bash-deny",   label: "Bash — Denied" },
   { value: "bash-ask",    label: "Bash — Ask" },
   { value: "bash-allow",  label: "Bash — Allowed" },
-  { value: "bus-deny",    label: "Bus — Denied" },
-  { value: "bus-ask",     label: "Bus — Ask" },
-  { value: "bus-allow",   label: "Bus — Allowed" },
+  { value: "bus-deny",    label: "App — Denied" },
+  { value: "bus-ask",     label: "App — Ask" },
+  { value: "bus-allow",   label: "App — Allowed" },
 ];
 
 function flattenRules(trust: Record<Scope, ScopeRules>): FlatRule[] {
@@ -138,6 +138,21 @@ export default function PermissionsDetailsPage() {
   }, [conn]);
 
   const allRules = flattenRules(trust);
+
+  const renderKindOption = useCallback((opt: { value: string; label: string }) => {
+    if (opt.value === "all") return <span>{opt.label}</span>;
+    const meta = KIND_META[opt.value as RuleKind];
+    if (!meta) return <span>{opt.label}</span>;
+    const count = allRules.filter((r) => r.kind === opt.value).length;
+    return (
+      <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span className={`${styles.badge} ${styles.badgeScope} ${styles[meta.scopeClass]}`}>{meta.scopeLabel}</span>
+        <span className={`${styles.badge} ${styles.badgeList} ${styles[meta.listClass]}`}>{meta.listLabel}</span>
+        {count > 0 && <span className={styles.countBadge}>{count}</span>}
+      </span>
+    );
+  }, [allRules]);
+
   const flat = allRules.filter((f) => {
     if (filterKind !== "all" && f.kind !== filterKind) return false;
     if (filter) {
@@ -183,6 +198,7 @@ export default function PermissionsDetailsPage() {
                 ]}
                 value={filterKind}
                 onChange={(v) => setFilterKind(v as RuleKind | "all")}
+                renderOption={renderKindOption}
               />
             </div>
           </div>
@@ -200,8 +216,7 @@ export default function PermissionsDetailsPage() {
                     </div>
                     <div className={styles.itemRight}>
                       <span className={`${styles.badge} ${styles.badgeScope} ${styles[meta.scopeClass]}`}>{meta.scopeLabel}</span>
-                      <span className={`${styles.badge} ${styles.badgeList} ${styles[meta.listClass]}`}>{meta.listLabel}</span>
-                      {f.alwaysAsk && <span className={`${styles.badge} ${styles.badgeAlwaysAsk}`}>always ask</span>}
+                      <span className={`${styles.badge} ${styles.badgeList} ${f.alwaysAsk ? styles.badgeAlwaysAsk : styles[meta.listClass]}`}>{f.alwaysAsk ? "always ask" : meta.listLabel}</span>
                       <button className={`${shared.btnDanger} ${styles.removeBtn}`} onClick={() => handleRemove(f)}>Remove</button>
                     </div>
                   </div>
@@ -231,6 +246,7 @@ export default function PermissionsDetailsPage() {
                 options={KIND_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
                 value={newKind}
                 onChange={(v) => setNewKind(v as RuleKind)}
+                renderOption={renderKindOption}
               />
             </div>
             {newKind.endsWith("-ask") && (

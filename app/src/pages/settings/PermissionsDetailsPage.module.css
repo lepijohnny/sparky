@@ -240,6 +240,18 @@
   color: #ef4444;
 }
 
+.countBadge {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  background: var(--bg-hover);
+  border-radius: 8px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  margin-left: auto;
+}
+
 .removeBtn {
   border: none;
   background: none;
