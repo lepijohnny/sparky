@@ -48,6 +48,7 @@
 - **Rolling summaries** — Automatic conversation summarization to extend context
 - **Themes** — Light and dark themes with custom theme support
 - **Multi-workspace** — Isolated workspaces with separate chats, settings, and knowledge bases
+- **Routines** — Scheduled automation with cron triggers, chat actions, and run history
 - **Chat organization** — Flags, labels, and archives to keep conversations organized
 - **Print** — Export conversations with per-message visibility toggle
 - **Attachments** — Attach files to messages (images, documents, code)
@@ -56,16 +57,6 @@
 ## Knowledge Base
 
 Add documents (PDF, Markdown, text, URLs) as sources. Sparky chunks, embeds, and indexes them locally. When you chat, relevant chunks are retrieved using hybrid BM25 + vector search, reranked, and injected into context.
-
-## Extractor Plugins
-
-Install custom extractors to support new source types:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lepijohnny/sparky-extractors/main/install.sh) sparky-url-extractor
-```
-
-Plugins are automatically discovered on startup. See [`sparky-extractors`](https://github.com/lepijohnny/sparky-extractors) for available plugins.
 
 ## Architecture
 
@@ -185,6 +176,7 @@ server/             Node.js sidecar (TypeScript, WebSocket API)
   prompts/          Built-in role files, API docs, format guides
   settings/         Workspace settings (appearance, labels, LLM, profile)
   skills/           Skill CRUD, import/export, review pipeline
+  routines/         Scheduled automation — scheduler, executor, actions
   tools/            Tool definitions with Zod schemas (app_* naming)
 src-tauri/          Tauri shell (Rust) — window, IPC, model downloads, sidecar
 scripts/            Build helpers (macOS, Windows)
