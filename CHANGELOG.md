@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.0] — 2026-03-30
+
+### Added
+- **Routines** — Scheduled automation with cron triggers and multiple action types (chat, archive, flag, label)
+- Routine Assistant — guided questionnaire for creating routines via conversation
+- Routine scheduler with minute-aligned ticks (Croner)
+- Routine detail page with Schedule, Action, and History cards
+- Manual "Run Now" trigger for routines
+- **Steering messages** — Send messages to the agent while it's working; displayed as activity entries
+- **Tool output dedup** — MinHash signatures skip near-identical outputs (85% Jaccard threshold)
+- **Disk usage pie chart** in workspace settings with hover-to-expand slices
+- Skill files cached in Zustand store — instant switching, no flicker
+- Routine data and runs prefetched and stored in Zustand
+- Section-level fade transitions for smooth detail panel switching
+- Per-chat trust scope for Approve All
+- Chat sizeBytes tracking (refreshed at turn end)
+
+### Changed
+- Approval popup shows real action name instead of generic "Approval Required"
+- Detail panel content key is now section-level (no per-item remount animations)
+- Consistent list styling across all sidebar pages (chats, routines, skills, connections, settings)
+- Skill details layout — fixed header/status height, scrollable file card
+- Updated website landing page (tagline, screenshots, CTA)
+
+### Fixed
+- Approve All scope matching (`trustScope` instead of role name)
+- Steering injection skipped on cancellation or error
+- ECharts JS function stripping handles nested functions via balanced brace counting
+- Stale mermaid SVG blobs cleaned from workspace DB
+
 ## [0.6.0] — 2026-03-28
 
 ### Added
