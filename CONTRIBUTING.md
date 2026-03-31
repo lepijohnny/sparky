@@ -128,13 +128,22 @@ cd server && pnpm rebuild better-sqlite3 sqlite-vec
 ## Project Structure
 
 ```
-app/            React frontend (Vite, TypeScript, CSS Modules)
-server/         Node.js sidecar (TypeScript, WebSocket API, SQLite)
-src-tauri/      Tauri shell (Rust) — window, IPC, model downloads
-auth-core/      Shared auth types
-auth-flows/     Auth flow plugins (PAT, local, device, OAuth PKCE)
-scripts/        Build helpers
-website/        Docusaurus docs site (getsparky.chat)
+app/                React frontend (Vite, React 19, TypeScript, CSS Modules)
+auth-core/          Shared auth types (AuthFlow, grants, OAuth)
+auth-flows/         Auth flow plugins (PAT, local, device, OAuth PKCE)
+server/             Node.js sidecar (TypeScript, WebSocket API)
+  chat/             Chat CRUD, conversation loop, context builder
+  core/             Adapters, bus, auth, proxy, registry, search
+  knowledge/        RAG pipeline — chunking, indexing, search, worker
+  prompts/          Built-in role files, API docs, format guides
+  settings/         Workspace settings (appearance, labels, LLM, profile)
+  skills/           Skill CRUD, import/export, review pipeline
+  routines/         Scheduled automation — scheduler, executor, actions
+  tools/            Tool definitions with Zod schemas (app_* naming)
+src-tauri/          Tauri shell (Rust) — window, IPC, model downloads, sidecar
+scripts/            Build helpers (macOS, Windows)
+docs/               Architecture docs and assets
+website/            Documentation site — getsparky.chat (Docusaurus)
 ```
 
 ## Code Style
