@@ -1,3 +1,4 @@
+import type Database from "better-sqlite3";
 import type { EventBus } from "../core/bus";
 import type { Configuration } from "../core/config";
 import { ToolApproval } from "../core/tool.approval";
@@ -21,6 +22,7 @@ export interface ChatWorkspace {
   switchDb(dbPath: string, log: Logger): void;
   stopAll(): Promise<void>;
   dispose(): void;
+  readonly connection: Database.Database;
 }
 
 /** @deprecated Use ChatWorkspace instead */
@@ -151,6 +153,8 @@ export function createChatWorkspace(
   });
 
   return {
+    get connection() { return db.connection; },
+
     getChat(id) {
       return db.getChat(id);
     },

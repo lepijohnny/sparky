@@ -12,6 +12,7 @@ import { createSourceSelectionSlice, type SourceSelectionSlice } from "./sourceS
 import { createWorkspaceSlice, type WorkspaceSlice } from "./workspace";
 import { createTrustSlice, type TrustSlice } from "./trust";
 import { createSkillsSlice, type SkillsSlice } from "./skills";
+import { createRoutinesSlice, type RoutinesSlice } from "./routines";
 import { createUpdaterSlice, type UpdaterSlice } from "./updater";
 
 export type AppState =
@@ -27,6 +28,7 @@ export type AppState =
   & WorkspaceSlice
   & TrustSlice
   & SkillsSlice
+  & RoutinesSlice
   & UpdaterSlice;
 
 export const useStore = create<AppState>()(
@@ -44,6 +46,7 @@ export const useStore = create<AppState>()(
       ...createWorkspaceSlice(...a),
       ...createTrustSlice(...a),
       ...createSkillsSlice(...a),
+      ...createRoutinesSlice(...a),
       ...createUpdaterSlice(...a),
     }),
     {

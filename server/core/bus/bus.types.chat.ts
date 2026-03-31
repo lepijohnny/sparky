@@ -33,7 +33,7 @@ export interface ChatEvents {
   "chat.ask":                 { req: { chatId: string; content: string; attachmentIds?: string[]; services?: string[]; skills?: string[]; mode?: "read" | "write" | "execute"; knowledgeFilters?: string[] }; res: { ok: boolean } };
   "chat.stop":                { req: { chatId: string }; res: { ok: boolean } };
   "chat.search":              { req: { query: string; flagged?: boolean; archived?: boolean; labelId?: string }; res: { results: { chat: Chat; matchCount: number }[] } };
-  "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" | "permissions" | "skills"; mode?: "read" | "write" | "execute" }; res: { chatId: string } };
+  "chat.system.ask":          { req: { content: string; kind?: "general" | "connection" | "permissions" | "skills" | "routines"; mode?: "read" | "write" | "execute" }; res: { chatId: string } };
   "chat.created":             { req: { chat: Chat }; res: void };
   "chat.updated":             { req: { chat: Chat }; res: void };
   "chat.deleted":             { req: { id: string }; res: void };

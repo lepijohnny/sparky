@@ -49,6 +49,6 @@ describe("schema migration", () => {
     const cols = db.prepare("PRAGMA table_info(chats)").all() as { name: string }[];
     expect(cols.map((c) => c.name)).toContain("mode");
     const row = db.prepare("SELECT version FROM schema_version").get() as { version: number };
-    expect(row.version).toBe(2);
+    expect(row.version).toBe(3);
   });
 });

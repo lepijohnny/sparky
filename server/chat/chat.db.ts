@@ -166,6 +166,8 @@ export class ChatDatabase {
   readonly path: string;
   wsDir = "";
 
+  get connection(): Database.Database { return this.db; }
+
   constructor(dbPath: string, private log: Logger) {
     this.path = dbPath;
     this.db = new Database(dbPath);

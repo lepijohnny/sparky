@@ -126,6 +126,15 @@ const ROUTES: RouteEntry[] = [
   ["skills.import", { notifiable: true }],
   ["skills.export", { notifiable: true }],
 
+  "routine.list",
+  "routine.get",
+  ["routine.create", { notifiable: true }],
+  ["routine.update", { notifiable: true }],
+  ["routine.delete", { notifiable: true }],
+  ["routine.toggle", { notifiable: true }],
+  "routine.history",
+  "routine.run",
+
   "core.prefetch",
   "fs.complete",
 

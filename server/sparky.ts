@@ -28,6 +28,10 @@ import { shutdownWorker } from "./knowledge/worker/kt.worker.client";
 import { createSettingsCrud } from "./settings";
 import { createAdapters } from "./core/adapters/adapters";
 import { configJsonBackwardCompatibilityHook as backwardCompatibilityHook } from "./core/compat";
+import { createRoutineDb } from "./chat/chat.routine.db";
+import { registerRoutineBus } from "./routines/routine.bus";
+import { createRoutineExecutor } from "./routines/routine.executor";
+import { createRoutineScheduler } from "./routines/routine.scheduler";
 
 export interface Sparky {
   start(): Promise<{ port: number; token: string }>;
@@ -65,6 +69,12 @@ export function createSparky(): Sparky {
     defaultAgentFn, 
     knowledgeManager,
     getEnvVars);
+
+  const routineDb = createRoutineDb(chatManager.connection);
+  const routineLog = logger.createLogger("routine");
+  const executeRoutine = createRoutineExecutor(bus, routineDb, routineLog);
+  registerRoutineBus(bus, routineDb, routineLog, executeRoutine);
+  const routineScheduler = createRoutineScheduler(routineDb, executeRoutine, routineLog);
 
   let hub: Connection | null = null;
 
@@ -278,6 +288,9 @@ export function createSparky(): Sparky {
 
   bus.subscribe("svc.register", (data) => broadcast("svc.register", data));
 
+  bus.subscribe("routine.updated", (data) => broadcast("routine.updated", data));
+  bus.subscribe("routine.deleted", (data) => broadcast("routine.deleted", data));
+
   bus.subscribe("svc.updated", (data) => broadcast("svc.updated", data));
   bus.subscribe("svc.delete", (data) => broadcast("svc.delete", data));
   bus.subscribe("svc.guide", (data) => broadcast("svc.guide", data));
@@ -322,6 +335,8 @@ export function createSparky(): Sparky {
         return { ok: true };
       });
 
+      routineScheduler.start();
+
       log.info(`Ready on port ${port}`);
       return { port, token };
     },
@@ -329,6 +344,7 @@ export function createSparky(): Sparky {
     async dispose() {
       const log = logger.createLogger("sparky");
       log.info("Shutting down Sparky");
+      routineScheduler.stop();
       await shutdownWorker();
       chatManager.dispose();
       auth.dispose();

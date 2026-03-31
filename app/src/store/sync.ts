@@ -98,7 +98,23 @@ export function syncStore(conn: WsConnection): Unsubscribe {
   sub("skills.changed", () => {
     conn.request<{ skills: any[] }>("skills.list").then((res) => {
       useStore.getState().setSkills(res.skills);
+      for (const skill of res.skills) {
+        conn.request<{ skill: any; files: { name: string; content: string }[] }>("skills.get", { id: skill.id })
+          .then((r) => { useStore.getState().setSkillFiles(skill.id, r.files); })
+          .catch(() => {});
+      }
     }).catch(() => {});
+  });
+
+  sub<{ routine: any }>("routine.updated", ({ routine }) => {
+    useStore.getState().patchRoutine(routine);
+    conn.request<{ routine: any; runs: any[] }>("routine.get", { id: routine.id })
+      .then((res) => { useStore.getState().setRoutineRuns(routine.id, res.runs); })
+      .catch(() => {});
+  });
+
+  sub<{ id: string }>("routine.deleted", ({ id }) => {
+    useStore.getState().removeRoutine(id);
   });
 
   sub("settings.workspace.changed", () => {
@@ -123,12 +139,13 @@ export function syncPopup(conn: WsConnection): void {
 
 async function fetchInitialData(conn: WsConnection) {
   try {
-    const [chats, sources, connections, labels, skills] = await Promise.all([
+    const [chats, sources, connections, labels, skills, routines] = await Promise.all([
       conn.request<{ chats: Chat[] }>("chat.list.all"),
       conn.request<{ sources: Source[] }>("kt.sources.list"),
       conn.request<{ services: ServiceInfo[] }>("svc.list"),
       conn.request<{ labels: Label[] }>("settings.labels.list"),
       conn.request<{ skills: any[] }>("skills.list"),
+      conn.request<{ routines: any[] }>("routine.list"),
     ]);
 
     const store = useStore.getState();
@@ -137,6 +154,19 @@ async function fetchInitialData(conn: WsConnection) {
     store.setConnections(connections.services);
     store.setLabels(labels.labels);
     store.setSkills(skills.skills);
+    store.setRoutines(routines.routines);
+
+    for (const skill of skills.skills) {
+      conn.request<{ skill: any; files: { name: string; content: string }[] }>("skills.get", { id: skill.id })
+        .then((res) => { useStore.getState().setSkillFiles(skill.id, res.files); })
+        .catch(() => {});
+    }
+
+    for (const routine of routines.routines) {
+      conn.request<{ routine: any; runs: any[] }>("routine.get", { id: routine.id })
+        .then((res) => { useStore.getState().setRoutineRuns(routine.id, res.runs); })
+        .catch(() => {});
+    }
 
     refetchWorkspace(conn);
     refetchTrust(conn);
