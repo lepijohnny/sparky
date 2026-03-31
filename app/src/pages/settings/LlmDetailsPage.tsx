@@ -109,9 +109,10 @@ export default function LlmDetailsPage() {
   const isDefault = (c: LlmConnection) => defaultConn?.id === c.id;
 
   return (
-    <div className={shared.contentArea}>
-      <div className={shared.card}>
+    <div className={shared.contentArea} style={{ overflow: "hidden" }}>
+      <div className={shared.card} style={{ flexShrink: 0, maxHeight: "50%", display: "flex", flexDirection: "column" }}>
         <div className={shared.cardHeader}>Default</div>
+        <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         <div className={shared.cardBodyRow}>
           <div className={shared.fieldText}>
             <label className={shared.fieldLabel}>Connection</label>
@@ -201,9 +202,10 @@ export default function LlmDetailsPage() {
 
           </>
         )}
+        </div>
       </div>
 
-      <div className={shared.card}>
+      <div className={shared.card} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className={local.cardHeaderWithAction}>
           <span>Connections</span>
           <button className={local.addBtn} onClick={() => setShowModal(true)}>
@@ -211,7 +213,7 @@ export default function LlmDetailsPage() {
             New Connection
           </button>
         </div>
-        <div className={shared.cardBody}>
+        <div className={shared.cardBody} style={{ flex: 1, minHeight: 0, overflowY: "auto", maxHeight: "none" }}>
           {connections.length === 0 ? (
             <div className={shared.emptyState}>
               No connections configured. Add a connection to get started.

@@ -237,11 +237,11 @@ export default function WorkspaceDetailsPage() {
   }
 
   return (
-    <div className={shared.contentArea}>
+    <div className={shared.contentArea} style={{ overflow: "hidden" }}>
       {/* Workspace Info */}
-      <div className={shared.card}>
+      <div className={shared.card} style={{ flexShrink: 0 }}>
         <div className={shared.cardHeader}>Workspace</div>
-        <div className={shared.cardBody}>
+        <div className={shared.cardBody} style={{ overflowY: "auto", maxHeight: "none" }}>
           <div className={styles.infoRow}>
             <div className={shared.fieldText}>
               <label className={shared.fieldLabel}>Name</label>
@@ -253,9 +253,9 @@ export default function WorkspaceDetailsPage() {
       </div>
 
       {/* Knowledge Search */}
-      <div className={shared.card}>
+      <div className={shared.card} style={{ flexShrink: 0, maxHeight: "45%", display: "flex", flexDirection: "column" }}>
         <div className={shared.cardHeader}>Knowledge</div>
-        <div className={shared.cardBody}>
+        <div className={shared.cardBody} style={{ flex: 1, minHeight: 0, overflowY: "auto", maxHeight: "none" }}>
           <div className={shared.cardBodyRow}>
             <div className={shared.fieldText}>
               <label className={shared.fieldLabel}>Search mode</label>
@@ -315,12 +315,12 @@ export default function WorkspaceDetailsPage() {
 
       {/* Disk Space */}
       {workspaceSpace && workspaceSpace.total > 0 && (
-        <div className={shared.card}>
+        <div className={shared.card} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           <div className={shared.cardHeader}>
             <HardDrive size={14} strokeWidth={1.5} style={{ marginRight: 6 }} />
             Disk Usage
           </div>
-          <div className={shared.cardBody}>
+          <div className={shared.cardBody} style={{ flex: 1, minHeight: 0, overflowY: "auto", maxHeight: "none" }}>
             <DiskPieChart space={workspaceSpace} />
           </div>
         </div>

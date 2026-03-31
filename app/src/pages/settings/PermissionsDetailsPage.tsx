@@ -6,6 +6,7 @@ import { useStore } from "../../store";
 import type { PermissionMode, Scope, RuleList, ScopeRules } from "../../store/trust";
 import type { Chat } from "../../types/chat";
 import AssistantAsk from "../../components/shared/AssistantAsk";
+import Dropdown from "../../components/shared/Dropdown";
 import shared from "../../styles/shared.module.css";
 import styles from "./PermissionsDetailsPage.module.css";
 
@@ -174,16 +175,16 @@ export default function PermissionsDetailsPage() {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             />
-            <select
-              className={styles.kindSelect}
-              value={filterKind}
-              onChange={(e) => setFilterKind(e.target.value as RuleKind | "all")}
-            >
-              <option value="all">All ({allRules.length})</option>
-              {KIND_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label} ({allRules.filter((r) => r.kind === o.value).length})</option>
-              ))}
-            </select>
+            <div className={styles.dropdownWrap}>
+              <Dropdown
+                options={[
+                  { value: "all", label: `All (${allRules.length})` },
+                  ...KIND_OPTIONS.map((o) => ({ value: o.value, label: `${o.label} (${allRules.filter((r) => r.kind === o.value).length})` })),
+                ]}
+                value={filterKind}
+                onChange={(v) => setFilterKind(v as RuleKind | "all")}
+              />
+            </div>
           </div>
           {flat.length === 0 ? (
             <div className={shared.emptyState}>{allRules.length === 0 ? "No rules configured." : "No rules match filter."}</div>
@@ -225,15 +226,13 @@ export default function PermissionsDetailsPage() {
               onChange={(e) => setNewPattern(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
             />
-            <select
-              className={styles.kindSelect}
-              value={newKind}
-              onChange={(e) => setNewKind(e.target.value as RuleKind)}
-            >
-              {KIND_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <div className={styles.dropdownWrap}>
+              <Dropdown
+                options={KIND_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                value={newKind}
+                onChange={(v) => setNewKind(v as RuleKind)}
+              />
+            </div>
             {newKind.endsWith("-ask") && (
               <label className={styles.alwaysAskLabel}>
                 <input type="checkbox" checked={newAlwaysAsk} onChange={(e) => setNewAlwaysAsk(e.target.checked)} />

@@ -80,10 +80,10 @@ export default function ProfileDetailsPage({ onboarding }: { onboarding?: boolea
   }
 
   return (
-    <div className={shared.contentArea}>
-      <div className={shared.card}>
+    <div className={shared.contentArea} style={{ overflow: "hidden" }}>
+      <div className={shared.card} style={{ flexShrink: 0 }}>
         <div className={shared.cardHeader}>Profile</div>
-        <div className={shared.cardBody}>
+        <div className={shared.cardBody} style={{ overflowY: "auto", maxHeight: "none" }}>
           <div className={shared.cardBodyRow}>
             <div className={shared.fieldText}>
               <label className={shared.fieldLabel}>Nickname</label>
@@ -126,19 +126,19 @@ export default function ProfileDetailsPage({ onboarding }: { onboarding?: boolea
         </div>
       </div>
 
-      <div className={shared.card}>
+      <div className={shared.card} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className={shared.cardHeader}>Context Prompt</div>
-        <div className={shared.cardBody}>
-          <div className={styles.promptRow}>
+        <div className={shared.cardBody} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", maxHeight: "none" }}>
+          <div className={styles.promptRow} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <p className={shared.fieldHint}>
               Custom instructions appended to every chat's system prompt. Use this for preferences, role context, or recurring guidelines.
             </p>
             <textarea
               className={styles.promptTextarea}
+              style={{ flex: 1, minHeight: 0 }}
               value={contextPrompt}
               onChange={handleContextPrompt}
               placeholder="e.g. I'm a senior frontend engineer. Prefer TypeScript and React. Be concise."
-              rows={6}
             />
           </div>
         </div>

@@ -45,8 +45,13 @@ export default function Dropdown({ options, value, onChange, placeholder, disabl
   useLayoutEffect(() => {
     if (!open || !triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
+    const listHeight = 208;
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    const fitsBelow = spaceBelow >= listHeight;
     setPos({
-      top: rect.bottom + 4,
+      ...(fitsBelow
+        ? { top: rect.bottom + 4 }
+        : { bottom: window.innerHeight - rect.top + 4 }),
       right: window.innerWidth - rect.right,
       width: 280,
     });

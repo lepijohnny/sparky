@@ -266,13 +266,17 @@
   background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 7px 12px;
-  font-size: 12px;
+  padding: 9px 14px;
+  font-size: 13px;
   font-family: inherit;
   color: var(--fg);
   outline: none;
   transition: border-color 150ms ease;
   min-width: 0;
+}
+
+.addInput:hover {
+  border-color: var(--fg-subtle);
 }
 
 .addInput:focus {
@@ -286,30 +290,11 @@
 .addInputMono {
   composes: addInput;
   font-family: var(--font-mono, monospace);
-  font-size: 11px;
 }
 
-.kindSelect {
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 7px 28px 7px 10px;
-  font-size: 11px;
-  font-family: inherit;
-  color: var(--fg);
-  cursor: pointer;
-  outline: none;
-  white-space: nowrap;
+.dropdownWrap {
   flex-shrink: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-}
-
-.kindSelect:focus {
-  border-color: var(--accent);
+  width: 180px;
 }
 
 .alwaysAskLabel {

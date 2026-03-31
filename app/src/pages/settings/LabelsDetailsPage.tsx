@@ -16,7 +16,7 @@ export default function LabelsDetailsPage() {
     const trimmed = newName.trim();
     if (!trimmed || !conn) return;
     setNewName("");
-    await conn.request("settings.labels.create", { name: trimmed }, { notify: true, message: `Label "${trimmed}" created`, expire: false  });
+    await conn.request("settings.labels.create", { name: trimmed }, { notify: true, message: `Label "${trimmed}" created`, expire: true  });
   };
 
   const handleRename = async (id: string) => {
@@ -37,10 +37,10 @@ export default function LabelsDetailsPage() {
   };
 
   return (
-    <div className={shared.contentArea}>
-      <div className={shared.card}>
+    <div className={shared.contentArea} style={{ overflow: "hidden" }}>
+      <div className={shared.card} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className={shared.cardHeader}>Labels</div>
-        <div className={shared.cardBody}>
+        <div className={shared.cardBody} style={{ flex: 1, minHeight: 0, overflowY: "auto", maxHeight: "none" }}>
           {labels.length > 0 ? (
             <div className={styles.list}>
               {labels.map((label) => (
