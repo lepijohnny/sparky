@@ -510,6 +510,77 @@
   background: var(--bg-hover);
 }
 
+.deleteBtn {
+  margin-left: auto;
+}
+
+.deleteBtn:hover {
+  color: var(--danger, #e55);
+  background: var(--bg-hover);
+}
+
+/* ─── Edit mode ─── */
+
+.editWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.editArea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 400px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-raised);
+  color: var(--fg);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.editArea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.editSave,
+.editCancel {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.editSave {
+  background: var(--accent);
+  color: #fff;
+}
+
+.editSave:hover {
+  opacity: 0.85;
+}
+
+.editCancel {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.editCancel:hover {
+  opacity: 0.85;
+}
 
 @media print {
   .wrap {
@@ -537,6 +608,14 @@
   }
 
   .statusRow {
+    display: none !important;
+  }
+
+  .messageActions {
+    display: none !important;
+  }
+
+  .editWrap {
     display: none !important;
   }
 }

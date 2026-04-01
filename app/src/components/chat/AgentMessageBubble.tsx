@@ -1,7 +1,5 @@
 import {
   AlertCircle,
-  GitBranch,
-  Pin,
   BookOpen,
   Brain,
   ChevronRight,
@@ -24,6 +22,8 @@ import {
   Wrench,
 } from "lucide-react";
 import { memo, type ReactElement, useCallback, useMemo, useRef, useState } from "react";
+import { MessageActions } from "./MessageActions";
+import { MessageEditor } from "./MessageEditor";
 import { tokenize, tokenizeStream, type BlockRenderer } from "../../lib/markdownLexer";
 import { codeRenderer } from "../../lib/renderers/codeRenderer";
 import { createMarkdownRenderer } from "../../lib/renderers/markdownRenderer";
@@ -74,6 +74,8 @@ export interface AgentMessageBubbleProps {
   chatId?: string;
   onToggleAnchor?: (rowid: number, anchored: boolean) => void;
   onBranch?: (rowid: number) => void;
+  onEdit?: (rowid: number, content: string) => void;
+  onDeleteTurn?: (turnId: string) => void;
 }
 
 const ICON_SIZE = 12;
@@ -303,7 +305,7 @@ function AgentMessageBubbleStatusRight({ conversationTokens, contextWindow }: { 
 // ── Main ──
 
 const AgentMessageBubble = memo(
-  function AgentMessageBubble({ message, role, searchQuery, chatId, onToggleAnchor, onBranch }: AgentMessageBubbleProps): ReactElement {
+  function AgentMessageBubble({ message, role, searchQuery, chatId, onToggleAnchor, onBranch, onEdit, onDeleteTurn }: AgentMessageBubbleProps): ReactElement {
     const { content: rawContent, activities, status } = message;
     const streaming = status === "streaming";
     const ticker = useStore((s) => {
@@ -314,6 +316,15 @@ const AgentMessageBubble = memo(
     const content = useStreamDrip(rawContent, streaming);
     const errorActivity = activities.find((a) => a.type === "agent.error");
     const errorMessage = errorActivity?.data?.message as string | undefined;
+
+    const [editing, setEditing] = useState(false);
+
+    const handleEditSave = useCallback((newContent: string) => {
+      if (onEdit && message.rowid != null) {
+        onEdit(message.rowid, newContent);
+      }
+      setEditing(false);
+    }, [onEdit, message.rowid]);
 
     const rendererMap = useMemo(() => {
       const md = createMarkdownRenderer(searchQuery);
@@ -378,41 +389,38 @@ const AgentMessageBubble = memo(
             <span>{errorMessage}</span>
           </div>
         )}
-        {content.length > 0 && (
-          <div className={styles.bubbleOuter} data-bubble>
-            <div className={styles.bubbleGroup} data-streaming={streaming || undefined}>
-              {rendered}
-            </div>
-            {!streaming && (
-              <div className={styles.bubbleFooter}>
-                <AgentMessageBubbleStatusLeft status={status} durationMs={message.durationMs} />
-                <AgentMessageBubbleStatusRight conversationTokens={message.conversationTokens} contextWindow={message.contextWindow} />
+        {editing ? (
+          <MessageEditor content={rawContent} onSave={handleEditSave} onCancel={() => setEditing(false)} />
+        ) : (
+          <>
+            {content.length > 0 && (
+              <div className={styles.bubbleOuter} data-bubble>
+                <div className={styles.bubbleGroup} data-streaming={streaming || undefined}>
+                  {rendered}
+                </div>
+                {!streaming && (
+                  <div className={styles.bubbleFooter}>
+                    <AgentMessageBubbleStatusLeft status={status} durationMs={message.durationMs} />
+                    <AgentMessageBubbleStatusRight conversationTokens={message.conversationTokens} contextWindow={message.contextWindow} />
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
         {streaming && <Spinner status={status} />}
-        {!streaming && message.rowid != null && (
-          <div className={styles.messageActions}>
-            {onBranch && (
-              <button
-                className={styles.anchorBtn}
-                onClick={() => onBranch(message.rowid!)}
-                title="Branch conversation from here"
-              >
-                <GitBranch size={12} strokeWidth={1.5} />
-              </button>
-            )}
-            {onToggleAnchor && (
-              <button
-                className={`${styles.anchorBtn} ${message.anchored ? styles.anchorBtnActive : ""}`}
-                onClick={() => onToggleAnchor(message.rowid!, !message.anchored)}
-                title={message.anchored ? "Unpin from context" : "Pin to context"}
-              >
-                <Pin size={12} strokeWidth={1.5} />
-              </button>
-            )}
-          </div>
+        {!streaming && !editing && message.rowid != null && (
+          <MessageActions
+            rowid={message.rowid}
+            turnId={message.id}
+            content={rawContent}
+            anchored={message.anchored}
+            onToggleAnchor={onToggleAnchor}
+            onBranch={onBranch}
+            onEdit={onEdit}
+            onDeleteTurn={onDeleteTurn}
+            onEditStart={() => setEditing(true)}
+          />
         )}
       </div>
     );

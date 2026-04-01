@@ -390,6 +390,20 @@ export class ChatDatabase {
     return txn();
   }
 
+  deleteTurn(chatId: string, turnId: string): number {
+    const result = this.db.prepare(
+      "DELETE FROM entries WHERE chat_id = :chat_id AND turn_id = :turn_id"
+    ).run({ chat_id: chatId, turn_id: turnId });
+    return result.changes;
+  }
+
+  updateEntryContent(chatId: string, rowid: number, content: string): boolean {
+    const result = this.db.prepare(
+      "UPDATE entries SET content = :content WHERE chat_id = :chat_id AND rowid = :rowid"
+    ).run({ content, chat_id: chatId, rowid });
+    return result.changes > 0;
+  }
+
   addEntry(chatId: string, entry: ChatEntry): number {
     if (entry.kind === "message") {
       const result = this.sql.addMessage.run({

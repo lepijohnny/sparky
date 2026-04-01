@@ -10,6 +10,8 @@ export interface ChatEvents {
   "chat.list.labeled":        { req: { labelId?: string }; res: { chats: Chat[] } };
   "chat.create":              { req: { name?: string }; res: { chat: Chat } };
   "chat.branch":              { req: { chatId: string; beforeRowid: number }; res: { chat: Chat } };
+  "chat.turn.delete":         { req: { chatId: string; turnId: string }; res: { deleted: number } };
+  "chat.entry.edit":          { req: { chatId: string; rowid: number; content: string }; res: { ok: boolean } };
   "chat.delete":              { req: { id: string }; res: { deleted: boolean } };
   "chat.rename":              { req: { id: string; name: string }; res: { chat: Chat } };
   "chat.retitle":             { req: { id: string }; res: { ok: boolean } };
