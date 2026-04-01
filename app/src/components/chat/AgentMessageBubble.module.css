@@ -475,6 +475,15 @@
   transition: width 300ms ease;
 }
 
+.messageActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  align-self: flex-end;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
 .anchorBtn {
   display: flex;
   align-items: center;
@@ -488,8 +497,6 @@
   cursor: pointer;
   opacity: 0.8;
   transition: opacity 100ms ease, color 100ms ease;
-  align-self: flex-end;
-  margin-top: 4px;
   flex-shrink: 0;
 }
 

@@ -57,6 +57,7 @@ const ROUTES: RouteEntry[] = [
   "chat.list.archived",
   "chat.list.labeled",
   ["chat.create", { notifiable: true }],
+  ["chat.branch", { notifiable: true }],
   ["chat.delete", { notifiable: true }],
   ["chat.rename", { notifiable: true }],
   ["chat.retitle", { notifiable: false }],

@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  GitBranch,
   Pin,
   BookOpen,
   Brain,
@@ -72,6 +73,7 @@ export interface AgentMessageBubbleProps {
   searchQuery?: string;
   chatId?: string;
   onToggleAnchor?: (rowid: number, anchored: boolean) => void;
+  onBranch?: (rowid: number) => void;
 }
 
 const ICON_SIZE = 12;
@@ -301,7 +303,7 @@ function AgentMessageBubbleStatusRight({ conversationTokens, contextWindow }: { 
 // ── Main ──
 
 const AgentMessageBubble = memo(
-  function AgentMessageBubble({ message, role, searchQuery, chatId, onToggleAnchor }: AgentMessageBubbleProps): ReactElement {
+  function AgentMessageBubble({ message, role, searchQuery, chatId, onToggleAnchor, onBranch }: AgentMessageBubbleProps): ReactElement {
     const { content: rawContent, activities, status } = message;
     const streaming = status === "streaming";
     const ticker = useStore((s) => {
@@ -390,14 +392,27 @@ const AgentMessageBubble = memo(
           </div>
         )}
         {streaming && <Spinner status={status} />}
-        {!streaming && onToggleAnchor && message.rowid != null && (
-          <button
-            className={`${styles.anchorBtn} ${message.anchored ? styles.anchorBtnActive : ""}`}
-            onClick={() => onToggleAnchor(message.rowid!, !message.anchored)}
-            title={message.anchored ? "Unpin from context" : "Pin to context"}
-          >
-            <Pin size={12} strokeWidth={1.5} />
-          </button>
+        {!streaming && message.rowid != null && (
+          <div className={styles.messageActions}>
+            {onBranch && (
+              <button
+                className={styles.anchorBtn}
+                onClick={() => onBranch(message.rowid!)}
+                title="Branch conversation from here"
+              >
+                <GitBranch size={12} strokeWidth={1.5} />
+              </button>
+            )}
+            {onToggleAnchor && (
+              <button
+                className={`${styles.anchorBtn} ${message.anchored ? styles.anchorBtnActive : ""}`}
+                onClick={() => onToggleAnchor(message.rowid!, !message.anchored)}
+                title={message.anchored ? "Unpin from context" : "Pin to context"}
+              >
+                <Pin size={12} strokeWidth={1.5} />
+              </button>
+            )}
+          </div>
         )}
       </div>
     );
