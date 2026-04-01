@@ -98,10 +98,10 @@ function baseOpts(run: (msgs: unknown[]) => AsyncGenerator<AgentEvent>) {
 }
 
 describe("agentStream.retry", () => {
-  test("given error with no output, when retry(3), then retries and succeeds on second attempt", async () => {
+  test("given server error with no output, when retry(3), then retries and succeeds on second attempt", async () => {
     const run = mockStreamSequence([
       [
-        { type: "error", message: "401 Unauthorized" } as AgentEvent,
+        { type: "error", message: "500 Internal Server Error" } as AgentEvent,
         { type: "done" } as AgentEvent,
       ],
       [
@@ -118,10 +118,29 @@ describe("agentStream.retry", () => {
     expect(emitted.some((e) => e.type === "text.done")).toBe(true);
   });
 
+  test("given 4xx client error, when retry(3), then does not retry", async () => {
+    const run = mockStreamSequence([
+      [
+        { type: "error", message: "429 Rate limited" } as AgentEvent,
+        { type: "done" } as AgentEvent,
+      ],
+      [
+        { type: "text.delta", content: "Hello" } as AgentEvent,
+        { type: "text.done", content: "Hello" } as AgentEvent,
+        { type: "done" } as AgentEvent,
+      ],
+    ]);
+    const { opts } = baseOpts(run);
+
+    const result = await agentStream(opts).retry(3);
+
+    expect(result).toBe("error");
+  });
+
   test("given error with text output, when retry(3), then does not retry", async () => {
     const run = mockStream([
       { type: "text.delta", content: "Partial..." } as AgentEvent,
-      { type: "error", message: "401 Unauthorized" } as AgentEvent,
+      { type: "error", message: "500 Server Error" } as AgentEvent,
       { type: "done" } as AgentEvent,
     ]);
     const { opts, emitted } = baseOpts(run as any);
