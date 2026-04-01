@@ -366,6 +366,25 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     }
   }, [conn, chat.id, selectChat, addToast]);
 
+  const handleEdit = useCallback(async (rowid: number, content: string) => {
+    if (!conn) return;
+    setEntries((prev) => prev.map((e) =>
+      e.kind === "message" && e.rowid === rowid ? { ...e, content } : e
+    ));
+    conn.request("chat.entry.edit", { chatId: chat.id, rowid, content }).catch(() => {});
+  }, [conn, chat.id]);
+
+  const handleDeleteTurn = useCallback(async (rawTurnId: string) => {
+    if (!conn) return;
+    const turnId = rawTurnId.replace(/-assistant$|-user$/, "");
+    setEntries((prev) => prev.filter((e) => {
+      if (e.kind === "message") return e.id !== turnId;
+      if (e.kind === "activity") return e.messageId !== turnId;
+      return true;
+    }));
+    conn.request("chat.turn.delete", { chatId: chat.id, turnId }).catch(() => {});
+  }, [conn, chat.id]);
+
   const handleToggleAnchor = useCallback(async (rowid: number, anchored: boolean) => {
     if (!conn) return;
     setEntries((prev) => prev.map((e) =>
@@ -570,7 +589,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
                   className={`${styles.message} ${styles.messageAssistant}`}
                 >
                   <ErrorBoundary fallback={<div className={styles.bubbleError}>Failed to render message</div>}>
-                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} onBranch={handleBranch} />
+                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} onBranch={handleBranch} onEdit={handleEdit} onDeleteTurn={handleDeleteTurn} />
                   </ErrorBoundary>
                 </div>
               )

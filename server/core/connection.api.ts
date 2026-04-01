@@ -58,6 +58,8 @@ const ROUTES: RouteEntry[] = [
   "chat.list.labeled",
   ["chat.create", { notifiable: true }],
   ["chat.branch", { notifiable: true }],
+  ["chat.turn.delete", { notifiable: true }],
+  ["chat.entry.edit", { notifiable: true }],
   ["chat.delete", { notifiable: true }],
   ["chat.rename", { notifiable: true }],
   ["chat.retitle", { notifiable: false }],

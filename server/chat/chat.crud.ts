@@ -158,6 +158,18 @@ export class ChatCrud {
     return { chat };
   }
 
+  deleteTurn(data: { chatId: string; turnId: string }): { deleted: number } {
+    const deleted = this.db.deleteTurn(data.chatId, data.turnId);
+    if (deleted > 0) this.log.info("Deleted turn", { chatId: data.chatId, turnId: data.turnId, entries: deleted });
+    return { deleted };
+  }
+
+  editEntry(data: { chatId: string; rowid: number; content: string }): { ok: boolean } {
+    const ok = this.db.updateEntryContent(data.chatId, data.rowid, data.content);
+    if (ok) this.log.info("Edited entry", { chatId: data.chatId, rowid: data.rowid });
+    return { ok };
+  }
+
   delete(data: { id: string }): { deleted: boolean } {
     const deleted = this.db.deleteChat(data.id);
     if (deleted) {

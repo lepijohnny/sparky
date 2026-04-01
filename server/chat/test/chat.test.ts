@@ -257,4 +257,37 @@ describe("ChatManager", () => {
     expect(branchedMessages.length).toBeLessThan(allMessages.length);
     expect(branchedMessages.length).toBeGreaterThanOrEqual(2);
   });
+
+  test("given chat with messages, when deleting turn, then turn entries are removed", async () => {
+    const { chat } = await bus.emit("chat.create", { name: "Del Turn" });
+    await bus.emit("chat.ask", { chatId: chat.id, content: "Hello" });
+    await delay(600);
+
+    const before = await bus.emit("chat.get.id", { id: chat.id });
+    const assistantMsg = before!.entries.find((e: any) => e.kind === "message" && e.role === "assistant");
+    expect(assistantMsg).toBeDefined();
+
+    const { deleted } = await bus.emit("chat.turn.delete", { chatId: chat.id, turnId: assistantMsg!.id });
+    expect(deleted).toBeGreaterThan(0);
+
+    const after = await bus.emit("chat.get.id", { id: chat.id });
+    const remaining = after!.entries.filter((e: any) => e.kind === "message" && e.role === "assistant");
+    expect(remaining.length).toBe(0);
+  });
+
+  test("given chat with messages, when editing entry, then content is updated", async () => {
+    const { chat } = await bus.emit("chat.create", { name: "Edit Test" });
+    await bus.emit("chat.ask", { chatId: chat.id, content: "Hello" });
+    await delay(600);
+
+    const before = await bus.emit("chat.get.id", { id: chat.id });
+    const assistantMsg = before!.entries.find((e: any) => e.kind === "message" && e.role === "assistant");
+
+    const { ok } = await bus.emit("chat.entry.edit", { chatId: chat.id, rowid: assistantMsg!.rowid!, content: "Edited content" });
+    expect(ok).toBe(true);
+
+    const after = await bus.emit("chat.get.id", { id: chat.id });
+    const edited = after!.entries.find((e: any) => e.rowid === assistantMsg!.rowid);
+    expect(edited!.content).toBe("Edited content");
+  });
 });

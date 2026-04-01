@@ -110,8 +110,29 @@ export default function PrintDetailsPage({ chat }: PrintDetailsPageProps) {
   const handlePrint = useCallback(async () => {
     const originalTitle = document.title;
     document.title = chat.name || "Sparky Chat";
-    const restore = () => { document.title = originalTitle; };
+
+    const root = document.documentElement;
+    const saved = new Map<string, string>();
+    const printVars: Record<string, string> = {
+      "--bg": "#ffffff", "--fg": "#1a1a1a", "--bg-raised": "#f5f5f5",
+      "--bg-surface": "#f0f0f0", "--bg-overlay": "#f0f0f0", "--bg-hover": "transparent",
+      "--border": "#d0d0d0", "--fg-muted": "#666666", "--fg-subtle": "#999999",
+      "--accent": "#4078f2", "--accent-soft": "rgba(64,120,242,0.1)",
+      "--shadow": "none", "--code-bg": "#f5f5f5", "--code-fg": "#1a1a1a",
+    };
+    for (const [k, v] of Object.entries(printVars)) {
+      saved.set(k, root.style.getPropertyValue(k));
+      root.style.setProperty(k, v);
+    }
+
+    const restore = () => {
+      document.title = originalTitle;
+      for (const [k, v] of saved) {
+        if (v) root.style.setProperty(k, v); else root.style.removeProperty(k);
+      }
+    };
     window.addEventListener("afterprint", restore, { once: true });
+
     try {
       const { getCurrentWebview } = await import("@tauri-apps/api/webview");
       await getCurrentWebview().print();
