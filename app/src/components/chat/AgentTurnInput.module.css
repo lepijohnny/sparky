@@ -65,6 +65,17 @@
   cursor: pointer;
 }
 
+.systemLabel {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  cursor: default;
+}
+
+.systemLabel:hover {
+  transform: none;
+}
+
 .labelOverflow {
   font-size: 9px;
   font-weight: 600;

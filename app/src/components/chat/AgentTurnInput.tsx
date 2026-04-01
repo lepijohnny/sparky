@@ -1,5 +1,6 @@
 import { BookOpen, Check, Database, Loader2, Paperclip, Send, Square, X } from "lucide-react";
 import { withAlpha } from "../../lib/color";
+import { isSystemLabel, getSystemLabelName } from "../../lib/systemLabels";
 import { memo, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useStore } from "../../store";
 import type { WsConnection } from "../../lib/ws";
@@ -461,8 +462,17 @@ export default memo(function ChatInput({
   return (
     <div className={styles.inputArea}>
       <ApprovalPopup chatId={chat.id} />
-      {chatLabels.length > 0 && (
+      {((chat.labels ?? []).some(isSystemLabel) || chatLabels.length > 0) && (
         <div className={styles.labelBar}>
+          {(chat.labels ?? []).filter(isSystemLabel).map((id) => {
+            const name = getSystemLabelName(id);
+            if (!name) return null;
+            return (
+              <span key={id} className={`${styles.labelBadge} ${styles.systemLabel}`}>
+                <span className={styles.labelText}>{name}</span>
+              </span>
+            );
+          })}
           {chatLabels.slice(0, 5).map((l) => (
             <span
               key={l.id}

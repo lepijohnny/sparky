@@ -62,9 +62,10 @@ export const createChatsSlice: StateCreator<ChatsSlice, [], [], ChatsSlice> = (s
     for (const c of chats) {
       if (c.archived) { archived++; continue; }
       if (c.flagged) flagged++;
-      if (c.labels?.length) {
+      const userLabels = c.labels?.filter((id) => !id.startsWith("_"));
+      if (userLabels?.length) {
         labeled++;
-        for (const l of c.labels) labels[l] = (labels[l] ?? 0) + 1;
+        for (const l of userLabels) labels[l] = (labels[l] ?? 0) + 1;
       }
     }
     return { chats: chats.length - archived, flagged, archived, labeled, labels };

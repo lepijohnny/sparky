@@ -20,6 +20,7 @@ import { useStore } from "../../store";
 import { useListSelection } from "../../hooks/useListSelection";
 import { withAlpha } from "../../lib/color";
 import { groupByDate } from "../../lib/dateGroups";
+import { isSystemLabel, getSystemLabelName } from "../../lib/systemLabels";
 import type { Chat } from "../../types/chat";
 import ContextMenu, { type ContextMenuAction } from "../shared/ContextMenu";
 import { Blocks } from "lucide-react";
@@ -194,6 +195,15 @@ export default memo(function ChatList({
           {chat.labels && chat.labels.length > 0 && (
             <div className={styles.labelBadges}>
               {chat.labels.map((id) => {
+                if (isSystemLabel(id)) {
+                  const name = getSystemLabelName(id);
+                  if (!name) return null;
+                  return (
+                    <span key={id} className={`${styles.labelBadge} ${styles.systemBadge}`}>
+                      {name}
+                    </span>
+                  );
+                }
                 const label = labelMap.get(id);
                 if (!label) return null;
                 return (

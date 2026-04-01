@@ -7,12 +7,24 @@ import type { ChatDatabase } from "./chat.db";
 import type { Chat, ChatEntry } from "./chat.types";
 import { loadRole } from "../prompts/prompt.role";
 
-function getAgentRole(kind?: string): { role: string; name: string } {
-  const map: Record<string, { role: string; name: string }> = {
-    connection: { role: "connect", name: "Connection Assistant" },
-    permissions: { role: "trust", name: "Permission Assistant" },
-    skills: { role: "skills", name: "Skills Assistant" },
-    routines: { role: "routines", name: "Routine Assistant" },
+/** System labels: auto-assigned, accent-colored, hidden from user label management */
+export const SYSTEM_LABELS: Record<string, { id: string; name: string }> = {
+  connection: { id: "_connection", name: "Connection" },
+  permissions: { id: "_permission", name: "Permission" },
+  skills:     { id: "_skill",      name: "Skill" },
+  routines:   { id: "_routine",    name: "Routine" },
+};
+
+export function isSystemLabel(id: string): boolean {
+  return id.startsWith("_");
+}
+
+function getAgentRole(kind?: string): { role: string; name: string; systemLabel?: string } {
+  const map: Record<string, { role: string; name: string; systemLabel?: string }> = {
+    connection:  { role: "connect",  name: "Connection Assistant",  systemLabel: SYSTEM_LABELS.connection.id },
+    permissions: { role: "trust",    name: "Permission Assistant",  systemLabel: SYSTEM_LABELS.permissions.id },
+    skills:      { role: "skills",   name: "Skills Assistant",      systemLabel: SYSTEM_LABELS.skills.id },
+    routines:    { role: "routines", name: "Routine Assistant",     systemLabel: SYSTEM_LABELS.routines.id },
   };
   return map[kind ?? ""] ?? { role: "sparky", name: "System Chat" };
 }
@@ -99,7 +111,7 @@ export class ChatCrud {
     const llmDefault = this.config.get("llmDefault");
     const llms = this.config.get("llms") ?? [];
     const defaultConn = llms.find((c) => c.id === llmDefault?.id);
-    const { role, name } = getAgentRole(kind);
+    const { role, name, systemLabel } = getAgentRole(kind);
 
     const chat: Chat = {
       id: crypto.randomUUID(),
@@ -110,6 +122,7 @@ export class ChatCrud {
       thinking: defaultConn?.thinking ?? null,
       knowledge: loadRole(role).meta.knowledge,
       role,
+      labels: systemLabel ? [systemLabel] : undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -174,8 +187,13 @@ export class ChatCrud {
   }
 
   label(data: { id: string; labels: string[] }): { chat: Chat } {
+    const existing = this.db.getChat(data.id);
+    if (!existing) throw new Error(`Chat not found: ${data.id}`);
+    const systemLabels = (existing.labels ?? []).filter(isSystemLabel);
+    const userLabels = data.labels.filter((id) => !isSystemLabel(id));
+    const merged = [...systemLabels, ...userLabels];
     const chat = this.db.updateChat(data.id, {
-      labels: data.labels.length > 0 ? data.labels : undefined,
+      labels: merged.length > 0 ? merged : undefined,
     });
     if (!chat) throw new Error(`Chat not found: ${data.id}`);
 
