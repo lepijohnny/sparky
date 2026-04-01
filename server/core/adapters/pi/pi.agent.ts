@@ -77,7 +77,7 @@ function buildContext(turn: AgentTurn): Context {
   };
 }
 
-export type ContentBlockEvent = AgentEvent | { type: "citations"; text: string; label?: string };
+export type ContentBlockEvent = AgentEvent | { type: "citations"; text: string; label: string };
 
 export type ContentBlockHandler = (block: unknown) => ContentBlockEvent[] | undefined;
 
