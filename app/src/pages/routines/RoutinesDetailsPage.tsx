@@ -147,7 +147,7 @@ export default function RoutinesDetailsPage({ routineId, onOpenChat, onEditAssis
             {routine.once && <span className={styles.badge}>One-time</span>}
           </div>
           {routine.nextRun && (
-            <div className={styles.nextRun}>Next run: {formatDate(routine.nextRun)}</div>
+            <div className={styles.nextRun}>{routine.enabled ? `Next run: ${formatDate(routine.nextRun)}` : "Paused"}</div>
           )}
         </div>
       </div>
