@@ -37,16 +37,25 @@ function diffLineClass(line: string): string {
 const CodeBlock = memo(function CodeBlock({ code, language }: CodeBlockProps): ReactElement {
   const [copied, setCopied] = useState(false);
   const parsed = useMemo(() => {
-    if (language !== undefined) return { language, code };
-    return parseCodeBlock(code);
+    const p = language !== undefined ? { language, code } : parseCodeBlock(code);
+    const trimmed = p.code.split("\n");
+    while (trimmed.length && trimmed[0]!.trim() === "") trimmed.shift();
+    while (trimmed.length && trimmed[trimmed.length - 1]!.trim() === "") trimmed.pop();
+    return { language: p.language, code: trimmed.join("\n") };
   }, [code, language]);
 
   const isDiff = parsed.language === "diff";
   const codeLines = useMemo(() => parsed.code.split("\n"), [parsed.code]);
+  const lineNumWidth = `${String(codeLines.length).length + 2}ch`;
 
-  const highlighted = useMemo(() => {
+  const highlightedLines = useMemo(() => {
     if (isDiff) return null;
-    return highlight(parsed.code, parsed.language);
+    const html = highlight(parsed.code, parsed.language);
+    if (!html) return null;
+    const lines = html.split("\n");
+    while (lines.length && lines[0]!.trim() === "") lines.shift();
+    while (lines.length && lines[lines.length - 1]!.trim() === "") lines.pop();
+    return lines;
   }, [parsed.code, parsed.language, isDiff]);
 
   const handleCopy = useCallback(() => {
@@ -65,12 +74,12 @@ const CodeBlock = memo(function CodeBlock({ code, language }: CodeBlockProps): R
             : <><Copy size={13} strokeWidth={1.5} /><span>Copy</span></>}
         </button>
       </div>
-      {highlighted ? (
+      {highlightedLines ? (
         <pre className={styles.pre}>
           <code>
-            {highlighted.split("\n").map((line, i, arr) => (
+            {highlightedLines.map((line, i, arr) => (
               <span key={i} className={styles.line}>
-                <span className={styles.lineNum}>{i + 1}</span>
+                <span className={styles.lineNum} style={{ width: lineNumWidth }}>{i + 1}</span>
                 <span dangerouslySetInnerHTML={{ __html: line }} />
                 {i < arr.length - 1 ? "\n" : ""}
               </span>
@@ -81,7 +90,7 @@ const CodeBlock = memo(function CodeBlock({ code, language }: CodeBlockProps): R
         <pre className={styles.pre}>
           <code>{codeLines.map((line, i) => (
             <span key={i} className={`${styles.line} ${isDiff ? diffLineClass(line) : ""}`}>
-              {!isDiff && <span className={styles.lineNum}>{i + 1}</span>}
+              {!isDiff && <span className={styles.lineNum} style={{ width: lineNumWidth }}>{i + 1}</span>}
               {line}
               {i < codeLines.length - 1 ? "\n" : ""}
             </span>
