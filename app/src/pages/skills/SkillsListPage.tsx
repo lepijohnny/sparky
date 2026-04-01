@@ -62,6 +62,7 @@ export default function SkillsListPage({ selectedSkillId, onSelectSkill }: Skill
       icon: <Download size={14} strokeWidth={1.5} />,
       onClick: () => handleExport(skill),
     },
+    { divider: true },
     {
       label: "Delete",
       icon: <Trash2 size={14} strokeWidth={1.5} />,

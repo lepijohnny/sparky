@@ -45,6 +45,7 @@ export default function ConnectionsListPage({ selectedConnectionId, onSelectConn
       disabled: testing === svc.id,
       onClick: () => handleTest(svc.id),
     },
+    { divider: true },
     {
       label: "Delete",
       icon: <Trash2 size={14} strokeWidth={1.5} />,
