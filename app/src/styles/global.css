@@ -30,8 +30,8 @@
   --radius-sm:   4px;
   --transition:  150ms ease;
   --highlight:   color-mix(in srgb, var(--accent) 40%, transparent);
-  --code-bg:     #f5f5f5;
-  --code-fg:     #1e1e1e;
+  --code-bg:     var(--bg-raised);
+  --code-fg:     var(--fg);
 }
 
 html, body, #root {
