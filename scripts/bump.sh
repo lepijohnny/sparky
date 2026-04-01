@@ -62,7 +62,7 @@ if [ -f src-tauri/Cargo.toml ]; then
 fi
 
 git add -A
-git commit -m "bump: v${VERSION}"
+git commit -m "chore: bump v${VERSION}"
 git tag "$TAG"
 git push --follow-tags
 
