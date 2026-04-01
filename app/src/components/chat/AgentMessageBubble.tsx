@@ -306,7 +306,9 @@ function AgentMessageBubbleStatusRight({ conversationTokens, contextWindow }: { 
 
 const AgentMessageBubble = memo(
   function AgentMessageBubble({ message, role, searchQuery, chatId, onToggleAnchor, onBranch, onEdit, onDeleteTurn }: AgentMessageBubbleProps): ReactElement {
-    const { content: rawContent, activities, status } = message;
+    const { content: originalContent, activities, status } = message;
+    const editedContent = useStore((s) => message.rowid != null ? s.editedContent.get(message.rowid) : undefined);
+    const rawContent = editedContent ?? originalContent;
     const streaming = status === "streaming";
     const ticker = useStore((s) => {
       if (!streaming || !chatId) return undefined;

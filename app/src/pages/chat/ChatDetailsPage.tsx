@@ -366,13 +366,13 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     }
   }, [conn, chat.id, selectChat, addToast]);
 
+  const setEditedContent = useStore((s) => s.setEditedContent);
+
   const handleEdit = useCallback(async (rowid: number, content: string) => {
     if (!conn) return;
-    setEntries((prev) => prev.map((e) =>
-      e.kind === "message" && e.rowid === rowid ? { ...e, content } : e
-    ));
+    setEditedContent(rowid, content);
     conn.request("chat.entry.edit", { chatId: chat.id, rowid, content }).catch(() => {});
-  }, [conn, chat.id]);
+  }, [conn, chat.id, setEditedContent]);
 
   const handleDeleteTurn = useCallback(async (rawTurnId: string) => {
     if (!conn) return;

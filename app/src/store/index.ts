@@ -14,6 +14,7 @@ import { createTrustSlice, type TrustSlice } from "./trust";
 import { createSkillsSlice, type SkillsSlice } from "./skills";
 import { createRoutinesSlice, type RoutinesSlice } from "./routines";
 import { createUpdaterSlice, type UpdaterSlice } from "./updater";
+import { createEditsSlice, type EditsSlice } from "./edits";
 
 export type AppState =
   & NavigationSlice
@@ -29,7 +30,8 @@ export type AppState =
   & TrustSlice
   & SkillsSlice
   & RoutinesSlice
-  & UpdaterSlice;
+  & UpdaterSlice
+  & EditsSlice;
 
 export const useStore = create<AppState>()(
   persist(
@@ -48,6 +50,7 @@ export const useStore = create<AppState>()(
       ...createSkillsSlice(...a),
       ...createRoutinesSlice(...a),
       ...createUpdaterSlice(...a),
+      ...createEditsSlice(...a),
     }),
     {
       name: "sparky-app",

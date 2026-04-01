@@ -14,6 +14,7 @@ import { latexRenderer } from "../../lib/renderers/latexRenderer";
 import { tableRenderer } from "../../lib/renderers/tableRenderer";
 import { chartRenderer } from "../../lib/renderers/chartRenderer";
 import type { Chat, ChatEntry } from "../../types/chat";
+import { useStore } from "../../store";
 import styles from "./PrintDetailsPage.module.css";
 
 interface AssistantBlocksProps {
