@@ -70,10 +70,7 @@
   background: var(--accent-soft);
   border-color: var(--accent);
   cursor: default;
-}
-
-.systemLabel:hover {
-  transform: none;
+  pointer-events: none;
 }
 
 .labelOverflow {
