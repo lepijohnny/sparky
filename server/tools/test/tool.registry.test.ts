@@ -6,7 +6,7 @@ import { createEventBus } from "../../core/bus";
 import { noopLogger } from "../../logger";
 
 const mockTrust = { init: async () => {}, data: () => ({} as any), setMode: () => {}, addRule: () => {}, removeRule: () => {}, resolve: () => ({ decision: "allow" as const }), reset: () => {}, clear: () => {} };
-const mockApprovalCtx = { chatId: "c1", turnId: "t1", requestApproval: async () => true };
+const mockApprovalCtx = { chatId: "c1", turnId: "t1", requestApproval: async () => true, isChatAllowed: () => false };
 
 function makeCtx(signal?: AbortSignal): ToolContext {
   const bus = createEventBus(noopLogger);
@@ -22,6 +22,8 @@ function makeCtx(signal?: AbortSignal): ToolContext {
 
 const echoTool = defineTool({
   name: "echo",
+  label: "Echo",
+  icon: "terminal",
   description: "Echoes input",
   schema: z.object({ text: z.string() }),
   async execute(input) { return input.text; },
@@ -29,6 +31,8 @@ const echoTool = defineTool({
 
 const slowTool = defineTool({
   name: "slow",
+  label: "Slow",
+  icon: "clock",
   description: "Slow tool",
   schema: z.object({}),
   async execute(_input, ctx) {
@@ -40,6 +44,8 @@ const slowTool = defineTool({
 
 const failTool = defineTool({
   name: "fail",
+  label: "Fail",
+  icon: "alert",
   description: "Always fails",
   schema: z.object({}),
   recovery: "Try something else",
@@ -101,6 +107,8 @@ describe("createToolSet", () => {
   test("given tool with recovery hint, when validation fails, then error includes recovery", async () => {
     const strict = defineTool({
       name: "strict",
+      label: "Strict",
+      icon: "check",
       description: "Needs a name",
       schema: z.object({ name: z.string() }),
       recovery: "Provide a name string",

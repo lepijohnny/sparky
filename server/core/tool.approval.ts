@@ -46,6 +46,7 @@ export interface ApprovalExtra {
   link?: string;
   timeoutMs?: number;
   alwaysAsk?: boolean;
+  trustScope?: string;
   oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string };
 }
 
