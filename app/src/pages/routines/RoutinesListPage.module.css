@@ -36,6 +36,27 @@
   border-bottom: 1px solid var(--border);
 }
 
+.moreBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 100ms ease, color 100ms ease, background 100ms ease;
+}
+
+.item:hover .moreBtn {
+  opacity: 1;
+}
+
+.moreBtn:hover {
+  color: var(--fg);
+  background: var(--bg-overlay);
+}
+
 
 
 .item:hover {

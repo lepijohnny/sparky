@@ -453,6 +453,7 @@ export default function App() {
       <RoutinesListPage
         selectedId={selectedRoutineId}
         onSelect={selectRoutine}
+        onDeleted={() => selectRoutine("")}
       />
     );
   } else {
