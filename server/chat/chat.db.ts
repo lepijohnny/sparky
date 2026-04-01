@@ -354,6 +354,42 @@ export class ChatDatabase {
     return updated;
   }
 
+  branchChat(chat: Chat, sourceChatId: string, beforeRowid: number): number {
+    const txn = this.db.transaction(() => {
+      this.sql.createChat.run({
+        id: chat.id,
+        name: chat.name,
+        provider: chat.provider,
+        model: chat.model,
+        connection_id: chat.connectionId ?? "",
+        thinking: chat.thinking ?? null,
+        knowledge: chat.knowledge !== false ? 1 : 0,
+        mode: chat.mode ?? null,
+        flagged: chat.flagged ? 1 : 0,
+        archived: chat.archived ? 1 : 0,
+        unread: chat.unread ? 1 : 0,
+        role: chat.role ?? null,
+        labels: chat.labels?.length ? JSON.stringify(chat.labels) : null,
+        created_at: chat.createdAt,
+        updated_at: chat.updatedAt,
+      });
+      this.sql.createChatFts.run({ id: chat.id, name: chat.name });
+
+      const turn = this.db.prepare(
+        "SELECT turn_id FROM entries WHERE chat_id = :source_id AND rowid = :rowid"
+      ).get({ source_id: sourceChatId, rowid: beforeRowid }) as { turn_id: string } | undefined;
+
+      const result = this.db.prepare(`
+        INSERT INTO entries (chat_id, turn_id, kind, role, content, source, type, metadata, anchored, anchor_name, timestamp)
+        SELECT :target_id, turn_id, kind, role, content, source, type, metadata, anchored, anchor_name, timestamp
+        FROM entries WHERE chat_id = :source_id AND (rowid <= :before_rowid OR turn_id = :turn_id) ORDER BY rowid ASC
+      `).run({ target_id: chat.id, source_id: sourceChatId, before_rowid: beforeRowid, turn_id: turn?.turn_id ?? "" });
+
+      return result.changes;
+    });
+    return txn();
+  }
+
   addEntry(chatId: string, entry: ChatEntry): number {
     if (entry.kind === "message") {
       const result = this.sql.addMessage.run({

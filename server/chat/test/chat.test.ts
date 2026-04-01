@@ -220,4 +220,41 @@ describe("ChatManager", () => {
     const result = await bus.emit("chat.list.archived");
     expect(result.chats.some((c: any) => c.id === chat.id)).toBe(true);
   });
+
+  test("given chat with messages, when branching, then new chat has copied entries", async () => {
+    const { chat } = await bus.emit("chat.create", { name: "Original" });
+    await bus.emit("chat.ask", { chatId: chat.id, content: "Hello" });
+    await delay(600);
+
+    const original = await bus.emit("chat.get.id", { id: chat.id });
+    const lastMessage = original!.entries.filter((e: any) => e.kind === "message").pop();
+
+    const { chat: branched } = await bus.emit("chat.branch", { chatId: chat.id, beforeRowid: lastMessage.rowid });
+    expect(branched.name).toBe("Branch of Original");
+    expect(branched.id).not.toBe(chat.id);
+
+    const branchedData = await bus.emit("chat.get.id", { id: branched.id });
+    const branchedMessages = branchedData!.entries.filter((e: any) => e.kind === "message");
+    const originalMessages = original!.entries.filter((e: any) => e.kind === "message");
+    expect(branchedMessages.length).toBe(originalMessages.length);
+  });
+
+  test("given branched chat, when branching from mid-conversation, then only includes entries up to that point", async () => {
+    const { chat } = await bus.emit("chat.create", { name: "Multi-turn" });
+    await bus.emit("chat.ask", { chatId: chat.id, content: "First" });
+    await delay(600);
+    await bus.emit("chat.ask", { chatId: chat.id, content: "Second" });
+    await delay(600);
+
+    const original = await bus.emit("chat.get.id", { id: chat.id });
+    const allMessages = original!.entries.filter((e: any) => e.kind === "message");
+    const firstAssistant = allMessages.find((e: any) => e.role === "assistant");
+
+    const { chat: branched } = await bus.emit("chat.branch", { chatId: chat.id, beforeRowid: firstAssistant.rowid });
+    const branchedData = await bus.emit("chat.get.id", { id: branched.id });
+    const branchedMessages = branchedData!.entries.filter((e: any) => e.kind === "message");
+
+    expect(branchedMessages.length).toBeLessThan(allMessages.length);
+    expect(branchedMessages.length).toBeGreaterThanOrEqual(2);
+  });
 });

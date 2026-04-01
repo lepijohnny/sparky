@@ -16,6 +16,7 @@ import AgentTurnInput from "../../components/chat/AgentTurnInput";
 import ErrorBoundary from "../../components/shared/ErrorBoundary";
 
 import { useConnection } from "../../context/ConnectionContext";
+import { useToasts } from "../../context/ToastContext";
 import { useAgentReplyStream } from "../../hooks/useAgentReplyStream";
 import { useWsRequest } from "../../hooks/useWsRequest";
 import { useWsSubscriber } from "../../hooks/useWsSubscriber";
@@ -351,6 +352,20 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     [entries],
   );
 
+  const selectChat = useStore((s) => s.selectChat);
+  const addToast = useToasts().addToast;
+
+  const handleBranch = useCallback(async (rowid: number) => {
+    if (!conn) return;
+    try {
+      const res = await conn.request<{ chat: Chat }>("chat.branch", { chatId: chat.id, beforeRowid: rowid });
+      selectChat(res.chat);
+      addToast({ id: `branch-${Date.now()}`, kind: "info", title: `Branched to "${res.chat.name}"` });
+    } catch (err: any) {
+      addToast({ id: `branch-err-${Date.now()}`, kind: "error", title: err?.message ?? "Branch failed" });
+    }
+  }, [conn, chat.id, selectChat, addToast]);
+
   const handleToggleAnchor = useCallback(async (rowid: number, anchored: boolean) => {
     if (!conn) return;
     setEntries((prev) => prev.map((e) =>
@@ -555,7 +570,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
                   className={`${styles.message} ${styles.messageAssistant}`}
                 >
                   <ErrorBoundary fallback={<div className={styles.bubbleError}>Failed to render message</div>}>
-                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} />
+                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} onBranch={handleBranch} />
                   </ErrorBoundary>
                 </div>
               )

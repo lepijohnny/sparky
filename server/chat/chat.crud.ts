@@ -133,6 +133,31 @@ export class ChatCrud {
     return chat;
   }
 
+  branch(data: { chatId: string; beforeRowid: number }): { chat: Chat } {
+    const source = this.db.getChat(data.chatId);
+    if (!source) throw new Error(`Chat not found: ${data.chatId}`);
+
+    const chat: Chat = {
+      id: crypto.randomUUID(),
+      name: `Branch of ${source.name}`,
+      model: source.model,
+      provider: source.provider,
+      connectionId: source.connectionId,
+      thinking: source.thinking,
+      knowledge: source.knowledge,
+      mode: source.mode,
+      role: source.role,
+      labels: source.labels,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const copied = this.db.branchChat(chat, data.chatId, data.beforeRowid);
+    this.log.info("Branched chat", { source: data.chatId, target: chat.id, entries: copied });
+    this.bus.emit("chat.created", { chat });
+    return { chat };
+  }
+
   delete(data: { id: string }): { deleted: boolean } {
     const deleted = this.db.deleteChat(data.id);
     if (deleted) {

@@ -84,6 +84,7 @@ export function createChatWorkspace(
   bus.on("chat.list.archived", () => crud.listArchived());
   bus.on("chat.list.labeled", (data) => crud.listLabeled(data));
   bus.on("chat.create", (data) => crud.create(data));
+  bus.on("chat.branch", (data) => crud.branch(data));
   bus.on("chat.delete", (data) => {
     const result = crud.delete(data);
     if (result.deleted) cleanupChatAttachments(currentWorkspacePath, data.id);
