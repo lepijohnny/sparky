@@ -1,0 +1,159 @@
+---
+sidebar_position: 6
+description: "Routines — scheduled automations with cron triggers and multiple action types."
+sidebar_label: Routines
+---
+
+<span className="section-label">Look and Feel</span>
+
+# Routines
+
+<p className="header-description">Automate recurring tasks on a schedule.</p>
+
+Routines let you schedule repeating tasks that run automatically — from daily summaries to weekly cleanup. Each routine has a **cron trigger** and an **action** that executes when the schedule fires.
+
+## How Routines Work
+
+A routine is defined by three things:
+
+1. **Name** — what the routine does (e.g., "Morning email summary")
+2. **Schedule** — a cron expression defining when it runs (e.g., `0 9 * * 1-5` = weekdays at 9 AM)
+3. **Action** — what happens when the schedule fires
+
+Routines run in the background. Each execution creates a **run** record with status, duration, and any errors. You can view the full history in the routine detail page.
+
+## Action Types
+
+### Chat
+
+Opens a new conversation and sends a prompt to the agent. This is the most powerful action type — the agent can use all its tools, connections, and skills.
+
+**Example:** "Summarize my unread emails every morning at 9 AM"
+
+```yaml
+action:
+  type: chat
+  prompt: "Check my Gmail inbox for unread emails and give me a brief summary of each one."
+```
+
+The chat action can optionally specify a provider, model, and role to use for the conversation.
+
+### Archive
+
+Archives chats matching a filter. Useful for keeping your chat list clean.
+
+**Example:** "Archive chats older than 30 days"
+
+```yaml
+action:
+  type: archive
+  filter:
+    olderThan: 30
+```
+
+### Flag / Unflag
+
+Flags or unflags chats matching a filter.
+
+```yaml
+action:
+  type: flag
+  flag: true
+  filter:
+    nameContains: "important"
+```
+
+### Label
+
+Adds or removes a label from chats matching a filter.
+
+```yaml
+action:
+  type: label
+  labelId: "review"
+  filter:
+    archived: false
+```
+
+## Filters
+
+Archive, flag, and label actions accept filters to target specific chats:
+
+| Filter | Description |
+|--------|-------------|
+| `olderThan` | Chats older than N days |
+| `nameContains` | Chat name contains text |
+| `hasLabel` | Chat has a specific label |
+| `archived` | Only archived / not archived chats |
+| `flagged` | Only flagged / not flagged chats |
+
+Filters can be combined. If multiple filters are set, all must match (AND logic).
+
+## Creating Routines
+
+Go to **Routines** in the sidebar and start a new routine chat. The **Routine Assistant** walks you through a guided questionnaire:
+
+1. What should the routine do?
+2. When should it run? (natural language → cron)
+3. Any filters or conditions?
+
+The assistant creates the routine for you — no need to write cron expressions or JSON by hand.
+
+You can also create routines programmatically through the WebSocket API.
+
+## Cron Expressions
+
+Routines use standard 5-field cron expressions:
+
+```
+┌───────── minute (0-59)
+│ ┌─────── hour (0-23)
+│ │ ┌───── day of month (1-31)
+│ │ │ ┌─── month (1-12)
+│ │ │ │ ┌─ day of week (0-6, Sun=0)
+│ │ │ │ │
+* * * * *
+```
+
+**Common patterns:**
+
+| Expression | Schedule |
+|-----------|----------|
+| `0 9 * * *` | Every day at 9:00 AM |
+| `0 9 * * 1-5` | Weekdays at 9:00 AM |
+| `*/30 * * * *` | Every 30 minutes |
+| `0 0 * * 0` | Sundays at midnight |
+| `0 18 * * 5` | Fridays at 6:00 PM |
+| `0 8 1 * *` | First of every month at 8:00 AM |
+
+## Management
+
+### Enable / Disable
+
+Toggle a routine on or off from the routine list or detail page. Disabled routines keep their schedule but don't execute.
+
+### Run Now
+
+Trigger any routine manually from the context menu. Useful for testing before enabling the schedule.
+
+### History
+
+The detail page shows recent runs with:
+
+- **Status** — done, error, or running
+- **Duration** — how long the run took
+- **Chat** — link to the conversation (for chat actions)
+- **Error** — what went wrong (for failed runs)
+
+### Delete
+
+Remove a routine and all its run history from the context menu.
+
+## Execution Details
+
+- Each chat action creates a **new conversation** per run
+- Routines use the **same timeout** as regular agent turns
+- Multiple routines can run **concurrently**
+- Only **failure notifications** are shown (successful runs are silent)
+- The scheduler checks every **minute** for routines that need to run
+- Disabled routines are skipped during scheduling
