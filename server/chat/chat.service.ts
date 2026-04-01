@@ -87,7 +87,7 @@ export function createSvcCrud(
   async function refreshEndpointStatus(def: ServiceDef, name: string, ok: boolean): Promise<void> {
     const ep = def.endpoints.find((e) => e.name === name);
     if (ep) ep.status = ok ? "validated" : "failed";
-    if (ok) def.lastTestedAt = Date.now();
+    def.lastTestedAt = Date.now();
     if (!staged.has(def.id)) {
       await persistDef(def);
       bus.emit("svc.updated", def);
