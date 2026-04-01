@@ -63,7 +63,7 @@ fi
 
 git add -A
 git commit -m "chore: bump v${VERSION}"
-git tag "$TAG"
-git push --follow-tags
+git tag -a "$TAG" -m "Release ${TAG}"
+git push origin main "$TAG"
 
 echo "Released ${TAG} (${CURRENT} → ${VERSION})"
