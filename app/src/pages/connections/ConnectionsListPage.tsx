@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MoreHorizontal, TestTube, Trash2 } from "lucide-react";
+import { MoreHorizontal, Play, Trash2 } from "lucide-react";
 import { useConnection } from "../../context/ConnectionContext";
 import { useStore } from "../../store";
 import ContextMenu, { type ContextMenuAction } from "../../components/shared/ContextMenu";
@@ -40,8 +40,8 @@ export default function ConnectionsListPage({ selectedConnectionId, onSelectConn
 
   const actions = (svc: ServiceInfo): ContextMenuAction[] => [
     {
-      label: testing === svc.id ? "Testing…" : "Test connection",
-      icon: <TestTube size={14} strokeWidth={1.5} />,
+      label: testing === svc.id ? "Testing…" : "Test",
+      icon: <Play size={14} strokeWidth={1.5} />,
       disabled: testing === svc.id,
       onClick: () => handleTest(svc.id),
     },
