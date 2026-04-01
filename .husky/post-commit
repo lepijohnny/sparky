@@ -1,8 +1,0 @@
-if git diff-tree --no-commit-id --name-only HEAD | grep -q '^\.version$'; then
-  VERSION="v$(cat .version | tr -d '[:space:]')"
-  git tag -f "$VERSION"
-  echo "Tagged $VERSION"
-  if git remote get-url origin &>/dev/null; then
-    git push origin "$VERSION" --force 2>/dev/null && echo "Pushed $VERSION" || true
-  fi
-fi
