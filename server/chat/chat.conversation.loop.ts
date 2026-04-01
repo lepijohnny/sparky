@@ -152,6 +152,9 @@ export function agentStream(opts: AgentStreamOpts) {
         }
         if (attempt === times) return overflowed ? "overflow" : result.reason;
 
+        const isRateLimit = result.errors.some((e) => /429|rate.?limit|quota.*reset|exhausted.*capacity/i.test(e));
+        if (isRateLimit) return "error";
+
         const isOverflow = result.errors.some((e) => /prompt is too long|max.*token|context.*length/i.test(e));
         if (isOverflow) {
           overflowed = true;
