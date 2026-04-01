@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.4] — 2026-03-30
+
+### Added
+- **System labels** — Auto-assigned `_connection`, `_permission`, `_skill`, `_routine` labels on assistant chats; accent-colored, not user-removable, hidden from label management
+- Context menu on routine list items (Disable/Enable, Run Now, Delete)
+- Connection test toast feedback (success/error)
+
+### Changed
+- **Code blocks redesigned** — Theme-aware background, accent-colored line numbers with vertical separator, dynamic width, trimmed empty lines
+- Context menu (`...`) moved to absolute top-right on skills and connections list items (matches chat list pattern)
+- Divider line above Delete in skills and connections context menus
+- Connection "Test connection" renamed to "Test" with Play icon
+- Routines detail shows "Paused" instead of next run date when disabled
+- Error bubble restyled — red left accent border, normal text color, softer background
+- OAuth redirect pages use Sparky app icon
+- `bump.sh` replaces `tag.sh` — supports `--patch`, `--minor`, `--major` with annotated tags
+
+### Fixed
+- No retry on 4xx client errors (400, 429, etc.) — immediate bail out
+- `lastTestedAt` updates on both successful and failed connection tests
+- `trustScope` added to `ApprovalExtra` interface
+- `ContentBlockEvent` citations `label` made required (matches `MappedEvent`)
+- Tool registry test types updated (missing `label`, `icon`, `isChatAllowed`)
+- Removed post-commit tag hook (bump.sh handles versioning)
+
 ## [0.7.0] — 2026-03-30
 
 ### Added
