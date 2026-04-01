@@ -1,12 +1,24 @@
 #!/bin/bash
 set -e
 
-if [ -z "$1" ] || [ "$1" != "--version" ] || [ -z "$2" ]; then
-  echo "Usage: ./scripts/tag.sh --version <semver>"
+usage() {
+  echo "Usage: ./scripts/bump.sh --patch | --minor | --major"
   exit 1
-fi
+}
 
-VERSION="$2"
+if [ -z "$1" ]; then usage; fi
+
+CURRENT=$(cat .version)
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+case "$1" in
+  --patch) PATCH=$((PATCH + 1)) ;;
+  --minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+  --major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+  *) usage ;;
+esac
+
+VERSION="${MAJOR}.${MINOR}.${PATCH}"
 TAG="v${VERSION}"
 
 if git tag -l "$TAG" | grep -qxF "$TAG"; then
@@ -32,6 +44,8 @@ if [ -n "$DIRTY" ]; then
   exit 1
 fi
 
+echo "Bumping ${CURRENT} → ${VERSION}"
+
 echo -n "$VERSION" > .version
 
 if [ -f app/package.json ]; then
@@ -48,8 +62,8 @@ if [ -f src-tauri/Cargo.toml ]; then
 fi
 
 git add -A
-git commit -m "chore: release ${VERSION}"
+git commit -m "bump: v${VERSION}"
 git tag "$TAG"
 git push --follow-tags
 
-echo "Released ${TAG}"
+echo "Released ${TAG} (${CURRENT} → ${VERSION})"
