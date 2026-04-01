@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MoreHorizontal, Play, Trash2 } from "lucide-react";
 import { useConnection } from "../../context/ConnectionContext";
+import { useToasts } from "../../context/ToastContext";
 import { useStore } from "../../store";
 import ContextMenu, { type ContextMenuAction } from "../../components/shared/ContextMenu";
 import { serviceTransport, type ServiceInfo } from "../../types/service";
@@ -13,6 +14,7 @@ interface ConnectionsListPageProps {
 
 export default function ConnectionsListPage({ selectedConnectionId, onSelectConnection }: ConnectionsListPageProps) {
   const { conn } = useConnection();
+  const { addToast } = useToasts();
   const services = useStore((s) => s.connections);
   const [testing, setTesting] = useState<string | null>(null);
 
@@ -26,7 +28,14 @@ export default function ConnectionsListPage({ selectedConnectionId, onSelectConn
     if (!conn) return;
     setTesting(id);
     try {
-      await conn.request("svc.test", { service: id });
+      const res = await conn.request("svc.test", { service: id }) as { ok: boolean; error?: string };
+      if (res.ok) {
+        addToast({ id: `test-ok-${Date.now()}`, kind: "success", title: "Connection OK" });
+      } else {
+        addToast({ id: `test-err-${Date.now()}`, kind: "error", title: res.error ?? "Test failed" });
+      }
+    } catch (err: any) {
+      addToast({ id: `test-err-${Date.now()}`, kind: "error", title: err?.message ?? "Test failed" });
     } finally {
       setTesting(null);
     }
