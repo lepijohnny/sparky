@@ -397,10 +397,21 @@
 .bubbleError {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
+  color: var(--fg);
+  background: color-mix(in srgb, #ef4444 6%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, #ef4444 15%, transparent);
+  border-left: 3px solid #ef4444;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bubbleError svg {
+  flex-shrink: 0;
   color: #ef4444;
-  background: color-mix(in srgb, #ef4444 8%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+  margin-top: 2px;
 }
 
 .bubbleFooter {
