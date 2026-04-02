@@ -370,8 +370,8 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
 
   const handleEdit = useCallback(async (rowid: number, content: string) => {
     if (!conn) return;
+    await conn.request("chat.entry.edit", { chatId: chat.id, rowid, content });
     setEditedContent(rowid, content);
-    conn.request("chat.entry.edit", { chatId: chat.id, rowid, content }).catch(() => {});
   }, [conn, chat.id, setEditedContent]);
 
   const handleDeleteTurn = useCallback(async (rawTurnId: string) => {
