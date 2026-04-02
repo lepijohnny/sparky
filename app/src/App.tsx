@@ -582,7 +582,7 @@ export default function App() {
         context={
           <ContextPanel
             title={SECTION_LABELS[section]}
-            contentKey={section}
+            contentKey={section === "chats" || section === "flagged" || section === "labels" || section === "archived" ? "chats" : section}
             action={section === "sources" ? (
               <SourceAddButton onFile={handleAddFile} onFolder={handleAddFolder} onUrl={handleAddUrl} />
             ) : section === "connections" ? (
@@ -649,7 +649,7 @@ export default function App() {
         details={
           <DetailsPanel
             title={detailsTitle}
-            contentKey={section === "settings" ? settingsSub : section}
+            contentKey={section === "settings" ? settingsSub : section === "chats" || section === "flagged" || section === "labels" || section === "archived" ? "chats" : section}
           >
             {detailsContent}
           </DetailsPanel>
