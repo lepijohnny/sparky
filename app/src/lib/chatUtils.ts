@@ -24,7 +24,7 @@ const HIDDEN_ACTIVITY_TYPES = new Set(["agent.start", "agent.thinking.done"]);
  */
 export function collapseEntries(entries: ChatEntry[]): Message[] {
   const messages: Message[] = [];
-  const turnMap = new Map<string, { activities: ChatActivity[]; status: SpinnerStatus; assistantContent: string; conversationTokens?: number; contextWindow?: number; durationMs?: number }>();
+  const turnMap = new Map<string, { activities: ChatActivity[]; status: SpinnerStatus; assistantContent: string; assistantRowid?: number; assistantAnchored?: boolean; conversationTokens?: number; contextWindow?: number; durationMs?: number }>();
 
   for (const entry of entries) {
     if (entry.kind === "activity") {
@@ -61,6 +61,8 @@ export function collapseEntries(entries: ChatEntry[]): Message[] {
       if (!turnMap.has(entry.id)) turnMap.set(entry.id, { activities: [], status: "streaming", assistantContent: "" });
       const turn = turnMap.get(entry.id)!;
       turn.assistantContent = entry.content;
+      turn.assistantRowid = entry.rowid;
+      turn.assistantAnchored = entry.anchored;
     }
   }
 
@@ -80,17 +82,14 @@ export function collapseEntries(entries: ChatEntry[]): Message[] {
     });
 
     if (turn && turn.status !== "streaming") {
-      const assistantEntry = entries.find(
-        (e) => e.kind === "message" && e.role === "assistant" && e.id === entry.id,
-      );
       messages.push({
         id: entry.id + "-assistant",
         role: "assistant",
         content: turn.assistantContent,
         activities: turn.activities,
         status: turn.status,
-        rowid: assistantEntry?.rowid,
-        anchored: assistantEntry?.kind === "message" ? assistantEntry.anchored : undefined,
+        rowid: turn.assistantRowid,
+        anchored: turn.assistantAnchored,
         conversationTokens: turn.conversationTokens,
         contextWindow: turn.contextWindow,
         durationMs: turn.durationMs,
