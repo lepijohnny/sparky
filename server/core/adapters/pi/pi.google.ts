@@ -99,7 +99,7 @@ export function createPiGoogleAdapter(
           return events.length > 0 ? events : undefined;
         };
 
-        return createPiAgent({ model, apiKey, thinkingLevel, log, onPayload, onContentBlock });
+        return createPiAgent({ model, apiKey, thinkingLevel, log, onPayload, onContentBlock, nudgeToolUse: true });
       };
 
       const inner: Agent = {

@@ -70,6 +70,7 @@ export type AgentEvent =
   | { type: "tool.result"; id: string; output: unknown }
   | { type: "tool.denied"; id: string }
   | { type: "server_tool.start"; id: string; name: string; input: unknown }
+  | { type: "followup"; followUpType: string }
   | { type: "error"; message: string }
   | { type: "done" };
 

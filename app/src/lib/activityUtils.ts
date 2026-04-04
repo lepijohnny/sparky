@@ -244,6 +244,9 @@ export function getActivityLabel(activity: ChatActivity): string | null {
     case "user.steering":
       return `Steer: ${activity.data?.content ?? "Steering message"}`;
 
+    case "agent.followup.nudge":
+      return "Nudging model to continue";
+
     default:
       return `${activity.source}:${activity.type}`;
   }

@@ -60,6 +60,7 @@ const PERSISTED_ACTIVITY_TYPES = new Set([
   "agent.approval.requested",
   "agent.approval.approved",
   "agent.approval.denied",
+  "agent.followup.nudge",
   "agent.done",
   "agent.stopped",
   "agent.error",

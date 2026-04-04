@@ -88,6 +88,7 @@ export interface PiAgentOptions {
   log: Logger;
   onPayload?: (payload: unknown, model: Model<Api>) => unknown | undefined | Promise<unknown | undefined>;
   onContentBlock?: ContentBlockHandler;
+  nudgeToolUse?: boolean;
 }
 
 export interface PendingToolCall {
@@ -108,7 +109,7 @@ function* mapEvent(event: AssistantMessageEvent, textAccumulator: string[], onCo
     case "thinking_delta": yield { type: "thinking.delta", content: event.delta }; break;
     case "thinking_end":   yield { type: "thinking.done", content: event.content }; break;
     case "error": {
-      const errorMsg = event.error.errorMessage ?? "Unknown error";
+      const errorMsg = event.error.errorMessage ?? event.error.message ?? JSON.stringify(event.error) ?? "Unknown error";
       if (errorMsg.includes("401") || errorMsg.includes("unauthorized") || errorMsg.includes("authentication")) {
         throw new Error(errorMsg);
       }
@@ -133,15 +134,37 @@ function* mapEvent(event: AssistantMessageEvent, textAccumulator: string[], onCo
   }
 }
 
-function steerNoneAborted(turn: AgentTurn, context: Context, log: Logger, beforeHook?: () => void): boolean {
-  if (turn.cancellation.aborted) return false;
+export interface LoopState {
+  pendingCalls: PendingToolCall[];
+  keepGoing: boolean;
+  nudged: boolean;
+  round: number;
+}
+
+export interface FollowUpResult {
+  type: string;
+}
+
+type FollowUp = (turn: AgentTurn, context: Context, log: Logger, loop: LoopState) => FollowUpResult | null;
+
+export const followUpNudge: FollowUp = (turn, context, log, loop) => {
+  if (loop.nudged || loop.round <= 1 || turn.cancellation.aborted) return null;
+  log.info("Nudging model to continue after tool results");
+  context.messages.push(from(PiSdkUserMessagePrototype, { content: "Continue with the tool results above." }));
+  loop.nudged = true;
+  loop.keepGoing = true;
+  return { type: "nudge" };
+};
+
+export const followUpSteer: FollowUp = (turn, context, log, loop) => {
+  if (turn.cancellation.aborted) return null;
   const content = turn.steering?.();
-  if (!content) return false;
-  beforeHook?.();
+  if (!content) return null;
   log.info("Steer message passed to the agent:", { length: content.length });
   context.messages.push(from(PiSdkUserMessagePrototype, { content }));
-  return true;
-}
+  loop.keepGoing = true;
+  return { type: "steer" };
+};
 
 function addToolResultsToContext(context: Context, results: { id: string; name: string; arguments: Record<string, unknown>; output: string }[]): void {
   context.messages.push(from(PiSdkAssistantMessagePrototype, {
@@ -151,6 +174,13 @@ function addToolResultsToContext(context: Context, results: { id: string; name: 
   for (const r of results) {
     context.messages.push(from(PiSdkToolResultMessagePrototype, { toolCallId: r.id, toolName: r.name, content: [{ type: "text", text: r.output }] }));
   }
+}
+
+export function buildFollowUps(opts: PiAgentOptions): FollowUp[] {
+  const list: FollowUp[] = [];
+  if (opts.nudgeToolUse) list.push(followUpNudge);
+  list.push(followUpSteer);
+  return list;
 }
 
 export function createPiAgent(opts: PiAgentOptions): Agent {
@@ -165,18 +195,17 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
       };
 
       try {
-        let pendingCalls: PendingToolCall[] = [];
-        let keepGoing = true;
+        const loop = { pendingCalls: [] as PendingToolCall[], keepGoing: true, nudged: false, round: 0 };
+        const followUps = buildFollowUps(opts);
 
-        let round = 0;
-        while (keepGoing) {
-          keepGoing = false;
+        while (loop.keepGoing) {
+          loop.keepGoing = false;
 
           do {
-            round++;
-            opts.log.info("Tool loop", { round, pending: pendingCalls.length });
+            loop.round++;
+            opts.log.info("Tool loop", { round: loop.round, pending: loop.pendingCalls.length });
             if (turn.cancellation.aborted) break;
-            pendingCalls = [];
+            loop.pendingCalls = [];
             const textParts: string[] = [];
             const citationParts: { text: string; label: string }[] = [];
 
@@ -184,7 +213,7 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
               if (turn.cancellation.aborted) break;
               for (const event of mapEvent(piEvent, textParts, opts.onContentBlock)) {
                 if (event.type === "tool.pending") {
-                  pendingCalls.push(event.call);
+                  loop.pendingCalls.push(event.call);
                 } else if (event.type === "citations") {
                   citationParts.push({ text: event.text, label: event.label ?? "Citations" });
                 } else {
@@ -200,13 +229,20 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
               yield { type: "text.done", content: textParts.join("") + sources };
             }
 
-            if (pendingCalls.length === 0 || !turn.tools) break;
+            if (loop.pendingCalls.length === 0 || !turn.tools) break;
 
             const results: { id: string; name: string; arguments: Record<string, unknown>; output: string; }[] = [];
-            for (const tc of pendingCalls) {
+            for (const tc of loop.pendingCalls) {
               if (turn.cancellation.aborted) break;
 
-              steerNoneAborted(turn, context, opts.log, () => addToolResultsToContext(context, results.splice(0)));
+              if (!turn.cancellation.aborted) {
+                const steerContent = turn.steering?.();
+                if (steerContent) {
+                  addToolResultsToContext(context, results.splice(0));
+                  opts.log.info("Steer message passed to the agent:", { length: steerContent.length });
+                  context.messages.push(from(PiSdkUserMessagePrototype, { content: steerContent }));
+                }
+              }
 
               const output = await turn.tools!.execute(tc.name, tc.arguments).then((r) => typeof r === "string" ? r : r.text);
               if (turn.cancellation.aborted) break;
@@ -216,10 +252,13 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
 
             if (turn.cancellation.aborted) break;
             addToolResultsToContext(context, results);
-          } while (pendingCalls.length > 0);
+            loop.nudged = false;
 
-          if (steerNoneAborted(turn, context, opts.log)) {
-            keepGoing = true;
+          } while (loop.pendingCalls.length > 0);
+
+          for (const followUp of followUps) {
+            const result = followUp(turn, context, opts.log, loop);
+            if (result) { yield { type: "followup", followUpType: result.type }; break; }
           }
         }
       } catch (err: unknown) {

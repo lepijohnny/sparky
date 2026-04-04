@@ -223,6 +223,8 @@ function toEntry(
       const category = inferCategory(event.name, event.input);
       return { kind: "activity", messageId, source: "agent", type: "agent.tool.start", timestamp, data: { id: event.id, name: event.name, input: event.input, category, label, icon } };
     }
+    case "followup":
+      return { kind: "activity", messageId, source: "agent", type: `agent.followup.${event.followUpType}`, timestamp };
     case "error":
       return { kind: "activity", messageId, source: "agent", type: "agent.error", timestamp, data: { message: event.message } };
     case "done":

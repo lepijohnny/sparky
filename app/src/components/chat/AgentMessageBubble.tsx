@@ -8,6 +8,7 @@ import {
   FolderOpen,
   Globe,
   MessageSquare,
+  RefreshCw,
   Palette,
   Pencil,
   Plug,
@@ -119,6 +120,7 @@ function getActivityIcon(activity: ChatActivity): ReactElement {
   if (type === "agent.error") return <AlertCircle size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "agent.stopped") return <Square size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   if (type === "user.steering") return <MessageSquare size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
+  if (type === "agent.followup.nudge") return <RefreshCw size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
   return <ChevronRight size={ICON_SIZE} strokeWidth={ICON_STROKE} />;
 }
 
