@@ -52,7 +52,7 @@ describe("app_edit", () => {
   test("given file without matching text, when editing, then returns error with hint", async () => {
     const p = writeTmp("nomatch.txt", "hello world\nfoo bar\nbaz qux");
     const result = await edit.execute({ path: p, oldText: "missing foo", newText: "nope" }, ctx);
-    expect(result).toContain("Error: oldText not found");
+    expect(result).toContain("oldText not found");
     expect(result).toContain("Closest match near line");
     expect(result).toContain("app_read");
   });
@@ -60,7 +60,7 @@ describe("app_edit", () => {
   test("given file with duplicate matches, when editing, then returns error", async () => {
     const p = writeTmp("dup.txt", "foo bar foo");
     const result = await edit.execute({ path: p, oldText: "foo", newText: "baz" }, ctx);
-    expect(result).toContain("Error: oldText matches multiple locations");
+    expect(result).toContain("oldText matches multiple locations");
   });
 
   test("given nonexistent file, when editing, then returns error", async () => {
@@ -84,5 +84,38 @@ describe("app_edit", () => {
     const p = writeTmp("ws.txt", "  indented\n    deep");
     const result = await edit.execute({ path: p, oldText: "  indented", newText: "flat" }, ctx);
     expect(readFileSync(p, "utf-8")).toBe("flat\n    deep");
+  });
+
+  test("given edits array with two edits, when editing, then applies both sequentially", async () => {
+    const p = writeTmp("multi-edit.txt", "aaa\nbbb\nccc");
+    const result = await edit.execute({
+      path: p,
+      edits: [
+        { oldText: "aaa", newText: "111" },
+        { oldText: "ccc", newText: "333" },
+      ],
+    }, ctx);
+    expect(result).toContain("edit 1");
+    expect(result).toContain("edit 2");
+    expect(readFileSync(p, "utf-8")).toBe("111\nbbb\n333");
+  });
+
+  test("given edits array where second edit fails, when editing, then returns error without writing", async () => {
+    const p = writeTmp("multi-fail.txt", "aaa\nbbb\nccc");
+    const result = await edit.execute({
+      path: p,
+      edits: [
+        { oldText: "aaa", newText: "111" },
+        { oldText: "zzz", newText: "999" },
+      ],
+    }, ctx);
+    expect(result).toContain("Edit 2: oldText not found");
+    expect(readFileSync(p, "utf-8")).toBe("aaa\nbbb\nccc");
+  });
+
+  test("given no oldText and no edits, when editing, then returns error", async () => {
+    const p = writeTmp("empty-edit.txt", "hello");
+    const result = await edit.execute({ path: p }, ctx);
+    expect(result).toContain("Error: provide either");
   });
 });
