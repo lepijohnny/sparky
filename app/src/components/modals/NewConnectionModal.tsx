@@ -1,4 +1,3 @@
-
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
 
 import type { AuthFlowDefinition, AuthRequest, AuthRequestField, AuthVerdict } from "@sparky/auth-core";
@@ -27,7 +26,7 @@ interface Props {
   onAdded: () => void;
   /** Render without overlay/modal chrome — for embedding in pages */
   inline?: boolean;
-  /** Back button callback — shown in footer when provided */
+  /** Optional parent-level back button when in select step */
   onBack?: () => void;
 }
 
@@ -68,6 +67,8 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
   const [selectedCompany, setSelectedCompany] = useState(inline ? "" : (groups[0]?.company ?? ""));
   const [selectedFlowIdx, setSelectedFlowIdx] = useState(0);
   const [step, setStep] = useState<"select" | "connect">("select");
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const [hasStepped, setHasStepped] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [display, setDisplay] = useState<AuthRequestField[]>([]);
   const [pending, setPending] = useState(false);
@@ -78,6 +79,8 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
   const mouseDownOnOverlay = useRef(false);
 
   const resetFlow = useCallback(() => {
+    setHasStepped(true);
+    setDirection("backward");
     setSelectedCompany(inline ? "" : (groups[0]?.company ?? ""));
     setSelectedFlowIdx(0);
     setStep("select");
@@ -103,8 +106,6 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
   const group = groups.find((g) => g.company === selectedCompany);
   const companyFlows = group?.flows ?? [];
   const selectedFlow = companyFlows[selectedFlowIdx] ?? null;
-  const selectedProvider = selectedFlow?.provider ?? "";
-  const provider = providers.find((p) => p.id === selectedProvider);
 
   const handleCompanyChange = (company: string) => {
     setSelectedCompany(company);
@@ -245,6 +246,35 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     }
   };
 
+  const renderSelectStep = () => (
+    <>
+      <div className={styles.field}>
+        <label className={styles.label}>Provider</label>
+        <Dropdown
+          options={[
+            ...(inline && !selectedCompany ? [{ value: "", label: "Select a provider…" }] : []),
+            ...groups.map((g) => ({ value: g.company, label: g.company })),
+          ]}
+          value={selectedCompany}
+          onChange={handleCompanyChange}
+          disabled={step === "connect"}
+        />
+      </div>
+
+      {companyFlows.length > 1 && (
+        <div className={styles.field}>
+          <label className={styles.label}>Authentication</label>
+          <Dropdown
+            options={companyFlows.map((f) => ({ value: f.label, label: f.label }))}
+            value={selectedFlow?.label ?? ""}
+            onChange={handleFlowIdxChange}
+            disabled={step === "connect"}
+          />
+        </div>
+      )}
+    </>
+  );
+
   const renderConnectStep = () => {
     if (!selectedFlow) return null;
 
@@ -252,12 +282,10 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
       return (
         <div className={styles.connectSection}>
           {saving ? (
-            <>
-              <div className={styles.spinnerRow}>
-                <span className={styles.spinnerDot} />
-                Setting up connection…
-              </div>
-            </>
+            <div className={styles.spinnerRow}>
+              <span className={styles.spinnerDot} />
+              Setting up connection…
+            </div>
           ) : (
             <>
               {display.map((item, i) => {
@@ -297,15 +325,18 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
           {selectedFlow.fields!.map((field) => (
             <div key={field.name}>
               {field.url && (
-                <button
-                  className={styles.linkBtn}
-                  onClick={async () => {
-                    try { await shellOpen(field.url!); }
-                    catch { window.open(field.url!, "_blank"); }
-                  }}
-                >
-                  {field.label}
-                </button>
+                <p className={styles.hint}>
+                  Not sure about it?{" "}
+                  <button
+                    className={styles.linkBtn}
+                    onClick={async () => {
+                      try { await shellOpen(field.url!); }
+                      catch { window.open(field.url!, "_blank"); }
+                    }}
+                  >
+                    Setup the new one <span className={styles.externalLinkIcon}>↗</span>
+                  </button>
+                </p>
               )}
               <input
                 className={styles.input}
@@ -330,10 +361,7 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
       return (
         <div className={styles.connectSection}>
           {error && <p className={styles.errorText}>{error}</p>}
-          <div className={styles.spinnerRow}>
-            <span className={styles.spinnerDot} />
-            Connecting…
-          </div>
+          <p className={styles.hint}>Ready to connect this provider.</p>
         </div>
       );
     }
@@ -345,8 +373,9 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
     const autoConnect = ["pkce", "oauth", "device"].includes(selectedFlow?.grant ?? "");
 
     if (step === "select") {
+      setHasStepped(true);
+      setDirection("forward");
       setStep("connect");
-      if (!selectedFlow?.fields?.length && autoConnect) handleAuthFlow();
       return;
     }
 
@@ -367,61 +396,44 @@ export default function NewConnectionModal({ conn, providers, flows, onClose, on
       });
     }
 
-    if (autoConnect) return false;
+    if (autoConnect) return true;
     return true;
   };
 
-  const connectLabel = () => {
-    if (step === "select") {
-      if (selectedFlow?.fields?.length) return "Next";
-      return "Connect";
-    }
-    if (saving) return "Connecting…";
-    return "Connect";
-  };
+  const connectLabel = () => (step === "select" ? "Next" : saving ? "Connecting…" : "Connect");
 
   const body = (
     <>
       <div className={`${styles.modalBody} ${inline ? styles.inlineBody : ""}`}>
-        <div className={styles.field}>
-          <label className={styles.label}>Provider</label>
-          <Dropdown
-            options={[
-              ...(inline && !selectedCompany ? [{ value: "", label: "Select a provider…" }] : []),
-              ...groups.map((g) => ({ value: g.company, label: g.company })),
-            ]}
-            value={selectedCompany}
-            onChange={handleCompanyChange}
-            disabled={step === "connect"}
-          />
+        <div
+          key={`${step}-${direction}-${hasStepped ? "1" : "0"}`}
+          className={`${styles.stepPane} ${hasStepped
+            ? direction === "forward"
+              ? styles.stepEnterFromRight
+              : styles.stepEnterFromLeft
+            : ""}`}
+        >
+          {step === "select" ? renderSelectStep() : renderConnectStep()}
         </div>
-
-        {companyFlows.length > 1 && (
-          <div className={styles.field}>
-            <label className={styles.label}>Authentication</label>
-            <Dropdown
-              options={companyFlows.map((f) => ({ value: f.label, label: f.label }))}
-              value={selectedFlow?.label ?? ""}
-              onChange={handleFlowIdxChange}
-              disabled={step === "connect"}
-            />
-          </div>
-        )}
-
-        {step === "connect" && renderConnectStep()}
       </div>
+
       <div className={`${styles.modalFooter} ${inline ? styles.inlineFooter : ""}`}>
-        {onBack && (
+        {step === "connect" ? (
+          <button className={styles.btnMuted} onClick={resetFlow}>
+            Back
+          </button>
+        ) : onBack ? (
           <button className={styles.btnMuted} onClick={onBack}>
             Back
           </button>
-        )}
-        {!inline && !onBack && (
+        ) : (
           <button className={styles.btnMuted} onClick={onClose}>
             Cancel
           </button>
         )}
+
         {inline && <div style={{ flex: 1 }} />}
+
         {!(step === "connect" && pending) && (
           <button
             className={styles.btnPrimary}
