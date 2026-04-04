@@ -445,10 +445,12 @@ function flattenTurns(turns: Turn[], toolOutputDir: string | null = null): Agent
       for (const tc of turn.toolCalls) {
         if (tc.result?.kind === "activity") {
           const toolCallId = (tc.start as any).data?.id ?? "";
+          const toolName = (tc.start as any).data?.name ?? "";
           const raw = JSON.stringify((tc.result as any).data?.output ?? "");
           messages.push({
             role: "tool",
             toolCallId,
+            toolName,
             content: cacheLargeToolOutput(raw, outputCap, toolCallId, toolOutputDir),
           });
         }

@@ -64,7 +64,7 @@ function mapMessages(messages: AgentTurn["messages"]): Message[] {
         return from(PiSdkAssistantMessagePrototype, { content });
       }
       case "tool":
-        return from(PiSdkToolResultMessagePrototype, { toolCallId: msg.toolCallId, content: [{ type: "text", text: msg.content }] });
+        return from(PiSdkToolResultMessagePrototype, { toolCallId: msg.toolCallId, toolName: msg.toolName ?? "", content: [{ type: "text", text: msg.content }] });
     }
   });
 }

@@ -14,7 +14,7 @@ export type MessageContent = string | MessagePart[];
 export type AgentMessage =
   | { role: "user"; content: MessageContent }
   | { role: "assistant"; content: string; toolCalls?: ToolCall[] }
-  | { role: "tool"; toolCallId: string; content: string };
+  | { role: "tool"; toolCallId: string; toolName?: string; content: string };
 
 export interface ToolBinary {
   data: string;

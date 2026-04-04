@@ -43,7 +43,7 @@ export function createPiGoogleAIStudioAdapter(
       if (cachedModels) return cachedModels;
 
       try {
-        const models = getModels("google-generative-ai")
+        const models = getModels("google")
           .filter((m) => !BLOCKED_MODELS.has(m.id))
           .filter((m) => !PREVIEW_MODELS.test(m.id));
         cachedModels = models.map((m) => ({
@@ -77,7 +77,7 @@ export function createPiGoogleAIStudioAdapter(
         const token = await getCredential("token");
         if (!token) throw new Error("No Google AI Studio API key found — add your key in Settings → LLM");
 
-        const model = getModel("google-generative-ai", modelId as any);
+        const model = getModel("google", modelId as any);
         if (!model) throw new Error(`Unknown Google AI Studio model: ${modelId}`);
 
         const onPayload = agentOpts?.webSearch
