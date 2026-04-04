@@ -49,10 +49,12 @@ describe("app_edit", () => {
     expect(readFileSync(p, "utf-8")).toBe("replaced\nline3");
   });
 
-  test("given file without matching text, when editing, then returns error", async () => {
-    const p = writeTmp("nomatch.txt", "hello world");
-    const result = await edit.execute({ path: p, oldText: "missing", newText: "nope" }, ctx);
+  test("given file without matching text, when editing, then returns error with hint", async () => {
+    const p = writeTmp("nomatch.txt", "hello world\nfoo bar\nbaz qux");
+    const result = await edit.execute({ path: p, oldText: "missing foo", newText: "nope" }, ctx);
     expect(result).toContain("Error: oldText not found");
+    expect(result).toContain("Closest match near line");
+    expect(result).toContain("app_read");
   });
 
   test("given file with duplicate matches, when editing, then returns error", async () => {
