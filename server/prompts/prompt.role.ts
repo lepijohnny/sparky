@@ -165,7 +165,7 @@ export function buildRolePrompt(role: RoleDef, preferences: string, mode?: strin
   const sys: string[] = [
     `Platform: ${process.platform}`,
     `Home: ${homedir()}`,
-    `CWD: ${cwd ?? process.cwd()}`,
+    `Working directory: ${cwd ?? process.cwd()}`,
   ];
   if (chatId) sys.push(`ChatId: ${chatId}`);
   if (mode) {

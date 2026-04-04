@@ -71,6 +71,8 @@ const ROUTES: RouteEntry[] = [
   ["chat.thinking", { notifiable: true }],
   ["chat.knowledge", { notifiable: true }],
   ["chat.mode", { notifiable: true }],
+  ["chat.cwd", { notifiable: true }],
+  "chat.cwd.get",
   "chat.get.id",
   "chat.entries",
   "chat.anchor.add",

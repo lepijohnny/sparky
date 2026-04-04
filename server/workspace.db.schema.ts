@@ -124,6 +124,8 @@ const MIGRATIONS: Migration[] = [
 
     CREATE INDEX IF NOT EXISTS idx_routine_runs_routine ON routine_runs(routine_id, started_at DESC);
   `),
+  /** v4: per-chat working directory */
+  (db) => db.exec("ALTER TABLE chats ADD COLUMN cwd TEXT"),
 ];
 
 interface MigratableDb {

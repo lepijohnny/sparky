@@ -215,8 +215,9 @@ export class ChatConversation {
 
       const skills = await this.getSkillsMetadata(data.skills, data.chatId);
 
-      const chatCwd = join(this.wsDir, "chats", data.chatId, "cwd");
-      await mkdir(chatCwd, { recursive: true });
+      const defaultCwd = join(this.wsDir, "chats", data.chatId, "cwd");
+      await mkdir(defaultCwd, { recursive: true });
+      const chatCwd = chat.cwd || defaultCwd;
 
       const toolCtx = { 
         bus: this.bus, 

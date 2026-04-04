@@ -23,6 +23,8 @@ export interface ChatEvents {
   "chat.thinking":            { req: { id: string; thinking: number | null }; res: { chat: Chat } };
   "chat.knowledge":           { req: { id: string; knowledge: boolean }; res: { chat: Chat } };
   "chat.mode":                { req: { id: string; mode: string | null }; res: { chat: Chat } };
+  "chat.cwd":                 { req: { id: string; cwd: string | null }; res: { chat: Chat } };
+  "chat.cwd.get":             { req: { id: string }; res: { cwd: string } };
   "chat.get.id":              { req: { id: string }; res: { chat: Chat; entries: ChatEntry[]; hasMore: boolean; streaming: boolean; partialContent: string | null } | null };
   "chat.entries":             { req: { chatId: string; before?: number }; res: { entries: ChatEntry[]; hasMore: boolean } };
   "chat.anchor.add":          { req: { chatId: string; rowid: number }; res: void };

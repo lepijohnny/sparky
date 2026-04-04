@@ -17,6 +17,8 @@ export interface Chat {
   unread?: boolean;
   /** Prompt role — determines system prompt, tools, and context features */
   role?: string;
+  /** Custom working directory for tools (bash, read, write, etc.) */
+  cwd?: string | null;
   labels?: string[];
   createdAt: string;
   updatedAt: string;
