@@ -91,7 +91,7 @@ export default function PrintDetailsPage({ chat }: PrintDetailsPageProps) {
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
   const { data } = useWsRequest<{ entries: ChatEntry[] }>(
-    conn, "chat.get.id", { id: chat.id }, [chat.id],
+    conn, "chat.entries", { chatId: chat.id }, [chat.id],
   );
 
   useEffect(() => {
