@@ -4,8 +4,8 @@ import { defineTool, basename } from "./tool.registry";
 import { home, real, requireFile } from "./tool.path";
 
 const editPair = z.object({
-  oldText: z.string().describe("Exact text to find and replace (must match exactly)"),
-  newText: z.string().describe("New text to replace the old text with"),
+  oldText: z.string().describe("Exact text to find (must match exactly, including whitespace). Always app_read the file first and copy from output."),
+  newText: z.string().describe("Replacement text"),
 });
 
 function findClosestHint(content: string, oldText: string): string {
@@ -40,15 +40,12 @@ function applyEdit(content: string, oldText: string, newText: string, index: num
 export const edit = defineTool({
   name: "app_edit",
   description:
-    "Edit a file by replacing exact text. The oldText must match EXACTLY (including whitespace and indentation) — " +
-    "always app_read the file first and copy oldText from the output. " +
-    "Supports single edit (oldText + newText) or multiple edits (edits array). " +
-    "Keep oldText short (1-3 lines) for reliability. If edit fails, re-read the file before retrying.",
+    "Edit a file by replacing exact text. Always app_read the file first so oldText matches exactly. " +
+    "Provide one or more edits. Keep oldText short (1-3 lines) for reliability. " +
+    "If an edit fails, re-read the file before retrying.",
   schema: z.object({
     path: z.string().describe("Absolute or relative file path to edit"),
-    oldText: z.string().optional().describe("Exact text to find and replace (single edit mode)"),
-    newText: z.string().optional().describe("New text to replace the old text with (single edit mode)"),
-    edits: z.array(editPair).optional().describe("Array of {oldText, newText} pairs for multiple edits in one call"),
+    edits: z.array(editPair).describe("List of edits to apply. Each edit has oldText (exact match) and newText (replacement). Applied in order."),
   }),
   label: "Editing",
   icon: "pencil",
@@ -67,10 +64,8 @@ export const edit = defineTool({
     const raw = readFileSync(filePath);
     if (raw.includes(0)) return `Error: binary file — cannot edit "${input.path}"`;
 
-    const pairs: { oldText: string; newText: string }[] = input.edits
-      ?? (input.oldText !== undefined ? [{ oldText: input.oldText, newText: input.newText ?? "" }] : []);
-
-    if (pairs.length === 0) return "Error: provide either oldText+newText or an edits array.";
+    const pairs = input.edits;
+    if (!pairs || pairs.length === 0) return "Error: provide at least one edit in the edits array.";
 
     let content = raw.toString("utf-8");
     const results: string[] = [];

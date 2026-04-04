@@ -52,7 +52,7 @@ If the user asks you to delete a file, you need `app_bash` (Execute mode) to run
 
 ### Writing (requires Write or Execute mode)
 - `app_write("path/to/file.ts", "content")` — create or overwrite a file (creates parent dirs)
-- `app_edit("path/to/file.ts", "old text", "new text")` — surgical find-and-replace (oldText must match exactly)
+- `app_edit("path/to/file.ts", edits=[{oldText: "old", newText: "new"}, ...])` — surgical find-and-replace (oldText must match exactly)
 
 ### Shell (requires Execute mode)
 - `app_bash("npm test")` — execute a bash command, returns stdout/stderr
@@ -61,7 +61,7 @@ If the user asks you to delete a file, you need `app_bash` (Execute mode) to run
 1. `app_glob("src/**/*.ts")` — discover files matching a pattern
 2. `app_grep("createUser", "src/")` — find which files contain a term
 3. `app_read("src/user.ts")` — read the file contents
-4. `app_edit("src/user.ts", "old code", "new code")` — make a precise edit
+4. `app_edit("src/user.ts", edits=[{oldText: "old code", newText: "new code"}])` — make a precise edit
 5. `app_bash("npm test")` — verify the change
 
 **Tips:**
@@ -70,7 +70,6 @@ If the user asks you to delete a file, you need `app_bash` (Execute mode) to run
 - Use `app_grep` line numbers to `app_read` with `offset`/`limit` — jump straight to the relevant section instead of reading entire files.
 - Use `app_edit` for surgical changes — **always `app_read` the file first** so `oldText` matches exactly. Copy-paste from the read output, never type from memory.
 - If `app_edit` fails with "oldText not found", **always re-read the file** before retrying. Do not guess — the file content may have changed.
-- For multiple changes to the same file, use the `edits` array: `app_edit("path", edits=[{oldText: "...", newText: "..."}, ...])` — all edits applied atomically.
 - Keep `oldText` as short as possible while still being unique. Prefer 1–3 lines over large blocks.
 - Use `app_write` only for new files or complete rewrites. Prefer `app_edit` for existing files.
 - `app_write` requires non-empty content. If the user asks to "create a file" without specifying content, write sensible default content (e.g. `# main.py` for Python, a basic template for the file type). Never claim you created a file without actually calling the tool.

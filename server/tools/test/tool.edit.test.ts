@@ -37,21 +37,21 @@ describe("app_edit", () => {
 
   test("given file with matching text, when editing, then replaces text", async () => {
     const p = writeTmp("simple.txt", "hello world");
-    const result = await edit.execute({ path: p, oldText: "world", newText: "mars" }, ctx);
+    const result = await edit.execute({ path: p, edits: [{ oldText: "world", newText: "mars" }] }, ctx);
     expect(result).toContain("Edited");
     expect(readFileSync(p, "utf-8")).toBe("hello mars");
   });
 
   test("given file with multiline match, when editing, then replaces correctly", async () => {
     const p = writeTmp("multi.txt", "line1\nline2\nline3");
-    const result = await edit.execute({ path: p, oldText: "line1\nline2", newText: "replaced" }, ctx);
+    const result = await edit.execute({ path: p, edits: [{ oldText: "line1\nline2", newText: "replaced" }] }, ctx);
     expect(result).toContain("replaced 2 lines with 1 lines");
     expect(readFileSync(p, "utf-8")).toBe("replaced\nline3");
   });
 
   test("given file without matching text, when editing, then returns error with hint", async () => {
     const p = writeTmp("nomatch.txt", "hello world\nfoo bar\nbaz qux");
-    const result = await edit.execute({ path: p, oldText: "missing foo", newText: "nope" }, ctx);
+    const result = await edit.execute({ path: p, edits: [{ oldText: "missing foo", newText: "nope" }] }, ctx);
     expect(result).toContain("oldText not found");
     expect(result).toContain("Closest match near line");
     expect(result).toContain("app_read");
@@ -59,30 +59,30 @@ describe("app_edit", () => {
 
   test("given file with duplicate matches, when editing, then returns error", async () => {
     const p = writeTmp("dup.txt", "foo bar foo");
-    const result = await edit.execute({ path: p, oldText: "foo", newText: "baz" }, ctx);
+    const result = await edit.execute({ path: p, edits: [{ oldText: "foo", newText: "baz" }] }, ctx);
     expect(result).toContain("oldText matches multiple locations");
   });
 
   test("given nonexistent file, when editing, then returns error", async () => {
-    const result = await edit.execute({ path: join(TMP, "nope.txt"), oldText: "x", newText: "y" }, ctx);
+    const result = await edit.execute({ path: join(TMP, "nope.txt"), edits: [{ oldText: "x", newText: "y" }] }, ctx);
     expect(result).toContain("Error: file not found");
   });
 
   test("given directory path, when editing, then returns error", async () => {
-    const result = await edit.execute({ path: TMP, oldText: "x", newText: "y" }, ctx);
+    const result = await edit.execute({ path: TMP, edits: [{ oldText: "x", newText: "y" }] }, ctx);
     expect(result).toContain("Error: not a file");
   });
 
   test("given empty newText, when editing, then deletes the matched text", async () => {
     const p = writeTmp("delete.txt", "aaa\nbbb\nccc");
-    const result = await edit.execute({ path: p, oldText: "\nbbb", newText: "" }, ctx);
+    const result = await edit.execute({ path: p, edits: [{ oldText: "\nbbb", newText: "" }] }, ctx);
     expect(result).toContain("Edited");
     expect(readFileSync(p, "utf-8")).toBe("aaa\nccc");
   });
 
   test("given whitespace-sensitive match, when editing, then preserves exact match", async () => {
     const p = writeTmp("ws.txt", "  indented\n    deep");
-    const result = await edit.execute({ path: p, oldText: "  indented", newText: "flat" }, ctx);
+    const result = await edit.execute({ path: p, edits: [{ oldText: "  indented", newText: "flat" }] }, ctx);
     expect(readFileSync(p, "utf-8")).toBe("flat\n    deep");
   });
 
@@ -100,7 +100,7 @@ describe("app_edit", () => {
     expect(readFileSync(p, "utf-8")).toBe("111\nbbb\n333");
   });
 
-  test("given edits array where second edit fails, when editing, then returns error without writing", async () => {
+  test("given edits array where second edit fails, when editing, then file unchanged", async () => {
     const p = writeTmp("multi-fail.txt", "aaa\nbbb\nccc");
     const result = await edit.execute({
       path: p,
@@ -113,9 +113,9 @@ describe("app_edit", () => {
     expect(readFileSync(p, "utf-8")).toBe("aaa\nbbb\nccc");
   });
 
-  test("given no oldText and no edits, when editing, then returns error", async () => {
+  test("given empty edits array, when editing, then returns error", async () => {
     const p = writeTmp("empty-edit.txt", "hello");
-    const result = await edit.execute({ path: p }, ctx);
-    expect(result).toContain("Error: provide either");
+    const result = await edit.execute({ path: p, edits: [] }, ctx);
+    expect(result).toContain("Error: provide at least one edit");
   });
 });
