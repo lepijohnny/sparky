@@ -16,15 +16,16 @@ export function buildAuthFlows(lg: FileLogger, cred: Credentials, copilot: Provi
   };
 
   return [
-    ...createOAuthPkceFlow({
-      domain: "llm",
-      provider: "anthropic-oauth",
-      label: "Claude Pro / Max (OAuth)",
-      authorizeUrl: "https://claude.ai/oauth/authorize",
-      tokenUrl: "https://console.anthropic.com/v1/oauth/token",
-      clientId: "9d1c250a-e61b-44d9-88ed-5944d1962f5e",
-      scopes: ["org:create_api_key", "user:profile", "user:inference"],
-    })(ctx),
+    /** Temporarily disabled — Anthropic ToS prohibit Pro/Max usage */
+    // ...createOAuthPkceFlow({
+    //   domain: "llm",
+    //   provider: "anthropic-oauth",
+    //   label: "Claude Pro / Max (OAuth)",
+    //   authorizeUrl: "https://claude.ai/oauth/authorize",
+    //   tokenUrl: "https://console.anthropic.com/v1/oauth/token",
+    //   clientId: "9d1c250a-e61b-44d9-88ed-5944d1962f5e",
+    //   scopes: ["org:create_api_key", "user:profile", "user:inference"],
+    // })(ctx),
     ...createPatFlow({
       domain: "llm",
       provider: "anthropic-api",

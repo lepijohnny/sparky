@@ -15,7 +15,8 @@ export interface AdapterCatalog {
 
 export function createAdapters(cred: Credentials, log: Logger): AdapterCatalog {
   const map = new Map<string, ProviderAdapter>([
-    ["anthropic-oauth", createPiAnthropicAdapter("anthropic-oauth", "Anthropic", cred, log, { credPrefix: "llm.anthropic-oauth.pkce", isOAuth: true })],
+    /** Temporarily disabled — Anthropic ToS prohibit Pro/Max usage */
+    // ["anthropic-oauth", createPiAnthropicAdapter("anthropic-oauth", "Anthropic", cred, log, { credPrefix: "llm.anthropic-oauth.pkce", isOAuth: true })],
     ["anthropic-api", createPiAnthropicAdapter("anthropic-api", "Anthropic", cred, log, { credPrefix: "llm.anthropic-api.pat", isOAuth: false })],
     ["google", createPiGoogleAdapter(cred, log, { credPrefix: "llm.google.pkce" })],
     ["ollama", createPiOllamaAdapter(log)],
