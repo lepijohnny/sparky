@@ -120,6 +120,14 @@ export function buildAuthFlows(lg: FileLogger, cred: Credentials, copilot: Provi
     })(ctx),
     ...createPatFlow({
       domain: "llm",
+      provider: "google-ai-studio",
+      label: "Google AI Studio (API Key)",
+      fields: [
+        { name: "key", label: "API Key", placeholder: "AIza…", url: "https://aistudio.google.com/apikey" },
+      ],
+    })(ctx),
+    ...createPatFlow({
+      domain: "llm",
       provider: "mistral",
       label: "Mistral (API Key)",
       fields: [

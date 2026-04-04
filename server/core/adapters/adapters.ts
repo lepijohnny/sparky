@@ -5,6 +5,7 @@ import { createPiAnthropicAdapter } from "./pi/pi.anthropic";
 import { createPiCopilotAdapter } from "./pi/pi.copilot";
 import { createPiGoogleAdapter } from "./pi/pi.google";
 import { createPiOllamaAdapter } from "./pi/pi.ollama";
+import { createPiGoogleAIStudioAdapter } from "./pi/pi.google.aistudio";
 import { createPiMistralAdapter } from "./pi/pi.mistral";
 import { createPiOpenAIApiAdapter, createPiOpenAIOAuthAdapter } from "./pi/pi.openai";
 
@@ -19,6 +20,7 @@ export function createAdapters(cred: Credentials, log: Logger): AdapterCatalog {
     // ["anthropic-oauth", createPiAnthropicAdapter("anthropic-oauth", "Anthropic", cred, log, { credPrefix: "llm.anthropic-oauth.pkce", isOAuth: true })],
     ["anthropic-api", createPiAnthropicAdapter("anthropic-api", "Anthropic", cred, log, { credPrefix: "llm.anthropic-api.pat", isOAuth: false })],
     ["google", createPiGoogleAdapter(cred, log, { credPrefix: "llm.google.pkce" })],
+    ["google-ai-studio", createPiGoogleAIStudioAdapter(cred, log, { credPrefix: "llm.google-ai-studio.pat" })],
     ["ollama", createPiOllamaAdapter(log)],
     ["copilot", createPiCopilotAdapter(cred, log, { credPrefix: "llm.copilot.device" })],
     ["openai-oauth", createPiOpenAIOAuthAdapter(cred, log, { credPrefix: "llm.openai-oauth.pkce" })],
