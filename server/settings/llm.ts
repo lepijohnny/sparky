@@ -61,7 +61,7 @@ export class LlmSettings {
     return { connection };
   }
 
-  private async update(data: { id: string; model?: string; thinking?: number; knowledge?: boolean; assistant?: boolean }): Promise<{ connection: LlmConnection }> {
+  private async update(data: { id: string; name?: string; model?: string; thinking?: number; knowledge?: boolean; assistant?: boolean }): Promise<{ connection: LlmConnection }> {
     let updated: LlmConnection | null = null;
 
     await this.config.update("llms", (llms = []) =>
@@ -69,6 +69,7 @@ export class LlmSettings {
         if (c.id !== data.id) return c;
         const next: LlmConnection = {
           ...c,
+          ...(data.name !== undefined ? { name: data.name } : {}),
           ...(data.model !== undefined ? { model: data.model } : {}),
           ...(data.thinking !== undefined ? { thinking: data.thinking } : {}),
           ...(data.knowledge !== undefined ? { knowledge: data.knowledge } : {}),
@@ -80,7 +81,7 @@ export class LlmSettings {
     );
 
     if (!updated) throw new Error(`Connection not found: ${data.id}`);
-    this.log.info("Updated connection", { id: data.id, model: (updated as LlmConnection).model, thinking: (updated as LlmConnection).thinking, knowledge: (updated as LlmConnection).knowledge, assistant: (updated as LlmConnection).assistant });
+    this.log.info("Updated connection", { id: data.id, name: (updated as LlmConnection).name, model: (updated as LlmConnection).model, thinking: (updated as LlmConnection).thinking, knowledge: (updated as LlmConnection).knowledge, assistant: (updated as LlmConnection).assistant });
     return { connection: updated as LlmConnection };
   }
 

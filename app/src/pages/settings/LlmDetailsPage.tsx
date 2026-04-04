@@ -1,5 +1,5 @@
-import { AlertTriangle, CheckCircle, Plus } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertTriangle, CheckCircle, Pencil, Plus } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import NewConnectionModal from "../../components/modals/NewConnectionModal";
 import Dropdown from "../../components/shared/Dropdown";
 import { useStore } from "../../store";
@@ -67,6 +67,30 @@ export default function LlmDetailsPage() {
       refresh();
     } catch (err) {
       console.error("Failed to set default:", err);
+    }
+  };
+
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [editNameValue, setEditNameValue] = useState("");
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const handleStartRename = (c: LlmConnection) => {
+    setEditingName(c.id);
+    setEditNameValue(c.name);
+    setTimeout(() => nameInputRef.current?.select(), 0);
+  };
+
+  const handleCommitRename = async (id: string) => {
+    const trimmed = editNameValue.trim();
+    setEditingName(null);
+    if (!trimmed || !conn) return;
+    const existing = connections.find((c) => c.id === id);
+    if (existing && existing.name === trimmed) return;
+    try {
+      await conn.request("settings.llm.connections.update", { id, name: trimmed });
+      refresh();
+    } catch (err) {
+      console.error("Failed to rename connection:", err);
     }
   };
 
@@ -235,10 +259,28 @@ export default function LlmDetailsPage() {
                     {getProviderIcon(c.provider, 14)}
                   </span>
                   <div className={local.connectionInfo}>
-                    <span className={local.connectionName}>
-                      {c.name}
-                      {isDefault(c) && <span className={local.defaultLabel}>[default]</span>}
-                    </span>
+                    {editingName === c.id ? (
+                      <input
+                        ref={nameInputRef}
+                        className={local.nameInput}
+                        value={editNameValue}
+                        onChange={(e) => setEditNameValue(e.target.value)}
+                        onBlur={() => handleCommitRename(c.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleCommitRename(c.id);
+                          if (e.key === "Escape") setEditingName(null);
+                        }}
+                        maxLength={60}
+                      />
+                    ) : (
+                      <span className={local.connectionName}>
+                        {c.name}
+                        {isDefault(c) && <span className={local.defaultLabel}>[default]</span>}
+                        <button className={local.renameBtn} onClick={() => handleStartRename(c)} title="Rename">
+                          <Pencil size={11} strokeWidth={1.5} />
+                        </button>
+                      </span>
+                    )}
                     <span className={local.connectionMeta}>
                       <span className={local.connectionDate}>{new Date(c.createdAt).toLocaleDateString()}</span>
                     </span>

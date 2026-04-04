@@ -19,7 +19,7 @@ export interface SettingsEvents {
   "settings.llm.connections.list":      { req: void; res: { connections: LlmConnection[] } };
   "settings.llm.connections.add":       { req: Omit<LlmConnection, "id" | "createdAt" | "credPrefix">; res: { connection: LlmConnection } };
   "settings.llm.connections.remove":    { req: { id: string }; res: { removed: boolean } };
-  "settings.llm.connections.update":    { req: { id: string; model?: string; thinking?: number; assistant?: boolean }; res: { connection: LlmConnection } };
+  "settings.llm.connections.update":    { req: { id: string; name?: string; model?: string; thinking?: number; assistant?: boolean }; res: { connection: LlmConnection } };
   "settings.llm.default.get":          { req: void; res: { default: LlmDefault | null } };
   "settings.llm.default.set":          { req: LlmDefault; res: { default: LlmDefault } };
 
