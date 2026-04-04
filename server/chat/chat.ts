@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type Database from "better-sqlite3";
 import type { EventBus } from "../core/bus";
 import type { Configuration } from "../core/config";
@@ -115,6 +116,12 @@ export function createChatWorkspace(
   bus.on("chat.model", (data) => crud.model(data));
   bus.on("chat.thinking", (data) => crud.thinking(data));
   bus.on("chat.knowledge", (data) => crud.knowledge(data));
+  bus.on("chat.cwd", (data) => crud.cwd(data));
+  bus.on("chat.cwd.get", (data) => {
+    const chat = db.getChat(data.id);
+    if (!chat) return { cwd: "" };
+    return { cwd: chat.cwd || join(currentWorkspacePath, "chats", data.id, "cwd") };
+  });
   bus.on("chat.mode", (data) => crud.mode(data));
   bus.on("chat.get.id", (data) => {
     const result = crud.get(data);

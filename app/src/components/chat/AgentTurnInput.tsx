@@ -1,4 +1,4 @@
-import { BookOpen, Check, Database, Loader2, Paperclip, Send, Square, X } from "lucide-react";
+import { BookOpen, Check, Database, FolderOpen, Loader2, Paperclip, Send, Square, X } from "lucide-react";
 import { withAlpha } from "../../lib/color";
 import { isSystemLabel, getSystemLabelName } from "../../lib/systemLabels";
 import { memo, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -459,6 +459,32 @@ export default memo(function ChatInput({
     }
   }, [conn, chat.id]);
 
+  const handleCwdPick = useCallback(async () => {
+    if (!conn) return;
+    try {
+      const { cwd: defaultPath } = await conn.request<{ cwd: string }>("chat.cwd.get", { id: chat.id });
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      const selected = await open({ directory: true, multiple: false, defaultPath });
+      if (typeof selected === "string") {
+        await conn.request("chat.cwd", { id: chat.id, cwd: selected });
+      }
+    } catch (err) {
+      console.error("Failed to pick working directory:", err);
+    }
+  }, [conn, chat.id]);
+
+  const handleCwdClear = useCallback(async () => {
+    if (!conn) return;
+    try {
+      await conn.request("chat.cwd", { id: chat.id, cwd: null });
+    } catch (err) {
+      console.error("Failed to clear working directory:", err);
+    }
+  }, [conn, chat.id]);
+
+  const cwdFolderName = (chat.cwd || "").split("/").filter(Boolean).pop() ?? "cwd";
+  const cwdLabel = cwdFolderName.length > 12 ? cwdFolderName.slice(0, 9) + "…" : cwdFolderName;
+
   return (
     <div className={styles.inputArea}>
       <ApprovalPopup chatId={chat.id} />
@@ -626,6 +652,17 @@ export default memo(function ChatInput({
 
           </div>
           <div className={styles.toolbarRight}>
+            {(!chat.role || chat.role === "sparky") && (
+              <button
+                className={`${styles.cwdBtn} ${chat.cwd ? styles.cwdBtnActive : ""}`}
+                onClick={handleCwdPick}
+                onContextMenu={(e) => { e.preventDefault(); if (chat.cwd) handleCwdClear(); }}
+                title={chat.cwd ? `Working directory: ${chat.cwd}\nRight-click to clear` : "Set working directory"}
+              >
+                <FolderOpen size={12} strokeWidth={1.5} />
+                <span className={styles.cwdLabel}>{cwdLabel}</span>
+              </button>
+            )}
             <ModeSelector chat={chat} />
             {streaming || sending ? (
               <button className={`${styles.sendBtn} ${styles.stopBtn}`} onClick={onStop} disabled={!streaming}>

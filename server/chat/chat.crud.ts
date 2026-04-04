@@ -148,6 +148,7 @@ export class ChatCrud {
       mode: source.mode,
       role: source.role,
       labels: source.labels,
+      cwd: source.cwd,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -277,6 +278,15 @@ export class ChatCrud {
     if (!chat) throw new Error(`Chat not found: ${data.id}`);
 
     this.log.info("Set chat knowledge", { id: data.id, knowledge: data.knowledge });
+    this.bus.emit("chat.updated", { chat });
+    return { chat };
+  }
+
+  cwd(data: { id: string; cwd: string | null }): { chat: Chat } {
+    const chat = this.db.updateChat(data.id, { cwd: data.cwd || null });
+    if (!chat) throw new Error(`Chat not found: ${data.id}`);
+
+    this.log.info("Set chat cwd", { id: data.id, cwd: data.cwd });
     this.bus.emit("chat.updated", { chat });
     return { chat };
   }

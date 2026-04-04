@@ -12,6 +12,7 @@ export interface Chat {
   archived?: boolean;
   unread?: boolean;
   role?: string;
+  cwd?: string | null;
   labels?: string[];
   createdAt: string;
   updatedAt: string;
