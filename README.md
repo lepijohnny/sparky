@@ -142,7 +142,7 @@ cd server && npx vitest run
 
 | Provider | Auth | Local | Notes |
 |----------|------|-------|-------|
-| **Anthropic** | OAuth / API key | No | Pro/Max or API (key) |
+| **Anthropic** | OAuth / API key | No | API key only (OAuth Pro/Max disabled since 04.04.2026 — ToS change) |
 | **OpenAI** | OAuth / API key | No | ChatGPT (OAuth) or API (key) |
 | **GitHub Copilot** | Device flow | No | Requires Copilot subscription |
 | **Google Gemini** | OAuth | No | Cloud Code Assist endpoint |
