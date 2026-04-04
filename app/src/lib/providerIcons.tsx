@@ -80,6 +80,7 @@ const PROVIDER_ICONS: Record<string, (size: number) => JSX.Element> = {
 function resolveBase(providerId: string): string {
   if (providerId.startsWith("anthropic")) return "anthropic";
   if (providerId.startsWith("openai")) return "openai";
+  if (providerId.startsWith("google")) return "google";
   return providerId;
 }
 
