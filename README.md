@@ -36,7 +36,7 @@
 
 ## Features
 
-- **Multi-provider LLM** — Anthropic Claude, OpenAI ChatGPT, GitHub Copilot, Google Gemini, Mistral, Ollama (local models), more to come
+- **Multi-provider LLM** — Anthropic Claude, OpenAI ChatGPT, GitHub Copilot, Google Gemini, Google AI Studio, Mistral, Ollama (local models), more to come
 - **Skills** — Extensible skill system for specialized agent behaviors
 - **Local knowledge base** — RAG pipeline with hybrid BM25 + vector search + reranker, local embeddings via llama.cpp
 - **Service connections** — Connect APIs (GitHub, Gmail, Telegram, Todoist, etc.) with built-in proxy and approval system
@@ -146,6 +146,7 @@ cd server && npx vitest run
 | **OpenAI** | OAuth / API key | No | ChatGPT (OAuth) or API (key) |
 | **GitHub Copilot** | Device flow | No | Requires Copilot subscription |
 | **Google Gemini** | OAuth | No | Cloud Code Assist endpoint |
+| **Google AI Studio** | API key | No | Gemini models via AI Studio API key |
 | **Mistral** | API key | No | Mistral Large, Medium, Small, Pixtral, Codestral, etc. |
 | **Ollama** | None | Yes | Any GGUF model. Fully offline. |
 | **LM Studio** | None | Yes | Any GGUF model. Fully offline. |
