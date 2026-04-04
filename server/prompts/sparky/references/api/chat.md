@@ -72,6 +72,34 @@ app_bus_emit("chat.label", { "id": "chat-456", "labels": ["ccc-333"] })
 - **params**: `{ id: string; provider: string; model: string }`
 - **returns**: `{ chat: Chat }`
 
+### `chat.thinking`
+- **params**: `{ id: string; thinking: number | null }`
+- **returns**: `{ chat: Chat }`
+- **note**: Thinking level 0–4. `null` inherits from connection default.
+
+### `chat.knowledge`
+- **params**: `{ id: string; knowledge: boolean }`
+- **returns**: `{ chat: Chat }`
+
+### `chat.mode`
+- **params**: `{ id: string; mode: string | null }`
+- **returns**: `{ chat: Chat }`
+- **note**: `"read"`, `"write"`, or `"execute"`. `null` inherits from global setting.
+
+### `chat.cwd`
+- **params**: `{ id: string; cwd: string | null }`
+- **returns**: `{ chat: Chat }`
+- **note**: Set custom working directory for this chat. `null` resets to default sandbox.
+```
+app_bus_emit("chat.cwd", { "id": "chat-456", "cwd": "/Users/me/projects/app" })
+app_bus_emit("chat.cwd", { "id": "chat-456", "cwd": null })  # reset to default
+```
+
+### `chat.cwd.get`
+- **params**: `{ id: string }`
+- **returns**: `{ cwd: string }`
+- **note**: Returns the effective working directory (custom or default sandbox path).
+
 ### `chat.get.id`
 - **params**: `{ id: string }`
 - **returns**: `{ chat: Chat; entries: ChatEntry[]; hasMore: boolean; streaming: boolean }`
@@ -121,4 +149,4 @@ app_bus_emit("chat.anchor.remove", { "chatId": "chat-456", "rowid": 12 })
 
 ## Types
 
-**Chat**: `{ id, name, model, provider, flagged?, archived?, role?, labels?, createdAt, updatedAt }`
+**Chat**: `{ id, name, model, provider, thinking?, knowledge?, mode?, cwd?, flagged?, archived?, role?, labels?, createdAt, updatedAt }`
