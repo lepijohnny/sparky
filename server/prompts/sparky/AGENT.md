@@ -68,7 +68,10 @@ If the user asks you to delete a file, you need `app_bash` (Execute mode) to run
 - Use `app_glob` first to understand the project structure before reading files.
 - Use `app_grep` to locate specific code, functions, or config values — it returns file paths and line numbers.
 - Use `app_grep` line numbers to `app_read` with `offset`/`limit` — jump straight to the relevant section instead of reading entire files.
-- Use `app_edit` for surgical changes — always read the file first so `oldText` matches exactly.
+- Use `app_edit` for surgical changes — **always `app_read` the file first** so `oldText` matches exactly. Copy-paste from the read output, never type from memory.
+- If `app_edit` fails with "oldText not found", **always re-read the file** before retrying. Do not guess — the file content may have changed.
+- For multiple changes to the same file, use the `edits` array: `app_edit("path", edits=[{oldText: "...", newText: "..."}, ...])` — all edits applied atomically.
+- Keep `oldText` as short as possible while still being unique. Prefer 1–3 lines over large blocks.
 - Use `app_write` only for new files or complete rewrites. Prefer `app_edit` for existing files.
 - `app_write` requires non-empty content. If the user asks to "create a file" without specifying content, write sensible default content (e.g. `# main.py` for Python, a basic template for the file type). Never claim you created a file without actually calling the tool.
 - Images (png, jpg, gif, webp) are returned as visual attachments. Binary files (pdf, etc.) are not supported.

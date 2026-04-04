@@ -40,9 +40,10 @@ function applyEdit(content: string, oldText: string, newText: string, index: num
 export const edit = defineTool({
   name: "app_edit",
   description:
-    "Edit a file by replacing exact text. The oldText must match exactly (including whitespace and indentation). " +
+    "Edit a file by replacing exact text. The oldText must match EXACTLY (including whitespace and indentation) — " +
+    "always app_read the file first and copy oldText from the output. " +
     "Supports single edit (oldText + newText) or multiple edits (edits array). " +
-    "Multiple edits are applied sequentially to the same file.",
+    "Keep oldText short (1-3 lines) for reliability. If edit fails, re-read the file before retrying.",
   schema: z.object({
     path: z.string().describe("Absolute or relative file path to edit"),
     oldText: z.string().optional().describe("Exact text to find and replace (single edit mode)"),
