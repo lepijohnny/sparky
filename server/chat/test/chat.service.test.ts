@@ -264,7 +264,7 @@ describe("chat.service", () => {
 
     const result = await bus.emit("svc.call", { service: "unknown", action: "get_user" });
 
-    expect(result).toContain("not registered");
+    expect(result).toContain("not found");
   });
 
   test("given svc.delete, when service exists, then removes from config and clears credentials", async () => {
