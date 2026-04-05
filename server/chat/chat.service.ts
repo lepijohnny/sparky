@@ -70,8 +70,40 @@ export function createSvcCrud(
   }
 
   function findDef(id: string): ServiceDef | undefined {
+    const lower = id.toLowerCase();
     return staged.get(id)
-      ?? (config.get("services") ?? []).find((s) => s.id === id);
+      ?? staged.get(lower)
+      ?? (config.get("services") ?? []).find((s) => s.id === id || s.id === lower || s.label.toLowerCase() === lower);
+  }
+
+  function findDefOrSuggest(id: string): { def: ServiceDef } | { error: string } {
+    const def = findDef(id);
+    if (def) return { def };
+
+    const lower = id.toLowerCase();
+    const all = [...staged.values(), ...(config.get("services") ?? [])];
+    const dedup = (list: ServiceDef[]) => {
+      const seen = new Set<string>();
+      return list.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+    };
+
+    const similar = dedup(all.filter((s) => {
+      const haystack = `${s.id} ${s.label} ${s.description ?? ""}`.toLowerCase();
+      return haystack.includes(lower) || lower.includes(s.id.toLowerCase());
+    }));
+
+    if (similar.length > 0) {
+      const list = similar.map((s) => `- "${s.id}" (${s.label})`).join("\n");
+      return { error: `Service "${id}" not found. Did you mean one of these?\n${list}` };
+    }
+
+    const unique = dedup(all);
+    if (unique.length > 0) {
+      const list = unique.map((s) => `- "${s.id}" (${s.label})`).join("\n");
+      return { error: `Service "${id}" not found. Available services:\n${list}` };
+    }
+
+    return { error: `Service "${id}" not found. No services are registered.` };
   }
 
   async function persistDef(def: ServiceDef): Promise<void> {
@@ -176,8 +208,9 @@ export function createSvcCrud(
   });
 
   bus.on("svc.describe", (data) => {
-    const def = findDef(data.service);
-    if (!def) return { error: `Service "${data.service}" not found` };
+    const result = findDefOrSuggest(data.service);
+    if ("error" in result) return result;
+    const def = result.def;
 
     return {
       id: def.id,
@@ -203,8 +236,9 @@ export function createSvcCrud(
   });
 
   bus.on("svc.test", async (data) => {
-    const def = findDef(data.service);
-    if (!def) return { ok: false, error: `Service "${data.service}" not found.` };
+    const lookup = findDefOrSuggest(data.service);
+    if ("error" in lookup) return { ok: false, error: lookup.error };
+    const def = lookup.def;
 
     const ep = def.endpoints[0];
     if (!ep) return { ok: false, error: "No endpoints defined." };
@@ -257,11 +291,12 @@ export function createSvcCrud(
   bus.on("svc.call", async (data) => {
     const { action, params } = normalizeCallData(data as Record<string, unknown>);
     log.info("Proxy request", { service: data.service, action, params: Object.keys(params) });
-    const def = findDef(data.service);
-    if (!def) {
+    const lookup = findDefOrSuggest(data.service);
+    if ("error" in lookup) {
       log.warn("Proxy: service not found", { service: data.service });
-      return `Service "${data.service}" not registered. Ask the user to set it up.`;
+      return lookup.error;
     }
+    const def = lookup.def;
 
     try {
       const router = getRouter(def);
