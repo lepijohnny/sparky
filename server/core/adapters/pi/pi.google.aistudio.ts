@@ -108,7 +108,7 @@ export function createPiGoogleAIStudioAdapter(
           return events.length > 0 ? events : undefined;
         };
 
-        return createPiAgent({ model, apiKey: token, thinkingLevel, log, onPayload, onContentBlock, nudgeToolUse: true });
+        return createPiAgent({ model, apiKey: token, thinkingLevel, log, onPayload, onContentBlock, nudgeToolUse: true, thinkingBudgets: { minimal: 512 } });
       };
 
       const inner: Agent = {

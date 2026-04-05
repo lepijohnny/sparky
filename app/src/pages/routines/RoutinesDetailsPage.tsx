@@ -1,5 +1,6 @@
 import { Clock, ExternalLink, Play, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ModelSelector from "../../components/chat/ModelSelector";
 import { useConnection } from "../../context/ConnectionContext";
 import { useToasts } from "../../context/ToastContext";
 import { useStore } from "../../store";
@@ -53,6 +54,12 @@ export default function RoutinesDetailsPage({ routineId, onOpenChat, onEditAssis
   const routine = routines.find((r) => r.id === routineId) as (Routine & { action: RoutineAction }) | undefined ?? null;
   const runs = useStore((s) => s.routineRuns[routineId] ?? []) as RoutineRun[];
 
+  const llmConnections = useStore((s) => s.llmConnections);
+  const providers = useStore((s) => s.providers);
+  const defaultConn = useStore((s) => s.getDefaultConn());
+  const defaultProvider = defaultConn?.provider ?? "";
+  const defaultModel = defaultConn?.model ?? "";
+
   const [draft, setDraft] = useState(() =>
     routine?.action?.type === "chat" ? routine.action.prompt ?? "" : ""
   );
@@ -85,6 +92,14 @@ export default function RoutinesDetailsPage({ routineId, onOpenChat, onEditAssis
     await conn.request("routine.delete", { id: routine.id });
     onDeleted?.();
   }, [conn, routine, onDeleted]);
+
+  const handleModelChange = useCallback(async (provider: string, model: string) => {
+    if (!conn || !routine) return;
+    await conn.request("routine.update", {
+      id: routine.id,
+      action: { ...routine.action, provider, model },
+    });
+  }, [conn, routine]);
 
   const handleSavePrompt = useCallback(async () => {
     if (!conn || !routine || !draft.trim() || draft === routine.action.prompt) return;
@@ -156,6 +171,17 @@ export default function RoutinesDetailsPage({ routineId, onOpenChat, onEditAssis
       <div className={`${sharedStyles.card} ${styles.actionCard}`}>
         <div className={sharedStyles.cardHeader}>
           <div className={styles.cardHeaderLeft}>Action</div>
+          {routine.action.type === "chat" && (
+            <div className={`${styles.cardHeaderRight} ${styles.modelPicker}`}>
+              <ModelSelector
+                connections={llmConnections}
+                providers={providers}
+                activeProvider={routine.action.provider || defaultProvider}
+                activeModel={routine.action.model || defaultModel}
+                onChange={handleModelChange}
+              />
+            </div>
+          )}
         </div>
         <div className={styles.actionBody}>
           <div className={styles.actionType}>{routine.action.type}</div>
@@ -172,9 +198,7 @@ export default function RoutinesDetailsPage({ routineId, onOpenChat, onEditAssis
               rows={6}
             />
           )}
-          {routine.action.model && (
-            <div className={styles.model}>{routine.action.model}</div>
-          )}
+
         </div>
         {routine.action.type === "chat" && routine.action.prompt && (
           <div className={styles.promptActions}>

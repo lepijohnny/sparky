@@ -39,6 +39,7 @@ interface Props {
   activeModel: string;
   onChange: (provider: string, model: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
 export default memo(function ModelSelector({
@@ -48,6 +49,7 @@ export default memo(function ModelSelector({
   activeModel,
   onChange,
   disabled,
+  placeholder = "Select model",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [focusIdx, setFocusIdx] = useState(-1);
@@ -181,7 +183,7 @@ export default memo(function ModelSelector({
           {getProviderIcon(activeProvider, 14)}
         </span>
         <span className={styles.triggerLabel}>
-          {activeLabel ?? "Select model"}
+          {activeLabel ?? placeholder}
           {activeOption?.model.contextWindow && (
             <span className={styles.contextBadge}>
               {formatContextWindow(activeOption.model.contextWindow)}

@@ -89,6 +89,7 @@ export interface PiAgentOptions {
   onPayload?: (payload: unknown, model: Model<Api>) => unknown | undefined | Promise<unknown | undefined>;
   onContentBlock?: ContentBlockHandler;
   nudgeToolUse?: boolean;
+  thinkingBudgets?: Record<string, number>;
 }
 
 export interface PendingToolCall {
@@ -192,6 +193,7 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
         signal: turn.cancellation,
         ...(THINKING_LEVELS[opts.thinkingLevel] ? { reasoning: THINKING_LEVELS[opts.thinkingLevel] } : {}),
         ...(opts.onPayload ? { onPayload: opts.onPayload } : {}),
+        ...(opts.thinkingBudgets ? { thinkingBudgets: opts.thinkingBudgets } : {}),
       };
 
       try {
