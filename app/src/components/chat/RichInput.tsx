@@ -121,6 +121,61 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
     }
   }, []);
 
+  const syncCursorFromDOM = useCallback(() => {
+    const el = divRef.current;
+    if (!el) return;
+    const sel = window.getSelection();
+    if (!sel || !sel.anchorNode) return;
+
+    const segs = model.current.segments;
+    let node: Node | null = sel.anchorNode;
+    let domOff = sel.anchorOffset;
+
+    if (node === el) {
+      const children = el.childNodes;
+      if (domOff >= children.length) {
+        node = children[children.length - 1] ?? null;
+        domOff = node?.textContent?.length ?? 0;
+      } else {
+        node = children[domOff];
+        domOff = 0;
+      }
+    }
+
+    if (!node) return;
+
+    let segIdx = 0;
+    let charOff = 0;
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    let current: Node | null = walker.firstChild();
+    let textRunOffset = 0;
+
+    while (current) {
+      if (current.nodeType === Node.TEXT_NODE) {
+        if (current === node || current === sel.anchorNode) {
+          charOff = textRunOffset + domOff;
+          break;
+        }
+        textRunOffset += current.textContent?.length ?? 0;
+      } else if (current instanceof HTMLBRElement) {
+        textRunOffset += 1;
+      } else if (current instanceof HTMLElement && current.dataset.chip) {
+        if (current === node || current.contains(sel.anchorNode)) {
+          segIdx += 1;
+          charOff = 0;
+          break;
+        }
+        segIdx += 2;
+        textRunOffset = 0;
+      }
+      current = walker.nextNode();
+    }
+
+    if (segIdx < segs.length) {
+      model.current.cursor = { seg: segIdx, offset: charOff };
+    }
+  }, []);
+
   const closeTrigger = useCallback(() => {
     triggerActive.current = false;
     onTrigger(null);
@@ -511,6 +566,11 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
       return;
     }
 
+    if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !e.shiftKey) {
+      requestAnimationFrame(syncCursorFromDOM);
+      return;
+    }
+
     if (e.key === "ArrowLeft" && !e.shiftKey) {
       e.preventDefault();
       moveCursorLeft();
@@ -536,7 +596,7 @@ export default memo(forwardRef<RichInputHandle, RichInputProps>(function RichInp
       render();
       return;
     }
-  }, [onSend, moveCursorLeft, moveCursorRight, render]);
+  }, [onSend, moveCursorLeft, moveCursorRight, render, syncCursorFromDOM]);
 
   const deleteSelectionRange = useCallback((): boolean => {
     const sel = window.getSelection();
