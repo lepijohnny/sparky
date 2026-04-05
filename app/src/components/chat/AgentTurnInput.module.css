@@ -215,31 +215,37 @@
   gap: 12px;
 }
 
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbarRight > * {
+  min-width: 88px;
+}
+
 .toolbarLeft {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.toolbarRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+
 
 .sendBtn {
   appearance: none;
   background: var(--accent);
   border: none;
-  border-radius: 8px;
-  padding: 7px 14px;
+  border-radius: 6px;
+  padding: 4px 10px;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 11px;
   font-family: inherit;
   font-weight: 500;
   transition: opacity 150ms ease;
@@ -475,8 +481,9 @@
   -webkit-appearance: none;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 4px 8px 4px 10px;
+  padding: 4px 10px;
   border-radius: 6px;
   background: var(--bg-overlay);
   border: 1px solid var(--border);
@@ -484,7 +491,7 @@
   outline: none;
   transition: border-color 150ms ease, background 150ms ease;
   color: var(--fg-muted);
-  width: 110px;
+  font-size: 11px;
 }
 
 .cwdBtn:hover {
