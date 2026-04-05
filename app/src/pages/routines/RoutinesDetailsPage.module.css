@@ -233,6 +233,14 @@
   margin-top: 6px;
 }
 
+.modelRow {
+  margin-top: 8px;
+}
+
+.modelPicker {
+  margin-left: auto;
+}
+
 .runsBody {
   padding: 12px 20px;
   max-height: 120px;

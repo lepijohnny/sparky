@@ -82,19 +82,25 @@ export class ChatCrud {
     return { chats };
   }
 
-  create(data?: { name?: string; unread?: boolean }): { chat: Chat } {
+  create(data?: { name?: string; unread?: boolean; provider?: string; model?: string }): { chat: Chat } {
     const llmDefault = this.config.get("llmDefault");
     const llms = this.config.get("llms") ?? [];
     const defaultConn = llms.find((c) => c.id === llmDefault?.id);
 
+    const resolvedProvider = data?.provider || defaultConn?.provider || "";
+    const resolvedModel = data?.model || defaultConn?.model || "";
+    const resolvedConn = data?.provider
+      ? llms.find((c) => c.provider === data.provider) ?? defaultConn
+      : defaultConn;
+
     const chat: Chat = {
       id: crypto.randomUUID(),
       name: data?.name ?? "New Chat",
-      model: defaultConn?.model ?? "",
-      provider: defaultConn?.provider ?? "",
-      connectionId: defaultConn?.id,
-      thinking: defaultConn?.thinking ?? null,
-      knowledge: defaultConn?.knowledge !== false,
+      model: resolvedModel,
+      provider: resolvedProvider,
+      connectionId: resolvedConn?.id,
+      thinking: resolvedConn?.thinking ?? null,
+      knowledge: resolvedConn?.knowledge !== false,
       unread: data?.unread !== false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
