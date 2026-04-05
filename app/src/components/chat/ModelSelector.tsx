@@ -100,8 +100,8 @@ export default memo(function ModelSelector({
     const rect = triggerRef.current.getBoundingClientRect();
     setPos({
       bottom: window.innerHeight - rect.top + 4,
-      left: rect.left,
-      minWidth: 220,
+      right: window.innerWidth - rect.right,
+      width: 280,
     });
     setFocusIdx(activeIdx >= 0 ? activeIdx : 0);
   }, [open]);
