@@ -5,14 +5,13 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 4px 8px 4px 10px;
+  padding: 4px 10px;
   border-radius: 6px;
   background: var(--bg-overlay);
   border: 1px solid var(--border);
   cursor: pointer;
   outline: none;
   transition: border-color 150ms ease, background 150ms ease;
-  width: 88px;
 }
 
 .trigger:hover {
