@@ -184,6 +184,58 @@ expect(useStore.getState().chats).toHaveLength(1);
 
 **Test files** live next to source in `test/` subdirectories.
 
+## Design Decisions
+
+### Toolbar Layout
+
+The chat input toolbar is a horizontal bar below the RichInput text area:
+
+```
+[toolbarLeft: attach, knowledge, thinking, model] ---- [toolbarRight: CWD, Mode, Send]
+```
+
+- **CWD, Mode, Send** buttons are uniform: same `padding: 4px 10px`, `font-size: 11px`, `border-radius: 6px`, `min-width: 88px`, centered content.
+- All three use `background: var(--bg-overlay)` with `border: 1px solid var(--border)` (Send uses `var(--accent)` background).
+- Buttons stay in a **horizontal row** on the right side — not stacked vertically.
+
+### Dropdown/Popover Positioning
+
+All selector dropdowns (ModelSelector, ModeSelector, ThinkingSelector) open **above** the trigger button using `bottom` positioning:
+
+```ts
+setPos({
+  bottom: window.innerHeight - rect.top + 4,
+  right: window.innerWidth - rect.right,
+  width: 280,
+});
+```
+
+**Rules:**
+- Use `useLayoutEffect` with `[open]` dependency only — not `activeIdx`, not refs.
+- Never put `ref.current` in a dependency array — React doesn't track ref mutations; the effect won't re-fire when the ref is assigned after mount.
+- Never add a `useEffect` that reads `listRef.current` for repositioning — the ref is `null` on first render when `open` becomes `true`, causing the dropdown to never appear.
+- Position is calculated once when opening. No dynamic repositioning needed.
+- Anchor to `right` edge (not `left`) so dropdowns align with the right-side toolbar buttons.
+
+### RichInput Cursor Sync
+
+The RichInput uses a custom cursor model (`model.current.cursor`) that tracks position as `{ seg, offset }` within segments.
+
+- **Left/Right arrows**: handled with `e.preventDefault()` + custom `moveCursorLeft`/`moveCursorRight` that update `model.current.cursor`.
+- **Up/Down arrows**: delegated to browser native behavior, then `syncCursorFromDOM` runs on `requestAnimationFrame` to read the DOM selection back into `model.current.cursor`.
+- **Mouse clicks**: `handleClick` reads DOM selection and syncs `model.current.cursor` immediately.
+
+This ensures Left/Right always use the correct position after Up/Down or mouse navigation.
+
+### State in Selectors
+
+Selector components (ModelSelector, ModeSelector, ThinkingSelector) use **local `useState`/`useEffect`** for:
+- `open` (dropdown visibility)
+- `pos` (dropdown position)
+- `focusIdx` (keyboard navigation index)
+
+This is component-local UI state — not shared. Do not move to Zustand.
+
 ## Conventions
 
 - **CSS Modules** for all component styles (`.module.css`).
