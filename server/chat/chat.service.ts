@@ -82,22 +82,24 @@ export function createSvcCrud(
 
     const lower = id.toLowerCase();
     const all = [...staged.values(), ...(config.get("services") ?? [])];
-    const seen = new Set<string>();
-    const similar = all.filter((s) => {
-      if (seen.has(s.id)) return false;
-      seen.add(s.id);
+    const dedup = (list: ServiceDef[]) => {
+      const seen = new Set<string>();
+      return list.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+    };
+
+    const similar = dedup(all.filter((s) => {
       const haystack = `${s.id} ${s.label} ${s.description ?? ""}`.toLowerCase();
       return haystack.includes(lower) || lower.includes(s.id.toLowerCase());
-    });
+    }));
 
     if (similar.length > 0) {
       const list = similar.map((s) => `- "${s.id}" (${s.label})`).join("\n");
       return { error: `Service "${id}" not found. Did you mean one of these?\n${list}` };
     }
 
-    if (all.length > 0) {
-      const list = all.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; })
-        .map((s) => `- "${s.id}" (${s.label})`).join("\n");
+    const unique = dedup(all);
+    if (unique.length > 0) {
+      const list = unique.map((s) => `- "${s.id}" (${s.label})`).join("\n");
       return { error: `Service "${id}" not found. Available services:\n${list}` };
     }
 

@@ -267,6 +267,62 @@ describe("chat.service", () => {
     expect(result).toContain("not found");
   });
 
+  test("given svc.describe with wrong casing, when called, then finds service by case-insensitive id", async () => {
+    config.data.services = [makeDef({ id: "telegram", label: "Telegram" })];
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
+
+    const result = await bus.emit("svc.describe", { service: "Telegram" }) as any;
+
+    expect(result.id).toBe("telegram");
+  });
+
+  test("given svc.describe with label match, when called, then finds service by label", async () => {
+    config.data.services = [makeDef({ id: "tg_bot", label: "Telegram Bot" })];
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
+
+    const result = await bus.emit("svc.describe", { service: "telegram bot" }) as any;
+
+    expect(result.id).toBe("tg_bot");
+  });
+
+  test("given svc.describe with partial match, when called, then suggests similar services", async () => {
+    config.data.services = [
+      makeDef({ id: "telegram", label: "Telegram" }),
+      makeDef({ id: "slack", label: "Slack" }),
+    ];
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
+
+    const result = await bus.emit("svc.describe", { service: "tele" }) as any;
+
+    expect(result.error).toContain("not found");
+    expect(result.error).toContain("telegram");
+    expect(result.error).not.toContain("slack");
+  });
+
+  test("given svc.describe with no match, when called, then lists all available services", async () => {
+    config.data.services = [
+      makeDef({ id: "telegram", label: "Telegram" }),
+      makeDef({ id: "slack", label: "Slack" }),
+    ];
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
+
+    const result = await bus.emit("svc.describe", { service: "xyz_nothing" }) as any;
+
+    expect(result.error).toContain("not found");
+    expect(result.error).toContain("telegram");
+    expect(result.error).toContain("slack");
+  });
+
+  test("given svc.call with wrong casing, when called, then finds and calls service", async () => {
+    config.data.services = [makeDef({ id: "telegram", label: "Telegram" })];
+    createSvcCrud(bus, config, noopLogger, mockCred, mockStorage);
+    fetchSpy.mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const result = await bus.emit("svc.call", { service: "Telegram", action: "get_user", params: {} }) as any;
+
+    expect(result).not.toContain("not found");
+  });
+
   test("given svc.delete, when service exists, then removes from config and clears credentials", async () => {
     config.data.services = [makeDef()];
     const cred = { ...mockCred, deleteSvc: vi.fn() };
