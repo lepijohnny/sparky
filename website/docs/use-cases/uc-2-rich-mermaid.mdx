@@ -1,13 +1,22 @@
 ---
 sidebar_position: 2
-description: "Use case: Generate Mermaid diagrams, ECharts, and sortable tables in conversations."
-sidebar_label: Mermaid, Echarts and Tables
+description: "Use case: Generate Mermaid diagrams, ECharts, sortable tables, and HTML previews in conversations."
+sidebar_label: Mermaid, Echarts, Tables and HTML
 ---
 
 <span className="section-label">Use Cases</span>
 
-# Mermaid, Echarts and Tables
+# Mermaid, Echarts, Tables and HTML
 
 <p className="header-description">Coming soon.</p>
 
 <video src={require('../assets/uc/rich-output.mp4').default} autoPlay muted loop playsInline style={{maxWidth: '700px', width: '100%'}} />
+
+## HTML Preview
+
+When an LLM responds with an HTML code block (` ```html `), Sparky renders it as a **live preview** instead of showing raw code. This works for both full HTML documents and partial snippets.
+
+- **Live preview** — HTML is rendered in a sandboxed iframe with auto-resizing
+- **Source toggle** — Switch between the rendered preview and syntax-highlighted source code
+- **Safe by default** — `<script>` tags and inline event handlers are stripped before rendering
+- **Print-friendly** — When printing a conversation, HTML blocks render as inline content instead of iframes
