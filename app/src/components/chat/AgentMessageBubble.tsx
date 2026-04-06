@@ -32,6 +32,7 @@ import { mermaidRenderer } from "../../lib/renderers/mermaidRenderer";
 import { latexRenderer } from "../../lib/renderers/latexRenderer";
 import { tableRenderer } from "../../lib/renderers/tableRenderer";
 import { chartRenderer } from "../../lib/renderers/chartRenderer";
+import { htmlRenderer } from "../../lib/renderers/htmlRenderer";
 import { useStreamDrip } from "../../hooks/useStreamDrip";
 import type { ChatActivity } from "../../types/chat";
 import {
@@ -340,6 +341,7 @@ const AgentMessageBubble = memo(
       map.set("table", tableRenderer);
       map.set("chart", chartRenderer);
       map.set("echart", chartRenderer);
+      map.set("html", htmlRenderer);
       return map;
     }, [searchQuery]);
 
