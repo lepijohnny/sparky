@@ -51,7 +51,10 @@
 }
 
 .printWrap {
+  position: relative;
   overflow: hidden;
+  contain: layout style paint;
+  transform: translateZ(0);
 }
 
 @media print {

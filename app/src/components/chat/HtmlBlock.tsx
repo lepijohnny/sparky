@@ -37,6 +37,12 @@ function wrapSnippet(snippet: string): string {
 <body>${snippet}</body></html>`;
 }
 
+const FIXED_RE = /position\s*:\s*(fixed|sticky)/gi;
+
+function neutralizePositioning(css: string): string {
+  return css.replace(FIXED_RE, "position: relative");
+}
+
 function extractPrintHtml(html: string): string {
   const safe = stripScripts(html);
 
@@ -44,11 +50,14 @@ function extractPrintHtml(html: string): string {
   let match: RegExpExecArray | null;
   const re = new RegExp(STYLE_RE.source, STYLE_RE.flags);
   while ((match = re.exec(safe)) !== null) {
-    styleBlocks.push(match[1]);
+    styleBlocks.push(neutralizePositioning(match[1]));
   }
 
   const bodyMatch = BODY_RE.exec(safe);
-  const body = bodyMatch ? bodyMatch[1] : safe;
+  let body = bodyMatch ? bodyMatch[1] : safe;
+  body = body.replace(/style\s*=\s*"([^"]*)"/gi, (_m, inner: string) =>
+    `style="${neutralizePositioning(inner)}"`
+  );
 
   if (styleBlocks.length > 0) {
     return `<style>${styleBlocks.join("\n")}</style>${body}`;
@@ -63,7 +72,7 @@ const HtmlBlock = memo(function HtmlBlock({ code }: HtmlBlockProps) {
   const [height, setHeight] = useState(300);
 
   const srcDoc = useMemo(() => {
-    const safe = stripScripts(code);
+    const safe = neutralizePositioning(stripScripts(code));
     const doc = FULL_DOC_RE.test(safe) ? safe : wrapSnippet(safe);
     if (doc.includes("</body>")) {
       return doc.replace("</body>", RESIZE_SCRIPT + "</body>");
