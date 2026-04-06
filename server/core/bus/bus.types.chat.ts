@@ -43,6 +43,8 @@ export interface ChatEvents {
   "chat.updated":             { req: { chat: Chat }; res: void };
   "chat.deleted":             { req: { id: string }; res: void };
   "chat.event":               { req: ChatEvent; res: void };
+  "chat.summary.started":     { req: { chatId: string }; res: void };
+  "chat.summary.done":        { req: { chatId: string; coversUpTo: number }; res: void };
 
   "tool.approval.pending":    { req: { chatId: string }; res: PendingApprovalInfo | null };
   "tool.approval.request":    { req: { requestId: string; chatId: string; type: "confirm:yesno" | "input:credentials" | "input:oauth"; message: string; scope: string; tool: string; target: string; canPersist: boolean; alwaysAsk?: boolean; timeoutMs: number; remainingMs: number; description?: string; fields?: { name: string; label: string; type: string }[]; link?: string; oauth?: { authUrl: string; tokenUrl: string; scopes: string[]; tokenKey: string } }; res: void };

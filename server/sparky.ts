@@ -276,6 +276,8 @@ export function createSparky(): Sparky {
   bus.subscribe("chat.updated", (data) => broadcast("chat.updated", data));
   bus.subscribe("chat.deleted", (data) => broadcast("chat.deleted", data));
   bus.subscribe("chat.event", (data: any) => broadcast("chat.event", data));
+  bus.subscribe("chat.summary.started", (data) => broadcast("chat.summary.started", data));
+  bus.subscribe("chat.summary.done", (data) => broadcast("chat.summary.done", data));
   bus.subscribe("tool.approval.request", (data: any) => broadcast("tool.approval.request", data));
   bus.subscribe("tool.approval.dismissed", (data: any) => broadcast("tool.approval.dismissed", data));
 

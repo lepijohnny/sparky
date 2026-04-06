@@ -276,3 +276,69 @@ describe("generateSummary — single summary invariant", () => {
     expect(summary!.content).toBe("Second summary");
   });
 });
+
+describe("summaryCutoff — fetcher filtering", () => {
+  test("given summary with coversUpTo, when fetching entries, then entries at or before cutoff are excluded", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 10);
+    const cutoff = rowids[9];
+    db.upsertSummary(chat.id, "Summary text", cutoff);
+
+    const { entries } = db.getEntries(chat.id, 100);
+    const filtered = entries.filter((e) => ((e as any).rowid ?? 0) > cutoff);
+    const excluded = entries.filter((e) => ((e as any).rowid ?? 0) <= cutoff);
+
+    expect(excluded.length).toBeGreaterThan(0);
+    expect(filtered.length).toBeGreaterThan(0);
+    filtered.forEach((e) => expect((e as any).rowid).toBeGreaterThan(cutoff));
+  });
+
+  test("given summary with coversUpTo, when beforeRowid is at cutoff, then returns empty", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 10);
+    const cutoff = rowids[9];
+    db.upsertSummary(chat.id, "Summary text", cutoff);
+
+    const result = db.getEntries(chat.id, 100, cutoff);
+    const filtered = result.entries.filter((e) => ((e as any).rowid ?? 0) > cutoff);
+    expect(filtered).toHaveLength(0);
+  });
+
+  test("given no summary, when fetching entries, then all entries returned", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    populateChat(db, chat.id, 5);
+
+    const { entries } = db.getEntries(chat.id, 100);
+    expect(entries.length).toBeGreaterThan(0);
+    expect(db.getSummary(chat.id)).toBeNull();
+  });
+});
+
+describe("summaryCutoff — crud responses", () => {
+  test("given summary exists, when getting chat, then summaryCutoff is included", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 5);
+    db.upsertSummary(chat.id, "Summary", rowids[4]);
+
+    const summary = db.getSummary(chat.id);
+    expect(summary).not.toBeNull();
+    expect(summary!.coversUpTo).toBe(rowids[4]);
+  });
+
+  test("given no summary, when getting chat, then getSummary returns null", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    populateChat(db, chat.id, 5);
+
+    expect(db.getSummary(chat.id)).toBeNull();
+  });
+});

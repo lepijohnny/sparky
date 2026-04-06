@@ -346,6 +346,7 @@ export class ChatConversation {
 
     this.activeSummarizations.add(chatId);
     this.log.info("Summarization triggered", { chatId, lastKnownMemoryId: ctx.lastKnownMemoryId });
+    this.bus.emit("chat.summary.started", { chatId });
 
     try {
       const resolved = await this.defaultAgentFactory(chatId);
@@ -355,6 +356,10 @@ export class ChatConversation {
       }
 
       await generateSummary(this.db, resolved.agent, chatId, ctx.lastKnownMemoryId!, this.log);
+      const summary = this.db.getSummary(chatId);
+      if (summary) {
+        this.bus.emit("chat.summary.done", { chatId, coversUpTo: summary.coversUpTo });
+      }
     } finally {
       this.activeSummarizations.delete(chatId);
     }

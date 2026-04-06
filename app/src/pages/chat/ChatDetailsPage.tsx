@@ -110,6 +110,18 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     setModelGeneration((g) => g + 1);
   }, []));
 
+  const { addToast: addSummaryToast } = useToasts();
+  useWsSubscriber<{ chatId: string }>(conn, "chat.summary.started", useCallback((data) => {
+    if (data.chatId === chat.id) addSummaryToast({ id: `summary-start-${Date.now()}`, kind: "info", title: "Summarizing conversation…" });
+  }, [chat.id, addSummaryToast]));
+
+  useWsSubscriber<{ chatId: string; coversUpTo: number }>(conn, "chat.summary.done", useCallback((data) => {
+    if (data.chatId === chat.id) {
+      addSummaryToast({ id: `summary-done-${Date.now()}`, kind: "success", title: "Summary complete" });
+      setSummaryCutoff(data.coversUpTo);
+    }
+  }, [chat.id, addSummaryToast]));
+
   const onStreamEntry = useCallback((entry: ChatEntry) => {
     if (entry.kind === "message") {
       if (entry.role === "user" && optimisticIdRef.current) {
