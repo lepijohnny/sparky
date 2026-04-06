@@ -1,4 +1,5 @@
 import {
+  Fragment,
   memo,
   useCallback,
   useEffect,
@@ -83,6 +84,7 @@ const modelCache = new Map<string, { provider: string; model: string; label: str
 export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPageProps) {
   const { conn } = useConnection();
   const [entries, setEntries] = useState<ChatEntry[]>([]);
+  const [summaryCutoff, setSummaryCutoff] = useState<number | undefined>();
   const [ready, setReady] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const loadingMoreRef = useRef(false);
@@ -181,7 +183,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     });
 
     connRef.current?.request("chat.entries", { chatId: chatIdRef.current })
-      .then((data: any) => { if (data?.entries) setEntries(data.entries); })
+      .then((data: any) => { if (data?.entries) { setEntries(data.entries); setSummaryCutoff(data.summaryCutoff); } })
       .catch(() => {});
   }, []);
 
@@ -296,6 +298,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
   useEffect(() => {
     if (!loaded) return;
     setEntries(loaded.entries);
+    setSummaryCutoff((loaded as any).summaryCutoff);
     setHasMore(loaded.hasMore);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -321,6 +324,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
         .then((data: any) => {
           if (data?.entries) {
             setEntries(data.entries);
+            setSummaryCutoff(data.summaryCutoff);
             setHasMore(false);
           }
         })
@@ -573,27 +577,44 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
           <div className={styles.empty} />
         ) : (
           <div className={styles.inner} ref={innerRef}>
-            {messages.map((msg) =>
-              msg.role === "user" ? (
-                <div key={msg.id} data-rowid={msg.rowid}>
-                  <UserBubble
-                    message={msg}
-                    searchQuery={searchQuery}
-                    onToggleAnchor={handleToggleAnchor}
-                  />
-                </div>
-              ) : (
-                <div
-                  key={msg.id}
-                  data-rowid={msg.rowid}
-                  className={`${styles.message} ${styles.messageAssistant}`}
-                >
-                  <ErrorBoundary fallback={<div className={styles.bubbleError}>Failed to render message</div>}>
-                    <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} onBranch={handleBranch} onEdit={handleEdit} onDeleteTurn={handleDeleteTurn} />
-                  </ErrorBoundary>
-                </div>
-              )
-            )}
+            {messages.map((msg, idx) => {
+              let showCutoff = false;
+              if (summaryCutoff != null && msg.rowid != null && msg.rowid > summaryCutoff) {
+                let prevRowid: number | undefined;
+                for (let j = idx - 1; j >= 0; j--) {
+                  if (messages[j].rowid != null) { prevRowid = messages[j].rowid; break; }
+                }
+                showCutoff = prevRowid != null && prevRowid <= summaryCutoff;
+              }
+              return (
+                <Fragment key={`${msg.id}-${idx}`}>
+                  {showCutoff && (
+                    <div className={styles.summaryCutoff}>
+                      <span>summary cutoff</span>
+                    </div>
+                  )}
+                  {msg.role === "user" ? (
+                    <div data-rowid={msg.rowid}>
+                      <UserBubble
+                        message={msg}
+                        searchQuery={searchQuery}
+                        onToggleAnchor={handleToggleAnchor}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      data-rowid={msg.rowid}
+                      className={`${styles.message} ${styles.messageAssistant}`}
+                    >
+                      <ErrorBoundary fallback={<div className={styles.bubbleError}>Failed to render message</div>}>
+                        <AgentMessageBubble message={msg} role={chat.role} searchQuery={searchQuery} onToggleAnchor={handleToggleAnchor} onBranch={handleBranch} onEdit={handleEdit} onDeleteTurn={handleDeleteTurn} />
+                      </ErrorBoundary>
+                    </div>
+                  )}
+                </Fragment>
+              );
+            })}
+
             {stream.active && (
               <div className={`${styles.message} ${styles.messageAssistant}`}>
                 <AgentMessageBubble

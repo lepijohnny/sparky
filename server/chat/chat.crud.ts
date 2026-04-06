@@ -316,7 +316,7 @@ export class ChatCrud {
     }
   }
 
-  get(data: { id: string }): { chat: Chat; entries: ChatEntry[]; hasMore: boolean } | null {
+  get(data: { id: string }): { chat: Chat; entries: ChatEntry[]; hasMore: boolean; summaryCutoff?: number } | null {
     const chat = this.db.getChat(data.id);
     if (!chat) return null;
 
@@ -328,15 +328,17 @@ export class ChatCrud {
     const entries = extra.length > 0 ? [...extra, ...recent] : recent;
 
     this.db.enrichWithAttachments(entries, this.workspacePath);
+    const summary = this.db.getSummary(data.id);
 
     this.log.debug("Loaded chat", { id: data.id, entries: entries.length, anchored: anchored.length, hasMore });
-    return { chat, entries, hasMore };
+    return { chat, entries, hasMore, ...(summary ? { summaryCutoff: summary.coversUpTo } : {}) };
   }
 
-  entries(data: { chatId: string; before?: number }): { entries: ChatEntry[]; hasMore: boolean } {
+  entries(data: { chatId: string; before?: number }): { entries: ChatEntry[]; hasMore: boolean; summaryCutoff?: number } {
     const entries = this.db.getAllEntries(data.chatId);
     this.db.enrichWithAttachments(entries, this.workspacePath);
-    return { entries, hasMore: false };
+    const summary = this.db.getSummary(data.chatId);
+    return { entries, hasMore: false, ...(summary ? { summaryCutoff: summary.coversUpTo } : {}) };
   }
 
   anchorAdd(data: { chatId: string; rowid: number }): void {

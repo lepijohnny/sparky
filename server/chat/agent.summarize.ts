@@ -22,12 +22,13 @@ Conversation:
 {MESSAGES}`;
 
 export function shouldSummarize(ctx: ContextResult, existing: ChatSummary | null): boolean {
-  if (!ctx.lastKnownMemoryId || !ctx.hasSkippedEntries) return false;
+  if (!ctx.lastKnownMemoryId) return false;
+  if (ctx.includedTurns < 4) return false;
 
-  const available = ctx.budget.conversationTokens + ctx.budget.remaining;
-  if (available === 0) return false;
+  const used = ctx.budget.total - ctx.budget.remaining;
+  if (ctx.budget.total === 0) return false;
 
-  const usage = ctx.budget.conversationTokens / available;
+  const usage = used / ctx.budget.total;
   if (usage < BUDGET_THRESHOLD) return false;
 
   if (existing && existing.coversUpTo >= ctx.lastKnownMemoryId) return false;
@@ -71,12 +72,24 @@ export async function generateSummary(
   log: Logger,
 ): Promise<void> {
   const existing = db.getSummary(chatId);
+  const firstRowid = db.getFirstUserMessageRowid(chatId) ?? 1;
   const fromRowid = existing && existing.coversUpTo > 0
     ? existing.coversUpTo + 1
-    : db.getFirstUserMessageRowid(chatId) ?? 1;
-  const toRowid = lastKnownMemoryId - 1;
+    : firstRowid;
+  let toRowid = lastKnownMemoryId - 1;
 
-  if (fromRowid > toRowid) return;
+  if (fromRowid > toRowid) {
+    const allEntries = db.getEntriesRange(chatId, firstRowid, Number.MAX_SAFE_INTEGER);
+    const messages = allEntries.filter((e): e is Extract<typeof e, { kind: "message" }> => e.kind === "message");
+    if (messages.length < 4) return;
+    const keepRecent = Math.max(4, Math.floor(messages.length * 0.1));
+    const cutoffIdx = messages.length - keepRecent - 1;
+    if (cutoffIdx < 1) return;
+    const cutoff = (messages[cutoffIdx] as any).rowid as number | undefined;
+    if (!cutoff || cutoff <= fromRowid) return;
+    toRowid = cutoff;
+    log.info("Proactive summarization", { chatId, fromRowid, toRowid, summarized: cutoffIdx + 1, kept: keepRecent, totalMessages: messages.length });
+  }
 
   const entries = db.getEntriesRange(chatId, fromRowid, toRowid);
   if (entries.length === 0) return;

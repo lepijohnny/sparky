@@ -8,6 +8,11 @@ import type { Credentials } from "../../cred";
 import { RecoverableAgent } from "../agent.recoverable";
 import { createPiAgent } from "./pi.agent";
 
+/** Copilot enforces lower input limits than pi-ai's contextWindow for some models */
+const CONTEXT_OVERRIDES: Record<string, number> = {
+  "gpt-4o": 64000,
+};
+
 export function createPiCopilotAdapter(
   credentials: Credentials,
   log: Logger,
@@ -45,7 +50,8 @@ export function createPiCopilotAdapter(
         cachedModels = models.map((m) => ({
           id: m.id,
           label: m.name,
-          contextWindow: m.contextWindow,
+          contextWindow: CONTEXT_OVERRIDES[m.id] ?? m.contextWindow,
+          maxOutputTokens: m.maxTokens,
           supportsThinking: m.reasoning,
           supportsTools: true,
           supportsAttachments: m.input.includes("image")

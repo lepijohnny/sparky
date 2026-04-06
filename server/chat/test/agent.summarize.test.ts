@@ -51,9 +51,9 @@ function makeCtx(overrides: Partial<ContextResult> = {}): ContextResult {
     system: "",
     messages: [],
     budget: {
-      total: 200_000,
-      reserve: 4096,
-      systemTokens: 850,
+      total: 10000,
+      reserve: 0,
+      systemTokens: 0,
       toolTokens: 0,
       anchorTokens: 0,
       summaryTokens: 0,
@@ -73,28 +73,33 @@ function makeCtx(overrides: Partial<ContextResult> = {}): ContextResult {
 }
 
 describe("shouldSummarize — trigger logic", () => {
-  test("given 80% usage and skipped entries, when checking, then returns true", () => {
-    const ctx = makeCtx({ budget: { ...makeCtx().budget, conversationTokens: 8000, remaining: 2000 } });
+  test("given 80% total usage and skipped entries, when checking, then returns true", () => {
+    const ctx = makeCtx({ budget: { ...makeCtx().budget, total: 10000, remaining: 2000 } });
     expect(shouldSummarize(ctx, null)).toBe(true);
   });
 
-  test("given 50% usage, when checking, then returns false", () => {
-    const ctx = makeCtx({ budget: { ...makeCtx().budget, conversationTokens: 5000, remaining: 5000 } });
+  test("given 50% total usage, when checking, then returns false", () => {
+    const ctx = makeCtx({ budget: { ...makeCtx().budget, total: 10000, remaining: 5000 } });
     expect(shouldSummarize(ctx, null)).toBe(false);
   });
 
-  test("given exactly 60% usage, when checking, then returns true", () => {
-    const ctx = makeCtx({ budget: { ...makeCtx().budget, conversationTokens: 6000, remaining: 4000 } });
+  test("given exactly 60% total usage, when checking, then returns true", () => {
+    const ctx = makeCtx({ budget: { ...makeCtx().budget, total: 10000, remaining: 4000 } });
     expect(shouldSummarize(ctx, null)).toBe(true);
   });
 
-  test("given 59% usage, when checking, then returns false", () => {
-    const ctx = makeCtx({ budget: { ...makeCtx().budget, conversationTokens: 59, remaining: 41 } });
+  test("given 59% total usage, when checking, then returns false", () => {
+    const ctx = makeCtx({ budget: { ...makeCtx().budget, total: 100, remaining: 41 } });
     expect(shouldSummarize(ctx, null)).toBe(false);
   });
 
-  test("given no skipped entries, when checking, then returns false", () => {
+  test("given no skipped entries but above threshold, when checking, then returns true", () => {
     const ctx = makeCtx({ hasSkippedEntries: false });
+    expect(shouldSummarize(ctx, null)).toBe(true);
+  });
+
+  test("given fewer than 4 turns, when checking, then returns false", () => {
+    const ctx = makeCtx({ includedTurns: 3 });
     expect(shouldSummarize(ctx, null)).toBe(false);
   });
 
@@ -115,8 +120,8 @@ describe("shouldSummarize — trigger logic", () => {
     expect(shouldSummarize(ctx, existing)).toBe(true);
   });
 
-  test("given zero available budget, when checking, then returns false", () => {
-    const ctx = makeCtx({ budget: { ...makeCtx().budget, conversationTokens: 0, remaining: 0 } });
+  test("given zero total budget, when checking, then returns false", () => {
+    const ctx = makeCtx({ budget: { ...makeCtx().budget, total: 0, remaining: 0 } });
     expect(shouldSummarize(ctx, null)).toBe(false);
   });
 });
@@ -138,17 +143,53 @@ describe("generateSummary — first summary", () => {
     expect(summary!.coversUpTo).toBe(lastKnownMemoryId - 1);
   });
 
-  test("given no entries before lastKnownMemoryId, when generating, then no summary stored", async () => {
+  test("given no entries before lastKnownMemoryId and too few messages, when generating, then no summary stored", async () => {
     const db = setup();
     const chat = makeChat();
     db.createChat(chat);
-    const rowids = populateChat(db, chat.id, 2);
+    const rowids = populateChat(db, chat.id, 1);
     const firstRowid = rowids[0];
 
     const agent = summaryAgent("Should not be stored");
     await generateSummary(db, agent, chat.id, firstRowid, noopLogger);
 
     expect(db.getSummary(chat.id)).toBeNull();
+  });
+
+  test("given no entries before lastKnownMemoryId but enough messages, when generating, then proactive summary covers ~90% of messages", async () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 50);
+    const firstRowid = rowids[0];
+
+    const agent = summaryAgent("Proactive summary");
+    await generateSummary(db, agent, chat.id, firstRowid, noopLogger);
+
+    const summary = db.getSummary(chat.id);
+    expect(summary).not.toBeNull();
+    expect(summary!.content).toBe("Proactive summary");
+
+    const allMessages = db.getEntriesRange(chat.id, firstRowid, Number.MAX_SAFE_INTEGER)
+      .filter((e) => e.kind === "message");
+    const summarized = allMessages.filter((e) => (e as any).rowid <= summary!.coversUpTo);
+    const kept = allMessages.filter((e) => (e as any).rowid > summary!.coversUpTo);
+    expect(kept.length).toBeLessThanOrEqual(Math.max(4, Math.floor(allMessages.length * 0.1)) + 1);
+    expect(summarized.length).toBeGreaterThan(kept.length);
+  });
+
+  test("given no entries before lastKnownMemoryId with exactly 4 messages, when generating, then proactive summary stored", async () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 5);
+    const firstRowid = rowids[0];
+
+    const agent = summaryAgent("Proactive summary");
+    await generateSummary(db, agent, chat.id, firstRowid, noopLogger);
+
+    const summary = db.getSummary(chat.id);
+    expect(summary).not.toBeNull();
   });
 
   test("given agent returns empty text, when generating, then no summary stored", async () => {

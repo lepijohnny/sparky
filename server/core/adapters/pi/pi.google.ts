@@ -38,6 +38,7 @@ export function createPiGoogleAdapter(
           id: m.id,
           label: m.name,
           contextWindow: m.contextWindow,
+          maxOutputTokens: m.maxTokens,
           supportsThinking: m.reasoning,
           supportsTools: true,
           supportsAttachments: m.input.includes("image")

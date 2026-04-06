@@ -33,6 +33,7 @@ const DEFAULT_PREFERENCES = "";
 export class ChatConversation {
   private activeChats = new Map<string, AbortController>();
   private activeTurnIds = new Map<string, string>();
+  private activeSummarizations = new Set<string>();
   private steeringQueue = new Map<string, string[]>();
   private recording = false;
   wsDir = "";
@@ -207,7 +208,19 @@ export class ChatConversation {
         agent = new RecordingAgent(agent, join(dir, `${provider}.${model}.${ts}.json`));
       }
 
-      const fetcherFn = (pageSize: number, beforeRowid?: number) => this.db.getEntries(data.chatId, pageSize, beforeRowid);
+      const existingSummary = role.meta.summary ? this.db.getSummary(data.chatId) : null;
+      const summaryCutoff = existingSummary?.coversUpTo ?? 0;
+      const fetcherFn = (pageSize: number, beforeRowid?: number) => {
+        if (summaryCutoff > 0 && beforeRowid != null && beforeRowid <= summaryCutoff) {
+          return { entries: [], hasMore: false };
+        }
+        const result = this.db.getEntries(data.chatId, pageSize, beforeRowid);
+        if (summaryCutoff > 0) {
+          const filtered = result.entries.filter((e) => ((e as any).rowid ?? 0) > summaryCutoff);
+          return { entries: filtered, hasMore: filtered.length < result.entries.length ? false : result.hasMore };
+        }
+        return result;
+      };
 
       const roleName = chat.role ?? "sparky";
       const chatMode = data.mode ?? (chat.mode as PermissionMode | undefined) ?? this.trust.data().mode;
@@ -238,7 +251,6 @@ export class ChatConversation {
         ? await this.searchKnowledge(data.content, data.chatId, chat.name, data.knowledgeFilters)
         : [];
       const anchoredEntries = role.meta.anchors ? this.db.getAnchored(data.chatId) : [];
-      const existingSummary = role.meta.summary ? this.db.getSummary(data.chatId) : null;
       const servicesList = role.meta.services && data.services?.length
         ? data.services
         : [];
@@ -327,18 +339,25 @@ export class ChatConversation {
   }
 
   private async maybeSummarize(chatId: string, ctx: ContextResult): Promise<void> {
+    if (this.activeSummarizations.has(chatId)) return;
+
     const existing = this.db.getSummary(chatId);
     if (!shouldSummarize(ctx, existing)) return;
 
+    this.activeSummarizations.add(chatId);
     this.log.info("Summarization triggered", { chatId, lastKnownMemoryId: ctx.lastKnownMemoryId });
 
-    const resolved = await this.defaultAgentFactory(chatId);
-    if (!resolved) {
-      this.log.warn("Summarization skipped: no default agent", { chatId });
-      return;
-    }
+    try {
+      const resolved = await this.defaultAgentFactory(chatId);
+      if (!resolved) {
+        this.log.warn("Summarization skipped: no default agent", { chatId });
+        return;
+      }
 
-    await generateSummary(this.db, resolved.agent, chatId, ctx.lastKnownMemoryId!, this.log);
+      await generateSummary(this.db, resolved.agent, chatId, ctx.lastKnownMemoryId!, this.log);
+    } finally {
+      this.activeSummarizations.delete(chatId);
+    }
   }
 
   private async emit(chatId: string, entry: ChatEntry): Promise<void> {

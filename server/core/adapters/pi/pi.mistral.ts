@@ -43,6 +43,7 @@ export function createPiMistralAdapter(
           id: m.id,
           label: m.name,
           contextWindow: m.contextWindow,
+          maxOutputTokens: m.maxTokens,
           supportsThinking: m.reasoning,
           supportsTools: true,
           webSearch: "local" as const,

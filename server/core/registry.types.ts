@@ -6,6 +6,7 @@ export interface ModelDefinition {
   id: string;
   label: string;
   contextWindow?: number;
+  maxOutputTokens?: number;
   supportsThinking?: boolean;
   supportsTools?: boolean;
   supportsAttachments?: string[];

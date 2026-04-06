@@ -121,7 +121,9 @@ export function createSparky(): Sparky {
 
     return {
       agent: adapter.createAgent({ ...conn, model: modelId, thinking }),
-      contextWindow: modelDef?.contextWindow,
+      contextWindow: modelDef?.maxOutputTokens
+        ? (modelDef.contextWindow ?? 0) - modelDef.maxOutputTokens
+        : modelDef?.contextWindow,
       webSearch: modelDef?.webSearch,
     };
   }

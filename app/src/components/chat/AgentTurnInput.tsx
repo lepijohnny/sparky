@@ -199,10 +199,14 @@ export default memo(function ChatInput({
 
   const sendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const contextOverflow = contextTokens != null && contextWindow != null && contextWindow > 0
+    && contextTokens / contextWindow >= 0.8;
+
   const handleSend = useCallback(() => {
     const handle = inputRef.current;
     if (!handle || handle.isEmpty()) return;
     if (sending && !streaming) return;
+
     const text = handle.getText();
     if (!text.trim()) return;
     const currentAttachments = streaming ? [] : [...attachments];
@@ -676,8 +680,9 @@ export default memo(function ChatInput({
             ) : (
               <button
                 className={styles.sendBtn}
-                onClick={handleSend}
-                disabled={!hasContent}
+                onClick={contextOverflow ? () => addToast({ id: `ctx-overflow-${Date.now()}`, kind: "error", title: "Context is near or over capacity for this model. Try a model with a larger context window, or start a new chat." }) : handleSend}
+                disabled={!hasContent && !contextOverflow}
+                title={contextOverflow ? "Context is near or over capacity for this model" : undefined}
               >
                 <Send size={14} strokeWidth={1.5} />
                 Send
