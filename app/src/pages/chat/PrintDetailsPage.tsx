@@ -13,8 +13,8 @@ import { mermaidRenderer } from "../../lib/renderers/mermaidRenderer";
 import { latexRenderer } from "../../lib/renderers/latexRenderer";
 import { tableRenderer } from "../../lib/renderers/tableRenderer";
 import { chartRenderer } from "../../lib/renderers/chartRenderer";
+import { htmlRenderer } from "../../lib/renderers/htmlRenderer";
 import type { Chat, ChatEntry } from "../../types/chat";
-import { useStore } from "../../store";
 import styles from "./PrintDetailsPage.module.css";
 
 interface AssistantBlocksProps {
@@ -34,6 +34,7 @@ const AssistantBlocks = memo(function AssistantBlocks({ message, hiddenKeys, onT
     map.set("table", tableRenderer);
     map.set("chart", chartRenderer);
     map.set("echart", chartRenderer);
+    map.set("html", htmlRenderer);
     return map;
   }, []);
 

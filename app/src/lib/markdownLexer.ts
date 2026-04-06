@@ -1,7 +1,7 @@
 export interface ContentBlock { type: string; content: string }
 export interface BlockRenderer { type: string; render: (content: string, key: string) => unknown }
 
-const S_MD = 0, S_CODE = 1, S_MERMAID = 2, S_LATEXF = 3, S_LATEXD = 4, S_LATEXE = 5, S_TABLE = 6, S_TMAYBE = 7, S_LATEXB = 8, S_CHART = 9;
+const S_MD = 0, S_CODE = 1, S_MERMAID = 2, S_LATEXF = 3, S_LATEXD = 4, S_LATEXE = 5, S_TABLE = 6, S_TMAYBE = 7, S_LATEXB = 8, S_CHART = 9, S_HTML = 10;
 
 function ws(c: number) { return c === 0x20 || c === 0x09; }
 
@@ -100,6 +100,7 @@ export class MarkdownLexer {
     if (this.s === S_CODE) parts.push("```" + this.cl, ...this.bb);
     else if (this.s === S_MERMAID) parts.push("```mermaid", ...this.bb);
     else if (this.s === S_CHART) parts.push("```chart", ...this.bb);
+    else if (this.s === S_HTML) parts.push("```html", ...this.bb);
     else if (this.s === S_LATEXF) parts.push("```latex", ...this.bb);
     else if (this.s === S_LATEXD) parts.push("$$", ...this.bb);
     else if (this.s === S_LATEXB) parts.push("\\[", ...this.bb);
@@ -119,6 +120,7 @@ export class MarkdownLexer {
       case S_CODE: this.md.push("```" + this.cl, ...this.bb); this.bb.length = 0; break;
       case S_MERMAID: this.md.push("```mermaid", ...this.bb); this.bb.length = 0; break;
       case S_CHART: this.md.push("```chart", ...this.bb); this.bb.length = 0; break;
+      case S_HTML: this.md.push("```html", ...this.bb); this.bb.length = 0; break;
       case S_LATEXF: this.md.push("```latex", ...this.bb); this.bb.length = 0; break;
       case S_LATEXD: this.md.push("$$", ...this.bb); this.bb.length = 0; break;
       case S_LATEXB: this.md.push("\\[", ...this.bb); this.bb.length = 0; break;
@@ -146,14 +148,14 @@ export class MarkdownLexer {
     while (i < l.length && ws(l.charCodeAt(i))) i++;
     const e = l.length;
 
-    if (this.s === S_CODE || this.s === S_MERMAID || this.s === S_LATEXF || this.s === S_CHART) {
+    if (this.s === S_CODE || this.s === S_MERMAID || this.s === S_LATEXF || this.s === S_CHART || this.s === S_HTML) {
       const fv = fence(l, i, e);
       if (fv >= 1) {
         if (this.s === S_CODE) {
           this.flush();
           this.B.push({ type: "code", content: "```" + this.cl + "\n" + this.bb.join("\n") + "\n```" });
           this.bb.length = 0;
-        } else { this.emit(this.s === S_MERMAID ? "mermaid" : this.s === S_CHART ? "chart" : "latex"); }
+        } else { this.emit(this.s === S_MERMAID ? "mermaid" : this.s === S_CHART ? "chart" : this.s === S_HTML ? "html" : "latex"); }
         this.s = S_MD;
         if (fv === 2) {
           let j = i + 3;
@@ -198,6 +200,7 @@ export class MarkdownLexer {
       this.flush();
       if (lg === "mermaid") this.s = S_MERMAID;
       else if (lg === "chart" || lg === "echart") this.s = S_CHART;
+      else if (lg === "html") this.s = S_HTML;
       else if (lg === "latex") this.s = S_LATEXF;
       else { this.cl = lg; this.s = S_CODE; }
       return;

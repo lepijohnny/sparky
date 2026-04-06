@@ -151,6 +151,50 @@ describe("tokenize — mermaid blocks", () => {
 });
 
 // ---------------------------------------------------------------------------
+// tokenize — html blocks
+// ---------------------------------------------------------------------------
+describe("tokenize — html blocks", () => {
+  it("given html fence, then html content without fences", () => {
+    const result = blocks("```html\n<div>Hello</div>\n```");
+    expect(result).toEqual([{ type: "html", content: "<div>Hello</div>" }]);
+  });
+
+  it("given text around html, then three blocks", () => {
+    expect(types("before\n```html\n<p>Hi</p>\n```\nafter")).toEqual([
+      "markdown", "html", "markdown",
+    ]);
+  });
+
+  it("given unclosed html, then markdown fallback", () => {
+    const result = blocks("```html\n<div>Hello</div>");
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("markdown");
+    expect(result[0].content).toContain("```html");
+  });
+
+  it("given empty html, then no block emitted", () => {
+    const result = tokenize("```html\n```");
+    expect(result).toEqual([]);
+  });
+
+  it("given full html document, then all captured", () => {
+    const html = "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body><p>Hello</p></body>\n</html>";
+    const result = blocks("```html\n" + html + "\n```");
+    expect(result[0].type).toBe("html");
+    expect(result[0].content).toContain("<!DOCTYPE html>");
+    expect(result[0].content).toContain("</html>");
+  });
+
+  it("given html with style and script tags, then content preserved", () => {
+    const html = "<style>body { color: red; }</style>\n<script>console.log('hi');</script>\n<p>Hello</p>";
+    const result = blocks("```html\n" + html + "\n```");
+    expect(result[0].type).toBe("html");
+    expect(result[0].content).toContain("<style>");
+    expect(result[0].content).toContain("<script>");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // tokenize — latex fenced
 // ---------------------------------------------------------------------------
 describe("tokenize — latex fenced", () => {
@@ -493,7 +537,7 @@ describe("tokenize — real LLM output", () => {
       "```",
     ].join("\n");
     expect(types(input)).toEqual([
-      "markdown", "code", "markdown", "code", "markdown", "code",
+      "markdown", "html", "markdown", "code", "markdown", "code",
     ]);
   });
 
@@ -661,6 +705,25 @@ describe("tokenizeStream — fenced blocks", () => {
   it("given open fence with no content yet, then fence in pending", () => {
     const r = tokenizeStream("text\n```python\n");
     expect(r.pending).toContain("```python");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// tokenizeStream — html blocks
+// ---------------------------------------------------------------------------
+describe("tokenizeStream — html blocks", () => {
+  it("given closed html block, then html finalized", () => {
+    const r = tokenizeStream("text\n```html\n<div>Hello</div>\n```\nmore");
+    expect(r.blocks.map((b) => b.type)).toEqual(["markdown", "html"]);
+    expect(r.pending).toBe("more");
+  });
+
+  it("given unclosed html, then html in pending", () => {
+    const r = tokenizeStream("text\n```html\n<div>Hello</div>");
+    expect(r.blocks).toHaveLength(1);
+    expect(r.blocks[0].content).toBe("text");
+    expect(r.pending).toContain("```html");
+    expect(r.pending).toContain("<div>Hello</div>");
   });
 });
 
@@ -861,6 +924,11 @@ describe("tokenizeStream — incomplete blocks produce detectable pending", () =
   it("given unclosed code, then pending starts with ```", () => {
     const r = tokenizeStream("text\n```js\nconst x = 1;");
     expect(r.pending.trimStart().startsWith("```")).toBe(true);
+  });
+
+  it("given unclosed html fence, then pending starts with ```html", () => {
+    const r = tokenizeStream("text\n```html\n<div>Hello</div>");
+    expect(r.pending.trimStart().startsWith("```html")).toBe(true);
   });
 
   it("given unclosed latex fence, then pending starts with ```latex", () => {
