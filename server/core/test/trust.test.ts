@@ -125,7 +125,7 @@ describe("TrustStore", () => {
     trust.reset();
     expect(trust.data().mode).toBe("read");
     expect(trust.data().bash.allow).toHaveLength(0);
-    expect(trust.data().bash.ask).toHaveLength(3);
+    expect(trust.data().bash.ask).toHaveLength(4);
     expect(trust.data().bash.deny.length).toBeGreaterThan(0);
     expect(trust.data().write.deny.length).toBeGreaterThan(0);
     expect(trust.data().read.deny.length).toBeGreaterThan(0);
@@ -292,9 +292,9 @@ describe("TrustStore", () => {
     expect(res.rule?.alwaysAsk).toBeFalsy();
   });
 
-  test("given default bash ask rules, then rm does not have alwaysAsk", () => {
+  test("given default bash ask rules, then rm has alwaysAsk", () => {
     const data = trust.data();
     const rm = data.bash.ask.find((r) => r.label === "rm");
-    expect(rm?.alwaysAsk).toBeFalsy();
+    expect(rm?.alwaysAsk).toBe(true);
   });
 });
