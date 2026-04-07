@@ -4,7 +4,7 @@ import { defineTool, basename } from "./tool.registry";
 import { home, real, requireFile } from "./tool.path";
 
 const editPair = z.object({
-  oldText: z.string().describe("Exact text to find (must match exactly, including whitespace). Always app_read the file first and copy from output."),
+  oldText: z.string().describe("Exact text to find (must match exactly)"),
   newText: z.string().describe("Replacement text"),
 });
 
@@ -39,13 +39,10 @@ function applyEdit(content: string, oldText: string, newText: string, index: num
 
 export const edit = defineTool({
   name: "app_edit",
-  description:
-    "Edit a file by replacing exact text. Always app_read the file first so oldText matches exactly. " +
-    "Provide one or more edits. Keep oldText short (1-3 lines) for reliability. " +
-    "If an edit fails, re-read the file before retrying.",
+  description: "Edit a file by replacing exact text. Read file first. Keep oldText short (1–3 lines).",
   schema: z.object({
-    path: z.string().describe("Absolute or relative file path to edit"),
-    edits: z.array(editPair).describe("List of edits to apply. Each edit has oldText (exact match) and newText (replacement). Applied in order."),
+    path: z.string().describe("File path"),
+    edits: z.array(editPair).describe("Edits: [{oldText, newText}, ...] applied in order"),
   }),
   label: "Editing",
   icon: "pencil",

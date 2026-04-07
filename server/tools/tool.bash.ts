@@ -65,12 +65,9 @@ function run(command: string, timeoutMs: number, signal?: AbortSignal, envVars?:
 
 export const bash = defineTool({
   name: "app_bash",
-  description:
-    "Execute a bash command. Returns stdout and stderr. " +
-    `Output is truncated to last ${MAX_LINES} lines or ${formatSize(MAX_OUTPUT)} (whichever is hit first). ` +
-    "Optionally provide a timeout in seconds (default: 30s).",
+  description: `Execute a bash command. Returns stdout/stderr, truncated to ${MAX_LINES} lines or ${formatSize(MAX_OUTPUT)}.`,
   schema: z.object({
-    command: z.string().describe("Bash command to execute"),
+    command: z.string().describe("Bash command"),
     timeout: z.number().optional().describe("Timeout in seconds (default: 30)"),
   }),
   label: "Running",

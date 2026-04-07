@@ -6,12 +6,10 @@ import { home, real, rejectDir } from "./tool.path";
 
 export const write = defineTool({
   name: "app_write",
-  description:
-    "Write content to a file. Creates the file if it doesn't exist, overwrites if it does. " +
-    "Automatically creates parent directories. Content must not be empty — this tool cannot create empty files or delete files.",
+  description: "Write content to a file. Creates parent dirs. Overwrites if exists. Cannot create empty files.",
   schema: z.object({
-    path: z.string().describe("Absolute or relative file path to write"),
-    content: z.string().min(1).refine((s) => s.trim().length > 0, "Content must not be empty or whitespace-only").describe("Content to write to the file (must not be empty)"),
+    path: z.string().describe("File path"),
+    content: z.string().min(1).refine((s) => s.trim().length > 0, "Content must not be empty or whitespace-only").describe("File content (non-empty)"),
   }),
   label: "Writing",
   icon: "file-plus",

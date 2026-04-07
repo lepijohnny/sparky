@@ -9,12 +9,10 @@ const MAX_ENTRIES = 500;
 
 export const glob = defineTool({
   name: "app_glob",
-  description:
-    "List files matching a glob pattern. Returns paths sorted alphabetically, directories suffixed with '/'. " +
-    `Output is truncated to ${MAX_ENTRIES} entries.`,
+  description: `List files matching a glob pattern. Truncated to ${MAX_ENTRIES} entries.`,
   schema: z.object({
-    pattern: z.string().describe("Glob pattern, e.g. '**/*.ts', 'src/**/*.test.ts'"),
-    cwd: z.string().optional().describe("Directory to search from (default: current working directory)"),
+    pattern: z.string().describe("Glob pattern, e.g. '**/*.ts'"),
+    cwd: z.string().optional().describe("Search directory (default: cwd)"),
   }),
   label: "Searching",
   icon: "search",

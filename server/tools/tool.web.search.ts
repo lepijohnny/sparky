@@ -5,10 +5,10 @@ export const webSearch = defineTool({
   name: "app_web_search",
   label: "Web Searching",
   icon: "globe",
-  description: "Search the web using DuckDuckGo. Returns titles, URLs, and snippets. Use this to find documentation, APIs, or any information not available in app_read.",
+  description: "Web search via DuckDuckGo. Returns titles, URLs, snippets.",
   schema: z.object({
-    query: z.string().describe("Search query, e.g. 'todoist REST API v1 documentation'"),
-    maxResults: z.number().optional().default(10).describe("Max results to return (default 10)"),
+    query: z.string().describe("Search query"),
+    maxResults: z.number().optional().default(10).describe("Max results (default: 10)"),
   }),
   friendlyLabel: (input) => `Searched "${trunc(input.query)}"`,
   summarize: (input) => input.query,

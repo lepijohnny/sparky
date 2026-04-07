@@ -44,15 +44,11 @@ function truncateHead(lines: string[], maxLines: number, maxBytes: number): { co
 
 export const read = defineTool({
   name: "app_read",
-  description:
-    "Read the contents of a file. Supports text files and images (jpg, png, gif, webp). " +
-    "Images are returned as visual attachments. " +
-    `For text files, output is truncated to ${MAX_LINES} lines or ${formatSize(MAX_BYTES)} (whichever is hit first). ` +
-    "Use offset/limit for large files. When you need the full file, continue with offset until complete.",
+  description: `Read a file. Text truncated to ${MAX_LINES} lines/${formatSize(MAX_BYTES)}. Images returned as attachments. Use offset/limit for large files.`,
   schema: z.object({
-    path: z.string().describe("Absolute or relative file path to read"),
-    offset: z.number().optional().describe("Line number to start reading from (1-indexed)"),
-    limit: z.number().optional().describe("Maximum number of lines to read"),
+    path: z.string().describe("File path"),
+    offset: z.number().optional().describe("Start line (1-indexed)"),
+    limit: z.number().optional().describe("Max lines to read"),
   }),
   label: "Reading",
   icon: "file-text",

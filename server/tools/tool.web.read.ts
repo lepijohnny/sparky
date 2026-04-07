@@ -5,9 +5,9 @@ export const webRead = defineTool({
   name: "app_web_read",
   label: "Fetching",
   icon: "globe",
-  description: "Fetch and extract readable text from a URL. Use after app_web_search to read a specific page. Returns cleaned text content (max ~8K chars).",
+  description: "Fetch readable text from a URL (~8K chars max).",
   schema: z.object({
-    url: z.url().describe("URL to fetch and read, e.g. https://developer.todoist.com/api/v1/"),
+    url: z.url().describe("URL to read"),
   }),
   recovery: 'Use app_web_search first to find the correct URL.',
   friendlyLabel: (input) => {

@@ -308,8 +308,8 @@ export class ChatConversation {
       const durationMs = Date.now() - startTime;
       const terminalType = answer === "overflow" ? "done" : answer;
       await this.emitActivity(data.chatId, turnId, `agent.${terminalType}`, {
-        conversationTokens: ctx.budget.total - ctx.budget.remaining,
-        contextWindow: ctx.budget.total,
+        conversationTokens: ctx.budget.total - ctx.budget.remaining - ctx.budget.reserve,
+        contextWindow: ctx.budget.total - ctx.budget.reserve,
         durationMs,
       });
 

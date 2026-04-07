@@ -25,10 +25,11 @@ export function shouldSummarize(ctx: ContextResult, existing: ChatSummary | null
   if (!ctx.lastKnownMemoryId) return false;
   if (ctx.includedTurns < 4) return false;
 
-  const used = ctx.budget.total - ctx.budget.remaining;
-  if (ctx.budget.total === 0) return false;
+  const inputBudget = ctx.budget.total - ctx.budget.reserve;
+  const used = inputBudget - ctx.budget.remaining;
+  if (inputBudget <= 0) return false;
 
-  const usage = used / ctx.budget.total;
+  const usage = used / inputBudget;
   if (usage < BUDGET_THRESHOLD) return false;
 
   if (existing && existing.coversUpTo >= ctx.lastKnownMemoryId) return false;

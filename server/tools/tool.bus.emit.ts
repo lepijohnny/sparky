@@ -74,11 +74,10 @@ export const busEmit = defineTool({
   name: "app_bus_emit",
   label: "App",
   icon: "wrench",
-  description:
-    "Call an application bus event. The 'event' field is the event name and 'params' is a separate object with the event arguments. Never combine them into one string.",
+  description: "Call an app bus event. 'event' is the event name, 'params' is the arguments object. Read API reference before calling.",
   schema: z.object({
-    event: z.string().describe("Bus event name exactly as listed in the API docs, e.g. 'settings.sandbox.allowlist.add'"),
-    params: z.record(z.string(), z.unknown()).optional().describe("Event parameters as an object"),
+    event: z.string().describe("Bus event name, e.g. 'chat.create'"),
+    params: z.record(z.string(), z.unknown()).optional().describe("Event parameters as an object, e.g. { name: 'My Chat' }"),
   }),
   trustScope: "bus",
   trustTarget: (input) => {
@@ -120,19 +119,20 @@ export const busEmit = defineTool({
     }
 
     const eventDef = BUS_EVENTS[input.event];
+    const params = input.params ?? {};
 
-    const guideError = guide(input.event, input.params);
+    const guideError = guide(input.event, params);
     if (guideError) {
       ctx.log.warn("Guide validation failed", { event: input.event, error: guideError });
       if (eventDef?.hooks?.onError) {
         const busProxy = { emit: (e: string, d: unknown) => ctx.bus.emit(e as any, d) };
-        const custom = await eventDef.hooks.onError(input.params, guideError, busProxy);
+        const custom = await eventDef.hooks.onError(params, guideError, busProxy);
         if (custom) return custom;
       }
       return `Your params are wrong. Fix them and try again: ${guideError}`;
     }
 
-    const approvalHook = eventDef?.hooks?.requestApproval?.(input.params);
+    const approvalHook = eventDef?.hooks?.requestApproval?.(params);
     if (approvalHook) {
       const ok = await ctx.approvalCtx.requestApproval("app_bus_emit", approvalHook.label, {
         type: approvalHook.type,
@@ -143,8 +143,8 @@ export const busEmit = defineTool({
       if (approvalHook.successMessage) return approvalHook.successMessage;
     }
 
-    ctx.log.info("app_bus_emit", { event: input.event, params: input.params });
-    const result = await ctx.bus.emit(input.event as any, input.params);
+    ctx.log.info("app_bus_emit", { event: input.event, params });
+    const result = await ctx.bus.emit(input.event as any, params);
     if (result === undefined) return `Error: unknown event "${input.event}". Read the API docs: app_read("api/<domain>.md")`;
     return JSON.stringify(result);
   },

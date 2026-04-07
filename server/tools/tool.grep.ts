@@ -36,13 +36,11 @@ function runGrep(args: string[], signal?: AbortSignal): Promise<{ raw: string; n
 
 export const grep = defineTool({
   name: "app_grep",
-  description:
-    "Search file contents for a pattern using regex. Returns matching lines with file paths and line numbers. " +
-    `Output is truncated to ${MAX_MATCHES} matches. Long lines are truncated to ${MAX_LINE_LENGTH} chars.`,
+  description: `Search file contents with regex. Returns paths and line numbers. Max ${MAX_MATCHES} matches.`,
   schema: z.object({
-    pattern: z.string().describe("Search pattern (regex)"),
-    path: z.string().optional().describe("File or directory to search (default: current working directory)"),
-    ignoreCase: z.boolean().optional().describe("Case-insensitive search (default: false)"),
+    pattern: z.string().describe("Regex pattern"),
+    path: z.string().optional().describe("File or directory (default: cwd)"),
+    ignoreCase: z.boolean().optional().describe("Case-insensitive (default: false)"),
   }),
   label: "Matching",
   icon: "search",
