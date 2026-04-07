@@ -113,12 +113,9 @@ export class ChatConversation {
       this.approval.denyAll(chatId);
       controller.abort();
     }
-    const maxWait = 3000;
-    const start = Date.now();
-    while (this.activeChats.size > 0 && Date.now() - start < maxWait) {
-      await new Promise((r) => setTimeout(r, 50));
-    }
-    this.log.info("All chats stopped", { remaining: this.activeChats.size });
+    this.activeChats.clear();
+    this.activeTurnIds.clear();
+    this.activeSummarizations.clear();
   }
 
   /**
