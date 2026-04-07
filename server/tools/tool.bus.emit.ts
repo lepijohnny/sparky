@@ -144,8 +144,13 @@ export const busEmit = defineTool({
     }
 
     ctx.log.info("app_bus_emit", { event: input.event, params });
-    const result = await ctx.bus.emit(input.event as any, params);
-    if (result === undefined) return `Error: unknown event "${input.event}". Read the API docs: app_read("api/<domain>.md")`;
-    return JSON.stringify(result);
+    try {
+      const result = await ctx.bus.emit(input.event as any, params);
+      if (result === undefined) return `Error: unknown event "${input.event}". Read the API docs: app_read("api/<domain>.md")`;
+      return JSON.stringify(result);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return `Error calling "${input.event}": ${msg}\n\nYou sent: ${JSON.stringify(params)}\n\nRead the API docs to find the correct params: app_read("sparky/references/api/guidelines.md")`;
+    }
   },
 });
