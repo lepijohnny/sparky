@@ -28,7 +28,7 @@ import { shutdownWorker } from "./knowledge/worker/kt.worker.client";
 import { createSettingsCrud } from "./settings";
 import { createAdapters } from "./core/adapters/adapters";
 import { configJsonBackwardCompatibilityHook as backwardCompatibilityHook } from "./core/compat";
-import { createRoutineDb } from "./chat/chat.routine.db";
+import { createRoutineDb, type RoutineDb } from "./chat/chat.routine.db";
 import { registerRoutineBus } from "./routines/routine.bus";
 import { createRoutineExecutor } from "./routines/routine.executor";
 import { createRoutineScheduler } from "./routines/routine.scheduler";
@@ -70,7 +70,10 @@ export function createSparky(): Sparky {
     knowledgeManager,
     getEnvVars);
 
-  const routineDb = createRoutineDb(chatManager.connection);
+  let routineDbInner = createRoutineDb(chatManager.connection);
+  const routineDb: RoutineDb = new Proxy({} as RoutineDb, {
+    get(_target, prop) { return (routineDbInner as any)[prop]; },
+  });
   const routineLog = logger.createLogger("routine");
   const executeRoutine = createRoutineExecutor(bus, routineDb, routineLog);
   registerRoutineBus(bus, routineDb, routineLog, executeRoutine);
@@ -265,10 +268,13 @@ export function createSparky(): Sparky {
       : storage.root("workspace.db");
     currentWorkspacePath = storage.root(newWsDir);
 
+    routineScheduler.stop();
     await chatManager.stopAll();
     chatManager.switchDb(newDbPath, logger.createLogger("chat"));
     chatManager.setWorkspacePath(currentWorkspacePath);
     knowledgeManager.switchDb(newDbPath.replace(/\.db$/, ".kt.db"));
+    routineDbInner = createRoutineDb(chatManager.connection);
+    routineScheduler.start();
     broadcast("settings.workspace.changed", data);
   });
 
