@@ -3926,7 +3926,7 @@ dependencies = [
 
 [[package]]
 name = "sparky"
-version = "0.7.23"
+version = "0.7.24"
 dependencies = [
  "dirs",
  "libc",
