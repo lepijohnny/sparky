@@ -399,11 +399,13 @@ const AgentMessageBubble = memo(
           <MessageEditor content={rawContent} onSave={handleEditSave} onCancel={() => setEditing(false)} />
         ) : (
           <>
-            {content.length > 0 && (
+            {(content.length > 0 || (!streaming && status !== "done")) && (
               <div className={styles.bubbleOuter} data-bubble>
-                <div className={styles.bubbleGroup} data-streaming={streaming || undefined}>
-                  {rendered}
-                </div>
+                {content.length > 0 && (
+                  <div className={styles.bubbleGroup} data-streaming={streaming || undefined}>
+                    {rendered}
+                  </div>
+                )}
                 {!streaming && (
                   <div className={styles.bubbleFooter}>
                     <AgentMessageBubbleStatusLeft status={status} durationMs={message.durationMs} />
