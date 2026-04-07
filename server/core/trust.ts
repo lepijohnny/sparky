@@ -183,19 +183,11 @@ export function createTrustStore(log: Logger, basePath: string, keychain: Keycha
   }
 
   function loadScope(stored: Partial<ScopeRules> | undefined, fallback?: ScopeRules): ScopeRules {
-    const base = fallback ?? emptyScope();
-    if (!stored || (!stored.allow?.length && !stored.deny?.length && !stored.ask?.length)) {
-      return base;
-    }
-    const mergeUnique = (defaults: TrustRule[], saved: TrustRule[]): TrustRule[] => {
-      const patterns = new Set(saved.map((r) => r.pattern));
-      const missing = defaults.filter((r) => !patterns.has(r.pattern));
-      return [...missing, ...saved];
-    };
+    if (!stored) return fallback ?? emptyScope();
     return {
-      allow: mergeUnique(base.allow, stored.allow ?? []),
-      deny: mergeUnique(base.deny, stored.deny ?? []),
-      ask: mergeUnique(base.ask, stored.ask ?? []),
+      allow: stored.allow ?? [],
+      deny: stored.deny ?? [],
+      ask: stored.ask ?? [],
     };
   }
 
