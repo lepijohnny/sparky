@@ -16,7 +16,7 @@ import type { Agent, AgentEvent, AgentTurn, MessageContent } from "../../agent.t
 import { encodeBase64 } from "../adapter.encode64";
 import type { Logger } from "../../../logger.types";
 
-const THINKING_LEVELS: Record<number, "minimal" | "low" | "medium" | "high"> = { 1: "minimal", 2: "low", 3: "medium", 4: "high" };
+const THINKING_LEVELS: Record<number, "low" | "medium" | "high"> = { 1: "low", 2: "medium", 3: "medium", 4: "high" };
 
 async function* abortable<T>(source: AsyncIterable<T>, signal: AbortSignal): AsyncGenerator<T> {
   const iterator = source[Symbol.asyncIterator]();
