@@ -143,11 +143,11 @@ describe("buildContext", () => {
     expect(result.messages[0]).toEqual({ role: "user", content: "new message" });
   });
 
-  test("given zero available budget, when building, then returns empty", () => {
+  test("given zero available budget, when building, then still includes latest turn", () => {
     const entries = [userMsg("Hello", "t1")];
     const result = buildContext(arrayFetcher(entries), 100, "a".repeat(400));
-    expect(result.messages).toHaveLength(0);
-    expect(result.includedTurns).toBe(0);
+    expect(result.messages).toHaveLength(1);
+    expect(result.includedTurns).toBe(1);
   });
 
   test("given single entry exceeding budget, when building, then still includes latest turn", () => {

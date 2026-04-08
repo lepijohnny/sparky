@@ -241,7 +241,7 @@ export class ContextBuilder {
     let lastKnownMemoryId: number | null = null;
     let messages: AgentMessage[] = [];
 
-    if (this.entryFetcher && this.remaining > 0) {
+    if (this.entryFetcher) {
       const conv = buildConversation(this.entryFetcher, this.remaining, this.toolOutputPath);
       messages = conv.messages;
       conversationTokens = conv.tokensUsed;
