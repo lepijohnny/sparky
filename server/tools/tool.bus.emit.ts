@@ -1,7 +1,20 @@
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { z } from "zod/v4";
 import { defineTool, trunc } from "./tool.registry";
 import { guide } from "../core/assistant/assistant.tools.guide";
 import { BUS_EVENTS } from "../core/bus";
+
+const PROMPTS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "prompts", "sparky", "references", "api");
+let guidelinesCache: string | null = null;
+function getGuidelines(): string {
+  if (!guidelinesCache) {
+    try { guidelinesCache = readFileSync(join(PROMPTS_DIR, "guidelines.md"), "utf-8"); }
+    catch { guidelinesCache = ""; }
+  }
+  return guidelinesCache;
+}
 
 function svcLabel(id: string): string {
   return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -146,11 +159,11 @@ export const busEmit = defineTool({
     ctx.log.info("app_bus_emit", { event: input.event, params });
     try {
       const result = await ctx.bus.emit(input.event as any, params);
-      if (result === undefined) return `Error: unknown event "${input.event}". Read the API docs: app_read("api/<domain>.md")`;
+      if (result === undefined) return `Error: unknown event "${input.event}".\n\n${getGuidelines()}\n\nRead the domain API reference file BEFORE retrying.`;
       return JSON.stringify(result);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      return `Error calling "${input.event}": ${msg}\n\nYou sent: ${JSON.stringify(params)}\n\nRead the API docs to find the correct params: app_read("sparky/references/api/guidelines.md")`;
+      return `Error calling "${input.event}": ${msg}\n\nYou sent: ${JSON.stringify(params)}\n\n${getGuidelines()}\n\nRead the domain API reference file to find the correct params BEFORE retrying.`;
     }
   },
 });
