@@ -11,10 +11,18 @@ import { execute as label } from "./actions/routine.action.label";
 
 const actions: Record<string, ActionFn> = { chat, archive, flag, label };
 
+const RETRY_DELAYS = [30_000, 60_000, 120_000];
+const MAX_ROUTINE_DURATION = 10 * 60_000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function createRoutineExecutor(bus: EventBus, db: RoutineDb, log: Logger) {
   return async function execute(routine: Routine): Promise<void> {
     const runId = randomUUID();
     const startedAt = new Date().toISOString();
+    const startMs = Date.now();
 
     const run: RoutineRun = {
       id: runId,
@@ -24,27 +32,46 @@ export function createRoutineExecutor(bus: EventBus, db: RoutineDb, log: Logger)
     };
     db.addRoutineRun(run);
 
-    try {
-      const handler = actions[routine.action.type];
-      if (!handler) throw new Error(`Unknown action type: ${routine.action.type}`);
-      await handler({ bus, db, routine, run });
-
-      const finishedAt = new Date().toISOString();
-      db.updateRoutineRun(runId, {
-        status: "done",
-        finishedAt,
-        durationMs: new Date(finishedAt).getTime() - new Date(startedAt).getTime(),
-      });
-      log.info("Routine completed", { id: routine.id, runId });
-    } catch (err) {
-      const finishedAt = new Date().toISOString();
-      db.updateRoutineRun(runId, {
-        status: "error",
-        error: String(err),
-        finishedAt,
-        durationMs: new Date(finishedAt).getTime() - new Date(startedAt).getTime(),
-      });
-      log.error("Routine failed", { id: routine.id, runId, error: String(err) });
+    const handler = actions[routine.action.type];
+    if (!handler) {
+      db.updateRoutineRun(runId, { status: "error", error: `Unknown action type: ${routine.action.type}`, finishedAt: new Date().toISOString(), durationMs: 0 });
+      return;
     }
+
+    let lastError: string | undefined;
+
+    for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+      try {
+        await handler({ bus, db, routine, run });
+
+        const finishedAt = new Date().toISOString();
+        db.updateRoutineRun(runId, {
+          status: "done",
+          finishedAt,
+          durationMs: Date.now() - startMs,
+        });
+        if (attempt > 0) log.info("Routine succeeded after retry", { id: routine.id, runId, attempt });
+        else log.info("Routine completed", { id: routine.id, runId });
+        return;
+      } catch (err) {
+        lastError = String(err);
+        const elapsed = Date.now() - startMs;
+
+        if (attempt < RETRY_DELAYS.length && elapsed < MAX_ROUTINE_DURATION) {
+          const delay = RETRY_DELAYS[attempt];
+          log.warn("Routine attempt failed, retrying", { id: routine.id, runId, attempt: attempt + 1, delay, error: lastError });
+          await sleep(delay);
+        }
+      }
+    }
+
+    const finishedAt = new Date().toISOString();
+    db.updateRoutineRun(runId, {
+      status: "error",
+      error: lastError,
+      finishedAt,
+      durationMs: Date.now() - startMs,
+    });
+    log.error("Routine failed after all retries", { id: routine.id, runId, error: lastError });
   };
 }
