@@ -15,5 +15,6 @@ export async function execute({ bus, db, routine, run }: ActionContext): Promise
   await bus.emit("chat.ask", {
     chatId: chat.id,
     content: prompt,
+    await: true,
   });
 }
