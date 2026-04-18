@@ -122,7 +122,10 @@ export function createPiAnthropicAdapter(
 
                 log.info("Refreshing Anthropic OAuth token via pi-ai");
 
-                const newCreds = await refreshAnthropicToken(refreshToken);
+                const newCreds = await Promise.race([
+                  refreshAnthropicToken(refreshToken),
+                  new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Anthropic token refresh timed out after 30s")), 30_000)),
+                ]);
                 await setCredential("token", newCreds.access);
                 await setCredential("refreshToken", newCreds.refresh);
 

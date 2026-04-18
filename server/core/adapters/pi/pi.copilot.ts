@@ -27,7 +27,10 @@ export function createPiCopilotAdapter(
     const githubToken = await getCredential("token");
     if (!githubToken) throw new Error("No GitHub token found — please authenticate with Copilot");
 
-    const creds = await refreshGitHubCopilotToken(githubToken);
+    const creds = await Promise.race([
+      refreshGitHubCopilotToken(githubToken),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Copilot token refresh timed out after 30s")), 30_000)),
+    ]);
     cachedApiToken = creds.access;
     return cachedApiToken;
   }

@@ -118,7 +118,10 @@ export function createPiGoogleAdapter(
             if (!refreshToken) throw new Error("No refresh token available");
 
             log.info("Refreshing Google OAuth token via pi-ai");
-            const newCreds = await refreshGoogleCloudToken(refreshToken, "");
+            const newCreds = await Promise.race([
+              refreshGoogleCloudToken(refreshToken, ""),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Google token refresh timed out after 30s")), 30_000)),
+            ]);
             await setCredential("token", newCreds.access);
             if (newCreds.refresh) await setCredential("refreshToken", newCreds.refresh);
 

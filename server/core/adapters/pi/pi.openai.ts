@@ -181,7 +181,10 @@ export function createPiOpenAIOAuthAdapter(
 
             log.info("Refreshing OpenAI OAuth token via pi-ai");
 
-            const newCreds = await refreshOpenAICodexToken(refreshToken);
+            const newCreds = await Promise.race([
+              refreshOpenAICodexToken(refreshToken),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("OpenAI token refresh timed out after 30s")), 30_000)),
+            ]);
             await setCredential("token", newCreds.access);
             await setCredential("refreshToken", newCreds.refresh);
 
