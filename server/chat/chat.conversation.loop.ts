@@ -42,6 +42,8 @@ export function runAgentLoop(
   steering?: () => string | null,
   log?: Logger,
 ): Promise<TerminalReason> {
+  const logError = (msg: string, extra?: Record<string, unknown>) =>
+    log?.error(msg, { chatId, turnId, ...extra });
   return agentStream({
     run: (msgs) => agent.stream({ system, messages: msgs, cancellation: signal, tools, steering }),
     messages,
@@ -61,7 +63,10 @@ export function runAgentLoop(
       const entry = toEntry(event, turnId, tools, pendingTools);
       if (entry) await emit(chatId, entry);
     },
-    onError: (msg) => emitActivity(chatId, turnId, "agent.error", { message: msg }),
+    onError: (msg) => {
+      logError("Agent stream error", { error: msg });
+      return emitActivity(chatId, turnId, "agent.error", { message: msg });
+    },
   }).retry(3);
 }
 
@@ -129,11 +134,12 @@ export function agentStream(opts: AgentStreamOpts) {
         return { reason: "error", errors };
       }
 
-      return { reason: opts.signal.aborted ? "stopped" : "done", errors: [] };
+      return { reason: opts.signal.aborted ? "stopped" : "done", errors };
     } catch (err) {
       if (opts.signal.aborted) return { reason: "stopped", errors: [] };
-      await opts.onError(String(err));
-      return { reason: "error", errors: [] };
+      const msg = err instanceof Error ? `${err.message}\n${err.stack}` : String(err);
+      await opts.onError(msg);
+      return { reason: "error", errors: [err instanceof Error ? err.message : String(err)] };
     }
   }
 

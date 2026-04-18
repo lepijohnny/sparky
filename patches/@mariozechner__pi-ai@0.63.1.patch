@@ -1,11 +1,9 @@
 diff --git a/dist/providers/anthropic.js b/dist/providers/anthropic.js
-index d4fc29b8c97264ae51b212bdf69b29f7e8001ad1..d6fda57454b0e0e5297f1f511c1327b960565c66 100644
---- a/dist/providers/anthropic.js
-+++ b/dist/providers/anthropic.js
-@@ -220,6 +220,16 @@ export const streamAnthropic = (model, context, options) => {
+@@ -219,6 +219,16 @@
+                         };
                          output.content.push(block);
                          stream.push({ type: "toolcall_start", contentIndex: output.content.length - 1, partial: output });
-                     }
++                    }
 +                    else {
 +                        const block = { type: "text", text: "", index: event.index };
 +                        output.content.push(block);
@@ -15,18 +13,37 @@ index d4fc29b8c97264ae51b212bdf69b29f7e8001ad1..d6fda57454b0e0e5297f1f511c1327b9
 +                            block: event.content_block,
 +                            partial: output,
 +                        });
-+                    }
+                     }
                  }
                  else if (event.type === "content_block_delta") {
-                     if (event.delta.type === "text_delta") {
+@@ -341,7 +351,20 @@
+             for (const block of output.content)
+                 delete block.index;
+             output.stopReason = options?.signal?.aborted ? "aborted" : "error";
+-            output.errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
++            const baseMsg = error instanceof Error ? error.message : JSON.stringify(error);
++            const errorName = error instanceof Error ? error.constructor.name : "Unknown";
++            const stack = error instanceof Error ? error.stack : undefined;
++            const textSoFar = output.content
++                .filter(b => b.type === "text")
++                .map(b => b.text)
++                .join("")
++                .slice(-200);
++            const detail = [
++                `[${errorName}] ${baseMsg}`,
++                output.stopReason !== "aborted" && textSoFar ? `Last text: ...${textSoFar}` : null,
++                output.stopReason !== "aborted" && stack ? `Stack: ${stack}` : null,
++            ].filter(Boolean).join(" | ");
++            output.errorMessage = detail;
+             stream.push({ type: "error", reason: output.stopReason, error: output });
+             stream.end();
+         }
 diff --git a/dist/providers/google-gemini-cli.js b/dist/providers/google-gemini-cli.js
-index bffeb6219f2aeb34d103afa175b19f8f61e2fe9f..cf07f1dd4b4817703b45afb6a893f2fa300e9eed 100644
---- a/dist/providers/google-gemini-cli.js
-+++ b/dist/providers/google-gemini-cli.js
-@@ -517,6 +517,16 @@ export const streamGoogleGeminiCli = (model, context, options) => {
+@@ -516,6 +516,16 @@
+                                 if (output.content.some((b) => b.type === "toolCall")) {
                                      output.stopReason = "toolUse";
                                  }
-                             }
++                            }
 +                            if (candidate?.groundingMetadata) {
 +                                const block = { type: "text", text: "" };
 +                                output.content.push(block);
@@ -36,14 +53,10 @@ index bffeb6219f2aeb34d103afa175b19f8f61e2fe9f..cf07f1dd4b4817703b45afb6a893f2fa
 +                                    block: { type: "grounding_metadata", metadata: candidate.groundingMetadata },
 +                                    partial: output,
 +                                });
-+                            }
+                             }
                              if (responseData.usageMetadata) {
                                  // promptTokenCount includes cachedContentTokenCount, so subtract to get fresh input
-                                 const promptTokens = responseData.usageMetadata.promptTokenCount || 0;
 diff --git a/dist/providers/openai-responses-shared.js b/dist/providers/openai-responses-shared.js
-index 38dc2c4c1124111ca6bdc165817c127b6a3726ab..9a7e9cacea6e318e6ab6b53380b9edb5d0865c11 100644
---- a/dist/providers/openai-responses-shared.js
-+++ b/dist/providers/openai-responses-shared.js
 @@ -1,4 +1,29 @@
  import { calculateCost } from "../models.js";
 +async function* abortableStream(source, signal) {
@@ -74,7 +87,7 @@ index 38dc2c4c1124111ca6bdc165817c127b6a3726ab..9a7e9cacea6e318e6ab6b53380b9edb5
  import { shortHash } from "../utils/hash.js";
  import { parseStreamingJson } from "../utils/json-parse.js";
  import { sanitizeSurrogates } from "../utils/sanitize-unicode.js";
-@@ -221,7 +246,7 @@ export async function processResponsesStream(openaiStream, output, stream, model
+@@ -221,7 +246,7 @@
      let currentBlock = null;
      const blocks = output.content;
      const blockIndex = () => blocks.length - 1;
@@ -84,10 +97,7 @@ index 38dc2c4c1124111ca6bdc165817c127b6a3726ab..9a7e9cacea6e318e6ab6b53380b9edb5
              output.responseId = event.response.id;
          }
 diff --git a/dist/providers/openai-responses.js b/dist/providers/openai-responses.js
-index 6ecbb7f6a2e9394905ae91e04a2860e195ccf6f3..75f30e9f12a6d9524dd907fd4e677a053a8952c8 100644
---- a/dist/providers/openai-responses.js
-+++ b/dist/providers/openai-responses.js
-@@ -70,6 +70,7 @@ export const streamOpenAIResponses = (model, context, options) => {
+@@ -70,6 +70,7 @@
              await processResponsesStream(openaiStream, output, stream, model, {
                  serviceTier: options?.serviceTier,
                  applyServiceTierPricing,
@@ -96,18 +106,15 @@ index 6ecbb7f6a2e9394905ae91e04a2860e195ccf6f3..75f30e9f12a6d9524dd907fd4e677a05
              if (options?.signal?.aborted) {
                  throw new Error("Request was aborted");
 diff --git a/dist/types.d.ts b/dist/types.d.ts
-index 91d3c54f9a6d1e599a8b8bd0e0d5f53b8bb51cda..033ad71a027238858a7086b060496b2c3625aba0 100644
---- a/dist/types.d.ts
-+++ b/dist/types.d.ts
-@@ -205,6 +205,11 @@ export type AssistantMessageEvent = {
-     contentIndex: number;
+@@ -206,6 +206,11 @@
      toolCall: ToolCall;
      partial: AssistantMessage;
-+} | {
+ } | {
 +    type: "content_block";
 +    contentIndex: number;
 +    block: unknown;
 +    partial: AssistantMessage;
- } | {
++} | {
      type: "done";
      reason: Extract<StopReason, "stop" | "length" | "toolUse">;
+     message: AssistantMessage;

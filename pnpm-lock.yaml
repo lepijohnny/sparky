@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@mariozechner/pi-ai@0.63.1':
-    hash: d725f17c8fcc55266514c775e7c46946a703e1b1c244fe706f97a7468cb93d5d
+    hash: 20b4a985faa0a881b3bd143ecf06eb5594e787b51186d0bfc50bd3922a814684
     path: patches/@mariozechner__pi-ai@0.63.1.patch
 
 importers:
@@ -189,7 +189,7 @@ importers:
         version: 1.44.0(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))
       '@mariozechner/pi-ai':
         specifier: ^0.63.1
-        version: 0.63.1(patch_hash=d725f17c8fcc55266514c775e7c46946a703e1b1c244fe706f97a7468cb93d5d)(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(ws@8.19.0)(zod@4.3.6)
+        version: 0.63.1(patch_hash=20b4a985faa0a881b3bd143ecf06eb5594e787b51186d0bfc50bd3922a814684)(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(ws@8.19.0)(zod@4.3.6)
       '@modelcontextprotocol/sdk':
         specifier: ^1.27.1
         version: 1.27.1(zod@4.3.6)
@@ -5309,7 +5309,7 @@ snapshots:
       - ws
       - zod
 
-  '@mariozechner/pi-ai@0.63.1(patch_hash=d725f17c8fcc55266514c775e7c46946a703e1b1c244fe706f97a7468cb93d5d)(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(ws@8.19.0)(zod@4.3.6)':
+  '@mariozechner/pi-ai@0.63.1(patch_hash=20b4a985faa0a881b3bd143ecf06eb5594e787b51186d0bfc50bd3922a814684)(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(ws@8.19.0)(zod@4.3.6)':
     dependencies:
       '@anthropic-ai/sdk': 0.73.0(zod@4.3.6)
       '@aws-sdk/client-bedrock-runtime': 3.1005.0

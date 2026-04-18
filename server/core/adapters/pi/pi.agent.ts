@@ -110,11 +110,15 @@ function* mapEvent(event: AssistantMessageEvent, textAccumulator: string[], onCo
     case "thinking_delta": yield { type: "thinking.delta", content: event.delta }; break;
     case "thinking_end":   yield { type: "thinking.done", content: event.content }; break;
     case "error": {
-      const errorMsg = event.error.errorMessage ?? event.error.message ?? JSON.stringify(event.error) ?? "Unknown error";
+      const err = event.error;
+      const errorMsg = err.errorMessage ?? err.message ?? JSON.stringify(err) ?? "Unknown error";
+      const stopReason = err.stopReason ?? "unknown";
+      const contentTypes = (err.content ?? []).map((b: any) => b.type).join(",");
+      const errorDetail = `${errorMsg} [stopReason=${stopReason}, blocks=${contentTypes}, hasErrorMessage=${!!err.errorMessage}]`;
       if (errorMsg.includes("401") || errorMsg.includes("unauthorized") || errorMsg.includes("authentication")) {
         throw new Error(errorMsg);
       }
-      yield { type: "error", message: errorMsg };
+      yield { type: "error", message: errorDetail };
       break;
     }
     case "toolcall_end": {
@@ -219,6 +223,9 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
                 } else if (event.type === "citations") {
                   citationParts.push({ text: event.text, label: event.label ?? "Citations" });
                 } else {
+                  if (event.type === "error") {
+                    opts.log.error("Provider stream error event", { error: (event as any).message });
+                  }
                   yield event;
                 }
               }
@@ -265,12 +272,13 @@ export function createPiAgent(opts: PiAgentOptions): Agent {
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
+        const stack = err instanceof Error ? err.stack : undefined;
         if (turn.cancellation.aborted) {
           /* intentional abort */
         } else if (msg.includes("401") || msg.includes("unauthorized") || msg.includes("authentication")) {
           throw err;
         } else {
-          opts.log.error("pi-ai stream error", { error: msg });
+          opts.log.error("pi-ai stream error", { error: msg, stack, type: err?.constructor?.name });
           yield { type: "error", message: msg };
         }
       }
