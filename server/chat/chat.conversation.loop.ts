@@ -112,11 +112,12 @@ export interface AgentStreamOpts {
 }
 
 export function agentStream(opts: AgentStreamOpts) {
-  async function execute(messages: AgentMessage[]): Promise<{ reason: TerminalReason; errors: string[] }> {
+  async function execute(messages: AgentMessage[], emitErrors = true): Promise<{ reason: TerminalReason; errors: string[] }> {
     try {
       const pendingTools = new Map<string, { name: string; input: unknown }>();
       let hasOutput = false;
       const errors: string[] = [];
+      const deferredErrorEvents: AgentEvent[] = [];
 
       for await (const event of opts.run(messages)) {
         if (opts.signal.aborted) return { reason: "stopped", errors: [] };
@@ -125,9 +126,16 @@ export function agentStream(opts: AgentStreamOpts) {
           pendingTools.set(event.id, { name: event.name, input: event.input });
         }
         if (event.type === "text.delta" || event.type === "text.done" || event.type === "tool.result") hasOutput = true;
-        if (event.type === "error") errors.push((event as any).message ?? "Unknown error");
+        if (event.type === "error") {
+          errors.push((event as any).message ?? "Unknown error");
+          if (!emitErrors) { deferredErrorEvents.push(event); continue; }
+        }
 
         await opts.onEvent(event, pendingTools);
+      }
+
+      if (!emitErrors && hasOutput && deferredErrorEvents.length > 0) {
+        for (const event of deferredErrorEvents) await opts.onEvent(event, pendingTools);
       }
 
       if (!hasOutput && errors.length > 0 && !opts.signal.aborted) {
@@ -138,7 +146,7 @@ export function agentStream(opts: AgentStreamOpts) {
     } catch (err) {
       if (opts.signal.aborted) return { reason: "stopped", errors: [] };
       const msg = err instanceof Error ? `${err.message}\n${err.stack}` : String(err);
-      await opts.onError(msg);
+      if (emitErrors) await opts.onError(msg);
       return { reason: "error", errors: [err instanceof Error ? err.message : String(err)] };
     }
   }
@@ -152,11 +160,15 @@ export function agentStream(opts: AgentStreamOpts) {
       let messages = opts.messages;
       let overflowed = false;
       for (let attempt = 0; attempt <= times; attempt++) {
-        const result = await execute(messages);
+        const isFinal = attempt === times;
+        const result = await execute(messages, isFinal);
         if (result.reason !== "error" || result.errors.length === 0 || opts.signal.aborted) {
           return overflowed && result.reason === "done" ? "overflow" : result.reason;
         }
-        if (attempt === times) return overflowed ? "overflow" : result.reason;
+        if (isFinal) {
+          for (const err of result.errors) await opts.onError(err);
+          return overflowed ? "overflow" : result.reason;
+        }
 
         const isClientError = result.errors.some((e) => /\b(4\d{2})\b/.test(e));
         if (isClientError) return "error";
