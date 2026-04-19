@@ -58,5 +58,8 @@ function extractText(html: string): string {
     .join("\n");
 
   const cleaned = text.replace(/\n{3,}/g, "\n\n").trim();
-  return cleaned.slice(0, MAX_CHARS);
+  if (cleaned) return cleaned.slice(0, MAX_CHARS);
+
+  const fallback = root.text().replace(/[ \t]+/g, " ").replace(/\n{2,}/g, "\n").trim();
+  return fallback.slice(0, MAX_CHARS);
 }
