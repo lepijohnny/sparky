@@ -43,6 +43,7 @@ export interface ChatEvents {
   "chat.updated":             { req: { chat: Chat }; res: void };
   "chat.deleted":             { req: { id: string }; res: void };
   "chat.event":               { req: ChatEvent; res: void };
+  "chat.summarize":            { req: { chatId: string }; res: { ok: boolean } };
   "chat.summary.started":     { req: { chatId: string }; res: void };
   "chat.summary.done":        { req: { chatId: string; coversUpTo: number }; res: void };
 

@@ -352,11 +352,39 @@ export class ChatConversation {
         return;
       }
 
-      await generateSummary(this.db, resolved.agent, chatId, ctx.lastKnownMemoryId!, this.log);
+      await generateSummary(this.db, resolved.agent, chatId, ctx.lastKnownMemoryId! - 1, this.log);
       const summary = this.db.getSummary(chatId);
       if (summary) {
         this.bus.emit("chat.summary.done", { chatId, coversUpTo: summary.coversUpTo });
       }
+    } finally {
+      this.activeSummarizations.delete(chatId);
+    }
+  }
+
+  async forceSummarize(chatId: string): Promise<boolean> {
+    if (this.activeSummarizations.has(chatId)) return false;
+
+    const lastMessage = this.db.getLastMessageRowid(chatId);
+    if (!lastMessage) return false;
+
+    this.activeSummarizations.add(chatId);
+    this.log.info("Manual summarization triggered", { chatId });
+    this.bus.emit("chat.summary.started", { chatId });
+
+    try {
+      const resolved = await this.defaultAgentFactory(chatId);
+      if (!resolved) {
+        this.log.warn("Summarization skipped: no default agent", { chatId });
+        return false;
+      }
+
+      await generateSummary(this.db, resolved.agent, chatId, lastMessage, this.log);
+      const summary = this.db.getSummary(chatId);
+      if (summary) {
+        this.bus.emit("chat.summary.done", { chatId, coversUpTo: summary.coversUpTo });
+      }
+      return true;
     } finally {
       this.activeSummarizations.delete(chatId);
     }

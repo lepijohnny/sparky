@@ -19,6 +19,13 @@ import styles from "./AgentTurnInput.module.css";
 
 import { extractPathToken, pathBase, pathParent, normalizePath, pathFilter } from "../../lib/pathComplete";
 
+const COMMANDS: { id: string; name: string; prompt?: string; action?: string }[] = [
+  { id: "cmd:summarize", name: "Summarize", action: "chat.summarize" },
+  { id: "cmd:explain", name: "Explain", prompt: "Explain the above in simple terms." },
+  { id: "cmd:fix-grammar", name: "Fix grammar", prompt: "Fix the grammar in the above text." },
+  { id: "cmd:action-items", name: "Action items", prompt: "Extract action items from this conversation." },
+];
+
 function getPathTokenFromHandle(handle: RichInputHandle): string | null {
   return handle.getPathToken();
 }
@@ -232,6 +239,21 @@ export default memo(function ChatInput({
     const handle = inputRef.current;
     if (!handle || !trigger) return;
 
+    if (trigger.type === "@" && item.kind === "command") {
+      const cmd = COMMANDS.find((c) => c.id === item.id);
+      if (cmd) {
+        handle.clearTriggerText();
+        if (cmd.action) {
+          setTrigger(null);
+          conn?.request(cmd.action, { chatId: chat.id }).catch(() => {});
+          return;
+        }
+        if (cmd.prompt) handle.setText(cmd.prompt);
+      }
+      setTrigger(null);
+      return;
+    }
+
     if (trigger.type === "@") {
       handle.insertSvcChip(item.name);
     } else if (trigger.type === "#") {
@@ -324,6 +346,7 @@ export default memo(function ChatInput({
   const popoverItems: PopoverItem[] = trigger
     ? trigger.type === "@"
       ? [
+          ...COMMANDS.map((c) => ({ id: c.id, name: c.name, kind: "command" as const })),
           ...services.map((s) => ({ id: s.id, name: s.label, icon: s.icon, kind: "service" as const })),
           ...activeSkills.map((s) => ({ id: s.id, name: s.name, icon: s.icon, kind: "skill" as const })),
         ]

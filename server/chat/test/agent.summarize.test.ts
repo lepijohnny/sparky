@@ -127,36 +127,36 @@ describe("shouldSummarize — trigger logic", () => {
 });
 
 describe("generateSummary — first summary", () => {
-  test("given entries before lastKnownMemoryId, when generating, then summary is stored", async () => {
+  test("given entries up to toRowid, when generating, then summary covers up to toRowid", async () => {
     const db = setup();
     const chat = makeChat();
     db.createChat(chat);
     const rowids = populateChat(db, chat.id, 5);
-    const lastKnownMemoryId = rowids[6];
+    const toRowid = rowids[5];
 
     const agent = summaryAgent("This is a test summary.");
-    await generateSummary(db, agent, chat.id, lastKnownMemoryId, noopLogger);
+    await generateSummary(db, agent, chat.id, toRowid, noopLogger);
 
     const summary = db.getSummary(chat.id);
     expect(summary).not.toBeNull();
     expect(summary!.content).toBe("This is a test summary.");
-    expect(summary!.coversUpTo).toBe(lastKnownMemoryId - 1);
+    expect(summary!.coversUpTo).toBe(toRowid);
   });
 
-  test("given no entries before lastKnownMemoryId and too few messages, when generating, then no summary stored", async () => {
+  test("given toRowid before first message and too few messages, when generating, then no summary stored", async () => {
     const db = setup();
     const chat = makeChat();
     db.createChat(chat);
     const rowids = populateChat(db, chat.id, 1);
-    const firstRowid = rowids[0];
+    const toRowid = rowids[0] - 1;
 
     const agent = summaryAgent("Should not be stored");
-    await generateSummary(db, agent, chat.id, firstRowid, noopLogger);
+    await generateSummary(db, agent, chat.id, toRowid, noopLogger);
 
     expect(db.getSummary(chat.id)).toBeNull();
   });
 
-  test("given no entries before lastKnownMemoryId but enough messages, when generating, then proactive summary covers ~90% of messages", async () => {
+  test("given toRowid before first entry but enough messages, when generating, then proactive summary covers ~90% of messages", async () => {
     const db = setup();
     const chat = makeChat();
     db.createChat(chat);
@@ -164,7 +164,7 @@ describe("generateSummary — first summary", () => {
     const firstRowid = rowids[0];
 
     const agent = summaryAgent("Proactive summary");
-    await generateSummary(db, agent, chat.id, firstRowid, noopLogger);
+    await generateSummary(db, agent, chat.id, firstRowid - 1, noopLogger);
 
     const summary = db.getSummary(chat.id);
     expect(summary).not.toBeNull();
@@ -178,7 +178,7 @@ describe("generateSummary — first summary", () => {
     expect(summarized.length).toBeGreaterThan(kept.length);
   });
 
-  test("given no entries before lastKnownMemoryId with exactly 4 messages, when generating, then proactive summary stored", async () => {
+  test("given toRowid before first entry with exactly 4 messages, when generating, then proactive summary stored", async () => {
     const db = setup();
     const chat = makeChat();
     db.createChat(chat);
@@ -186,7 +186,7 @@ describe("generateSummary — first summary", () => {
     const firstRowid = rowids[0];
 
     const agent = summaryAgent("Proactive summary");
-    await generateSummary(db, agent, chat.id, firstRowid, noopLogger);
+    await generateSummary(db, agent, chat.id, firstRowid - 1, noopLogger);
 
     const summary = db.getSummary(chat.id);
     expect(summary).not.toBeNull();
@@ -220,7 +220,7 @@ describe("generateSummary — incremental", () => {
     const summary = db.getSummary(chat.id);
     expect(summary).not.toBeNull();
     expect(summary!.content).toBe("Extended summary with new info.");
-    expect(summary!.coversUpTo).toBe(rowids[14] - 1);
+    expect(summary!.coversUpTo).toBe(rowids[14]);
   });
 
   test("given existing summary already covers range, when generating, then no update", async () => {
@@ -244,13 +244,13 @@ describe("generateSummary — incremental", () => {
     db.createChat(chat);
     const rowids = populateChat(db, chat.id, 3);
 
-    db.upsertSummary(chat.id, "Covers up to row 5.", rowids[4]);
+    db.upsertSummary(chat.id, "Covers up to row 4.", rowids[4]);
 
     const agent = summaryAgent("Should not replace");
-    await generateSummary(db, agent, chat.id, rowids[5], noopLogger);
+    await generateSummary(db, agent, chat.id, rowids[4], noopLogger);
 
     const summary = db.getSummary(chat.id);
-    expect(summary!.content).toBe("Covers up to row 5.");
+    expect(summary!.content).toBe("Covers up to row 4.");
   });
 });
 
@@ -317,6 +317,44 @@ describe("summaryCutoff — fetcher filtering", () => {
     const { entries } = db.getEntries(chat.id, 100);
     expect(entries.length).toBeGreaterThan(0);
     expect(db.getSummary(chat.id)).toBeNull();
+  });
+});
+
+describe("getLastMessageRowid", () => {
+  test("given chat with messages, when getting last rowid, then returns the last message rowid", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 5);
+
+    const last = db.getLastMessageRowid(chat.id);
+    expect(last).toBe(rowids[rowids.length - 1]);
+  });
+
+  test("given empty chat, when getting last rowid, then returns undefined", () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+
+    expect(db.getLastMessageRowid(chat.id)).toBeUndefined();
+  });
+});
+
+describe("generateSummary — force (inclusive toRowid)", () => {
+  test("given chat with messages, when generating with last rowid, then summary includes the last message", async () => {
+    const db = setup();
+    const chat = makeChat();
+    db.createChat(chat);
+    const rowids = populateChat(db, chat.id, 5);
+    const lastRowid = rowids[rowids.length - 1];
+
+    const agent = summaryAgent("Full summary");
+    await generateSummary(db, agent, chat.id, lastRowid, noopLogger);
+
+    const summary = db.getSummary(chat.id);
+    expect(summary).not.toBeNull();
+    expect(summary!.content).toBe("Full summary");
+    expect(summary!.coversUpTo).toBe(lastRowid);
   });
 });
 

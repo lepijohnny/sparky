@@ -666,6 +666,13 @@ export class ChatDatabase {
     return row?.rowid;
   }
 
+  getLastMessageRowid(chatId: string): number | undefined {
+    const row = this.connection.prepare(
+      `SELECT rowid FROM entries WHERE chat_id = @chat_id AND kind = 'message' ORDER BY rowid DESC LIMIT 1`,
+    ).get({ chat_id: chatId }) as { rowid: number } | undefined;
+    return row?.rowid;
+  }
+
   getSummary(chatId: string): ChatSummary | null {
     const row = this.sql.getSummary.get({ chat_id: chatId }) as { rowid: number; content: string; metadata: string | null; timestamp: string } | undefined;
     if (!row) return null;

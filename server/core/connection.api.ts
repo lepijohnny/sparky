@@ -84,6 +84,7 @@ const ROUTES: RouteEntry[] = [
   "chat.attachment.remove",
   "chat.attachment.list",
   "chat.ask",
+  "chat.summarize",
   "chat.stop",
   "chat.search",
   "chat.system.ask",

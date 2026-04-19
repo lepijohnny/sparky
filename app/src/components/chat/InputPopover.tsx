@@ -9,7 +9,7 @@ export interface PopoverItem {
   icon?: string;
   color?: string;
   checked?: boolean;
-  kind?: "service" | "skill" | "label";
+  kind?: "service" | "skill" | "label" | "command";
 }
 
 interface InputPopoverProps {
@@ -100,7 +100,7 @@ export default memo(function InputPopover({
         filtered.map((item, i) => {
           const prev = i > 0 ? filtered[i - 1] : null;
           const showTitle = !prev || prev.kind !== item.kind;
-          const sectionLabel = item.kind === "skill" ? "Skills" : item.kind === "label" ? "Labels" : "Connections";
+          const sectionLabel = item.kind === "command" ? "Commands" : item.kind === "skill" ? "Skills" : item.kind === "label" ? "Labels" : "Connections";
           return (
             <div key={item.id}>
               {showTitle && <div className={styles.sectionTitle}>{sectionLabel}</div>}

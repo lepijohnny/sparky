@@ -138,6 +138,11 @@ export function createChatWorkspace(
 
   const attachments = registerAttachmentHandlers(bus, db, log, () => currentWorkspacePath);
 
+  bus.on("chat.summarize", async (data) => {
+    const ok = await conversation.forceSummarize(data.chatId);
+    return { ok };
+  });
+
   bus.on("chat.ask", async (data) => {
     const result = conversation.ask(data);
     result.catch((err) => {

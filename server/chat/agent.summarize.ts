@@ -77,7 +77,7 @@ export async function generateSummary(
   const fromRowid = existing && existing.coversUpTo > 0
     ? existing.coversUpTo + 1
     : firstRowid;
-  let toRowid = lastKnownMemoryId - 1;
+  let toRowid = lastKnownMemoryId;
 
   if (fromRowid > toRowid) {
     const allEntries = db.getEntriesRange(chatId, firstRowid, Number.MAX_SAFE_INTEGER);
