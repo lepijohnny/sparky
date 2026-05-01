@@ -108,6 +108,7 @@ export function buildAuthFlows(lg: FileLogger, cred: Credentials, copilot: Provi
       redirectPort: 1455,
       redirectPath: "/auth/callback",
       extraParams: { id_token_add_organizations: "true", codex_cli_simplified_flow: "true", originator: "sparky" },
+      includeStateInTokenExchange: false,
       bodyEncoding: "form",
     })(ctx),
     ...createPatFlow({

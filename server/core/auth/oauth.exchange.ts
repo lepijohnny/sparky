@@ -15,7 +15,7 @@ export async function exchangeToken(log: Logger, params: OAuthExchangeParams): P
   if (params.codeVerifier) {
     payload.code_verifier = params.codeVerifier;
   }
-  if (params.state) {
+  if (params.includeStateInTokenExchange && params.state) {
     payload.state = params.state;
   }
   const useForm = params.bodyEncoding === "form";

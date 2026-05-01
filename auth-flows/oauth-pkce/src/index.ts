@@ -14,6 +14,7 @@ export interface OAuthPkceFlowConfig {
   redirectPath?: string;
   extraParams?: Record<string, string>;
   bodyEncoding?: "json" | "form";
+  includeStateInTokenExchange?: boolean;
   onSuccess?: () => Promise<void>;
 }
 
@@ -82,6 +83,7 @@ export function createOAuthPkceFlow(config: OAuthPkceFlowConfig): AuthPluginFact
             clientSecret: config.clientSecret,
             codeVerifier: pendingVerifier,
             state: pendingState,
+            includeStateInTokenExchange: config.includeStateInTokenExchange,
             bodyEncoding: config.bodyEncoding,
           });
 
