@@ -358,6 +358,7 @@ export default function ChatDetailsPage({ chat, searchQuery }: ChatDetailsPagePr
     try {
       const res = await conn.request<{ chat: Chat }>("chat.model", { id: chatIdRef.current, provider, model });
       useStore.getState().patchChat(res.chat);
+      useStore.getState().patchSelection(res.chat);
     } catch (err) {
       console.error("Failed to set chat model:", err);
     }
